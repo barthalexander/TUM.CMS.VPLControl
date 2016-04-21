@@ -85,7 +85,7 @@
                 FontFamily="Consolas"
                 FontSize="10pt"
                 SyntaxHighlighting="C#"
-                Grid.ColumnSpan="2" Text="Scripting Editor" />
+                Grid.ColumnSpan="2" Text="Scripting Editor" HorizontalAlignment="Right" Width="550" Height="400" />
 
             <!--
             

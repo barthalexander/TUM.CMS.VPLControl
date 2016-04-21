@@ -72,8 +72,9 @@ namespace TUM.CMS.VplControl.Core
             scaleTransform = new ScaleTransform();
             translateTransform = new TranslateTransform();
             transformGroup = new TransformGroup();
-            transformGroup.Children.Add(scaleTransform);
             transformGroup.Children.Add(translateTransform);
+            transformGroup.Children.Add(scaleTransform);
+            
 
             // Zooming Transformation
             LayoutTransform = transformGroup;
@@ -431,7 +432,6 @@ namespace TUM.CMS.VplControl.Core
 
                 var scaledCanvasMouseOffsetX = mouseRelativetoCanvas.X*scaleTransform.ScaleX;
                 var scaledCanvasMouseOffsetY = mouseRelativetoCanvas.Y*scaleTransform.ScaleY;
-
                 translateTransform.X = -(scaledCanvasMouseOffsetX - mouseRelativetoCanvas.X);
                 translateTransform.Y = -(scaledCanvasMouseOffsetY - mouseRelativetoCanvas.Y);
             }
@@ -448,7 +448,6 @@ namespace TUM.CMS.VplControl.Core
 
                 var scaledCanvasMouseOffsetX = mouseRelativetoCanvas.X*scaleTransform.ScaleX;
                 var scaledCanvasMouseOffsetY = mouseRelativetoCanvas.Y*scaleTransform.ScaleY;
-
                 translateTransform.X = -(scaledCanvasMouseOffsetX - mouseRelativetoCanvas.X);
                 translateTransform.Y = -(scaledCanvasMouseOffsetY - mouseRelativetoCanvas.Y);
             }
@@ -709,7 +708,7 @@ namespace TUM.CMS.VplControl.Core
             if (radialMenu != null) radialMenu.Dispose();
             radialMenu = null;
         }
-
+        
         public void OpenFile()
         {
             var openFileDialog = new OpenFileDialog

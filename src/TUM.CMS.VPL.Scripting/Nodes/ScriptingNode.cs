@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -30,10 +31,10 @@ namespace TUM.CMS.VPL.Scripting.Nodes
             scriptingControl.CurrentFile = new CSharpScriptFile2();
 
 
-            //scriptingControl.Height = 400;
+            // scriptingControl.Height = 700;
             //scriptingControl.Width = 700;
             //scriptingControl.DockPanel.Height = 400;
-            IsResizeable = true;
+            IsResizeable = false;
 
             //scriptingControl.StartCompilingEventHandler += StartCompilingEventHandler;
 
@@ -50,16 +51,25 @@ namespace TUM.CMS.VPL.Scripting.Nodes
         private void HighlightingComboBoxOnSelectionChanged(object sender,
             SelectionChangedEventArgs selectionChangedEventArgs)
         {
-            switch (scriptingControl.HighlightingComboBox.SelectedItem.ToString())
+
+            try
             {
-                case "C#":
-                    scriptingControl.CurrentFile = new CSharpScriptFile2();
-                    break;
-                case "Python":
-                    scriptingControl.CurrentFile = new PythonScriptFile();
-                    break;
+                if (scriptingControl.HighlightingComboBox.SelectedItem != null)
+                    switch (scriptingControl.HighlightingComboBox.SelectedItem.ToString())
+                    {
+                        case "C#":
+                            scriptingControl.CurrentFile = new CSharpScriptFile2();
+                            break;
+                        case "Python":
+                            scriptingControl.CurrentFile = new PythonScriptFile();
+                            break;
+                    }
+                scriptingControl.TextEditor.Text = scriptingControl.CurrentFile.ScriptContent;
             }
-            scriptingControl.TextEditor.Text = scriptingControl.CurrentFile.ScriptContent;
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
         }
 
         public void StartCSharpCompilation(object sender, EventArgs eventArgs)
