@@ -14,40 +14,40 @@ using XbimGeometry.Interfaces;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcReaderNode : Node
+    public class IfcTreeNode : Node
     {
         private readonly TextBox _textBox;
         public XbimModel xModel;
 
-        private DrawingControl3D drawingControl3D;
-        private DynamicProductSelectionControl productSelectionControl;
-        public IfcReaderNode(Core.VplControl hostCanvas) : base(hostCanvas)
+        private XbimTreeview treeview;
+        // private DynamicProductSelectionControl productSelectionControl;
+        public IfcTreeNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             IsResizeable = true;
-
+            
+            treeview = new XbimTreeview
+            {
+                MinWidth = 620,
+                MinHeight = 100,
+            };
 
             AddInputPortToNode("Object", typeof(object));
 
+            AddControlToNode(treeview);
 
             // Init
-            // productSelectionControl = new DynamicProductSelectionControl();
-            // AddControlToNode(productSelectionControl);
+           // productSelectionControl = new DynamicProductSelectionControl();
+           // AddControlToNode(productSelectionControl);
 
             // Init 3DController
-            drawingControl3D = new DrawingControl3D
-            {
-                MinWidth    = 520,
-                MinHeight   = 520,
-            };
-
-            AddControlToNode(drawingControl3D);
 
             // AddOutputPortToNode("IFCFile", typeof(object));
 
-           
+            
         }
 
        
+
         public override void Calculate()
         {
             var file = InputPorts[0].Data.ToString();
@@ -63,7 +63,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override Node Clone()
         {
-            return new IfcReaderNode(HostCanvas)
+            return new IfcTreeNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left
@@ -76,11 +76,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             int number = zufall.Next(1, 100);
 
             var path = Path.GetTempPath();
-            xModel = new XbimModel();          
-            xModel.CreateFrom(filepath, path + "temp_reader"+ number + ".xbim");
+            xModel = new XbimModel();
+            xModel.CreateFrom(filepath, path + "temp_tree"+ number +".xbim");
             xModel.Close();
 
-            var res = xModel.Open(path + "temp_reader" + number + ".xbim", XbimDBAccess.ReadWrite);
+
+            var res = xModel.Open(path + "temp_tree" + number + ".xbim", XbimDBAccess.ReadWrite);
 
             if (res == false)
             {
@@ -90,23 +91,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             // xModel.Close();
 
-            try
-            {
-                var context = new Xbim3DModelContext(xModel);
-                context.CreateContext(XbimGeometryType.PolyhedronBinary);
-                drawingControl3D.Model = xModel;
-                drawingControl3D.ShowAll();
-                drawingControl3D.ReloadModel();
-                drawingControl3D.LoadGeometry(xModel);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
 
             // drawingControl3D.ShowAll();
 
-            // productSelectionControl.Model = xModel;
+            treeview.Model = xModel;
+           //  productSelectionControl.Model = xModel;
 
             // xModel.Close();
 
