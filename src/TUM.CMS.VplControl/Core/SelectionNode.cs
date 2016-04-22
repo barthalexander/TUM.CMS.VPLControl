@@ -86,6 +86,11 @@ namespace TUM.CMS.VplControl.Core
                     HostCanvas.Children.Remove(Border);
                 }
             }
+            else if (e.Key == Key.Escape)
+            {
+                Dispose();
+                HostCanvas.Children.Remove(Border);
+            }
             else
             {
                 switch (e.Key)
@@ -112,8 +117,8 @@ namespace TUM.CMS.VplControl.Core
 
         private void SelectionNode_MouseLeave(object sender, MouseEventArgs e)
         {
-            Dispose();
-            HostCanvas.Children.Remove(Border);
+        //    Dispose();
+        //    HostCanvas.Children.Remove(Border);
         }
 
         private void searchTextBox_OnSearch(object sender, RoutedEventArgs e)
