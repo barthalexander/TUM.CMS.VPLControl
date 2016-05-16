@@ -28,7 +28,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             treeview = new XbimTreeview
             {
                 MinWidth = 620,
-                MinHeight = 100,
+                MinHeight = 100
             };
 
             AddInputPortToNode("Object", typeof(object));
