@@ -36,7 +36,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // Init 3DController
             drawingControl3D = new DrawingControl3D
             {
-                MinWidth    = 520,
+                MinWidth    = 1020,
                 MinHeight   = 520
             };
 
