@@ -5,6 +5,7 @@ using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.Utilities;
 using TUM.CMS.VplControl.Watch3D.Nodes;
 using TUM.CMS.VPL.Scripting.Nodes;
+using TUM.CMS.VplControl.Energy.Nodes;
 
 namespace TUM.CMS.VplControl.Test
 {
@@ -25,11 +26,15 @@ namespace TUM.CMS.VplControl.Test
                     .ToList());
 
             VplControl.ExternalNodeTypes.AddRange(
-                ClassUtility.GetTypesInNamespace(Assembly.GetExecutingAssembly(), "TUM.CMS.VplControl.Watch3D.Nodes")
-                    .ToList());
+             ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(Watch3DNode)), "TUM.CMS.VplControl.Watch3D.Nodes")
+                     .ToList());
 
-            VplControl.ExternalNodeTypes.Add(typeof (ScriptingNode));
-            VplControl.ExternalNodeTypes.Add(typeof (Watch3DNode));
+            VplControl.ExternalNodeTypes.AddRange(
+                ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(EnergyNode)), "TUM.CMS.VplControl.Energy.Nodes")
+                       .ToList());
+
+            VplControl.ExternalNodeTypes.Add(typeof(ScriptingNode));
+            // VplControl.ExternalNodeTypes.Add(typeof(Watch3DNode));
 
             VplControl.NodeTypeMode = NodeTypeModes.All;
 

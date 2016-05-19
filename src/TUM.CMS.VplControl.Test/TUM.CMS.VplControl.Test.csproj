@@ -193,6 +193,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TUM.CMS.VplControl.Energy\TUM.CMS.VplControl.Energy.csproj">
+      <Project>{41c13b58-2d10-4780-8473-3f6be8eb6c66}</Project>
+      <Name>TUM.CMS.VplControl.Energy</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TUM.CMS.VplControl.Watch3D\TUM.CMS.VplControl.Watch3D.csproj">
       <Project>{39c73fb5-d284-409d-835a-803090e867c9}</Project>
       <Name>TUM.CMS.VplControl.Watch3D</Name>
