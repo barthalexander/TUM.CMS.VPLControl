@@ -152,8 +152,10 @@
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Nodes\FacultyNode.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />
     <Compile Include="Nodes\IfcReaderNode.cs" />
+    <Compile Include="Nodes\ListIfcNode.cs" />
     <Compile Include="Nodes\OrderNode.cs" />
     <Compile Include="Nodes\SqrtNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
