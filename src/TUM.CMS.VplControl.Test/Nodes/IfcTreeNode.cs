@@ -70,18 +70,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
 
-        public void ReadIfc(string filepath)
+        public void ReadIfc(string file)
         {
-            Random zufall = new Random();
-            int number = zufall.Next(1, 100);
 
-            var path = Path.GetTempPath();
+
             xModel = new XbimModel();
-            xModel.CreateFrom(filepath, path + "temp_tree"+ number +".xbim");
-            xModel.Close();
+            
 
-
-            var res = xModel.Open(path + "temp_tree" + number + ".xbim", XbimDBAccess.ReadWrite);
+            var res = xModel.Open(file, XbimDBAccess.Read);
 
             if (res == false)
             {

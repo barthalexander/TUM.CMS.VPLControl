@@ -11,6 +11,7 @@ using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
+using System.Linq;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -18,7 +19,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         private readonly TextBox _textBox;
         public XbimModel xModel;
-
         private DrawingControl3D drawingControl3D;
         private DynamicProductSelectionControl productSelectionControl;
         public IfcReaderNode(Core.VplControl hostCanvas) : base(hostCanvas)
@@ -70,17 +70,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
 
-        public void ReadIfc(string filepath)
+        public void ReadIfc(string file)
         {
-            Random zufall = new Random();
-            int number = zufall.Next(1, 100);
-
-            var path = Path.GetTempPath();
+           
             xModel = new XbimModel();          
-            xModel.CreateFrom(filepath, path + "temp_reader"+ number + ".xbim");
-            xModel.Close();
-
-            var res = xModel.Open(path + "temp_reader" + number + ".xbim", XbimDBAccess.ReadWrite);
+            
+            var res = xModel.Open(file, XbimDBAccess.ReadWrite);
 
             if (res == false)
             {
@@ -92,6 +87,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             try
             {
+
                 var context = new Xbim3DModelContext(xModel);
                 context.CreateContext(XbimGeometryType.PolyhedronBinary);
                 drawingControl3D.Model = xModel;
