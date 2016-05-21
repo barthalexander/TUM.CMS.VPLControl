@@ -60,11 +60,10 @@ namespace TUM.CMS.VplControl.Test.Nodes
         //}
         public override void Calculate()
         {
-            var path = Path.GetTempPath();
+           
             XbimModel xModel = new XbimModel();
-            xModel.CreateFrom(InputPorts[0].Data.ToString(), path + "temp3.xbim");
-            xModel.Close();
-            var res = xModel.Open(path + "temp3.xbim", XbimDBAccess.ReadWrite);
+           
+            var res = xModel.Open(InputPorts[0].Data.ToString(), XbimDBAccess.ReadWrite);
 
             var scrollViewer = ControlElements[0] as ScrollViewer;
             if (scrollViewer == null) return;
