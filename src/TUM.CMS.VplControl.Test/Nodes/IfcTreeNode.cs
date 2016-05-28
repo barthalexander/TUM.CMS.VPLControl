@@ -12,7 +12,7 @@ using Xbim.Presentation;
 using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 
-namespace TUM.CMS.VplControl.IFC.Nodes
+namespace TUM.CMS.VplControl.Test.Nodes
 {
     public class IfcTreeNode : Node
     {

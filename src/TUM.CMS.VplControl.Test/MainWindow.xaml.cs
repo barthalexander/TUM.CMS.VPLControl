@@ -33,6 +33,7 @@ namespace TUM.CMS.VplControl.Test
                 ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(EnergyNode)), "TUM.CMS.VplControl.Energy.Nodes")
                        .ToList());
 
+            
             VplControl.ExternalNodeTypes.Add(typeof(ScriptingNode));
             // VplControl.ExternalNodeTypes.Add(typeof(Watch3DNode));
 

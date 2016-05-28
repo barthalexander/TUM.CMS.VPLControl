@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 
-namespace TUM.CMS.VplControl.Nodes
+namespace TUM.CMS.VplControl.Test.Nodes
 {
     public class OrderNode : Node
     {

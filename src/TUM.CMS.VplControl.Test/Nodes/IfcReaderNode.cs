@@ -13,7 +13,7 @@ using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using System.Linq;
 
-namespace TUM.CMS.VplControl.IFC.Nodes
+namespace TUM.CMS.VplControl.Test.Nodes
 {
     public class IfcReaderNode : Node
     {
