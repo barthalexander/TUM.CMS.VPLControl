@@ -70,6 +70,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -153,6 +154,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Nodes\FacultyNode.cs" />
+    <Compile Include="Nodes\IfcFilterNode.cs" />
     <Compile Include="Nodes\IfcParseNode.cs" />
     <Compile Include="Nodes\IfcMapsNode.cs" />
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
