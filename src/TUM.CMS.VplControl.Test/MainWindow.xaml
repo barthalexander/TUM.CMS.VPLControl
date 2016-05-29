@@ -9,14 +9,40 @@
 
 
     <Grid>
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="0" x:Name="colOne" />
+            <ColumnDefinition Width="0" x:Name="colTwo"/>
+            <ColumnDefinition Width="0" x:Name="colThree"/>
+            <ColumnDefinition Width="0" x:Name="colFour"/>
+            <ColumnDefinition Width="1*" x:Name="colFive" />
         </Grid.ColumnDefinitions>
 
-        <wpfToolkit:PropertyGrid Name="VplPropertyGrid" />
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-        <core:VplControl Name="VplControl" Grid.Column="2" />
+        <Menu VerticalAlignment="Top" Margin="0,0,-0.4,0" Grid.ColumnSpan="5" >
+            <Menu.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel HorizontalAlignment="Stretch"/>
+                </ItemsPanelTemplate>
+            </Menu.ItemsPanel>
+            <MenuItem Header="File">
+                <MenuItem Header="New" Click="MenuItem_New_Click"/>
+                <MenuItem Header="Open" Click="MenuItem_Open_Click"/>
+                <MenuItem Header="Save as" Click="MenuItem_SaveAS_Click"/>
+
+                <Separator HorizontalAlignment="Left"/>
+                <MenuItem Header="Exit" Click="MenuItem_Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Debug">
+                <MenuItem Header="Enable Debugging" IsCheckable="True" Checked="MenuItem_Show_Click" Unchecked="MenuItem_Hide_Click"/>
+
+              
+            </MenuItem>
+            <MenuItem Header="_Help" HorizontalAlignment="Right" FlowDirection="RightToLeft">
+                <MenuItem Header="Website" HorizontalAlignment="Right" Width="140" Click="MenuItem_Click"/>
+            </MenuItem>
+        </Menu>
+        <wpfToolkit:PropertyGrid Name="VplPropertyGrid" Grid.ColumnSpan="4" Margin="0,18,4.4,-23.4" Visibility="Hidden"/>
+        <GridSplitter Name="GridSplitter" Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Grid.ColumnSpan="2" Margin="0.4,0,506.6,-0.4" Visibility="Hidden"/>
+        <core:VplControl Name="VplControl" Grid.Column="3" Grid.ColumnSpan="2" Margin="4.4,18,-0.4,-0.4" />
     </Grid>
 </Window>
