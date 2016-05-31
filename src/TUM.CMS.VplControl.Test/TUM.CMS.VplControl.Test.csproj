@@ -158,6 +158,7 @@
     <Compile Include="Nodes\IfcFilterNode.cs" />
     <Compile Include="Nodes\IfcParseNode.cs" />
     <Compile Include="Nodes\IfcMapsNode.cs" />
+    <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
     <Compile Include="Nodes\IfcReadSpaceNode.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />
     <Compile Include="Nodes\IfcReaderNode.cs" />
