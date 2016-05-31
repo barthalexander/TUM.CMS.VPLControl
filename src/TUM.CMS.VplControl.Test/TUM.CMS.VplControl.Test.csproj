@@ -154,6 +154,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Nodes\FacultyNode.cs" />
+    <Compile Include="Nodes\IfcReadPropertiesNode.cs" />
     <Compile Include="Nodes\IfcFilterNode.cs" />
     <Compile Include="Nodes\IfcParseNode.cs" />
     <Compile Include="Nodes\IfcMapsNode.cs" />
