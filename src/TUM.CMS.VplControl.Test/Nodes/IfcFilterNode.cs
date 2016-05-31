@@ -77,10 +77,19 @@ namespace TUM.CMS.VplControl.Test.Nodes
 
             var comboBox = ControlElements[2] as ComboBox;
             if (comboBox == null) return;
+
+            
             
 
 
             var ifcwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+
+           // var ifcwallpropertyset = ifcwall[0].PropertySets.ToList ();
+            //var ifchasproperties = ifcwallpropertyset[0].HasProperties.ToList();
+           // var ifc = ifchasproperties[0].Name;
+
+            
+            
             var ifcbeam = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
             var ifccolumn = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList();
             var ifcslab = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList();
@@ -129,8 +138,13 @@ namespace TUM.CMS.VplControl.Test.Nodes
             if (comboBox == null) return;
 
            // Type t = comboBox.SelectedItem.GetType();
+
             
-            OutputPorts[0].Data = comboBox.SelectedItem;
+            var selecteditem = (ComboboxItem)(comboBox.SelectedItem);
+            OutputPorts[0].Data= selecteditem.Value;
+
+            
+            
             var textBlock = ControlElements[3] as TextBlock;
             if (textBlock == null) return;
             
