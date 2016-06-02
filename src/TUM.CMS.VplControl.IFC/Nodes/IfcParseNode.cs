@@ -14,7 +14,7 @@ using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Windows.Media;
 
-namespace TUM.CMS.VplControl.Test.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcParseNode : Node
     {

@@ -20,18 +20,17 @@ using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.Extensions;
 
-namespace TUM.CMS.VplControl.Test.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcBuildingPartsNode : Node
+    public class IfcReadSpacesNode : Node
     {
-        public IfcBuildingPartsNode(Core.VplControl hostCanvas)
+        public IfcReadSpacesNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
 
             AddInputPortToNode("IfcFile", typeof(string));
 
             AddOutputPortToNode("FilteredProducts", typeof(object));
-
 
 
             var textBlock = new TextBlock
@@ -54,9 +53,9 @@ namespace TUM.CMS.VplControl.Test.Nodes
                 //IsHitTestVisible = false
             };
 
+
             AddControlToNode(scrollViewer);
             AddControlToNode(new Label { Content = "IfcProductsNode" });
-
         }
         //private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         //{
@@ -75,47 +74,30 @@ namespace TUM.CMS.VplControl.Test.Nodes
             if (textBlock == null) return;
             textBlock.Text = "";
 
-           
-        
-
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcWall> walls = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcWindow> windows = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcDoor> doors = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
+            var ifcwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
             // Xbim.XbimExtensions.Interfaces.IModel ifcWall = ifcwall;
             //xModel.InsertCopy(ifcwall,XbimReadWriteTransaction);
             List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.IfcProducts.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
-            textBlock.Text += "Walls: \n\n";
-            foreach (var wall in walls)
+            foreach (var space in spaces)
             {
-                textBlock.Text += wall.Name + "\t";
+                textBlock.Text += space.Name + "\t" + space.LongName + "\t";
 
-                foreach (var relation in wall.Decomposes)
+                Console.WriteLine(space.Name);
+                Console.WriteLine(space.LongName);
+
+                foreach (var relation in space.Decomposes)
                 {
                     textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
-                }
-                textBlock.Text += "\n";
-            }
-            textBlock.Text += "\nWindows: \n\n";
+                    Console.WriteLine(string.Format("\tStorey = {0}", relation.RelatingObject.Name));
+                    Xbim.Ifc2x3.QuantityResource.IfcPhysicalSimpleQuantity area = space.GetElementPhysicalSimpleQuantity("GSA Space Areas", "GSA BIM Area");
+                    Xbim.Ifc2x3.QuantityResource.IfcQuantityArea areaMeasure = area as Xbim.Ifc2x3.QuantityResource.IfcQuantityArea;
+                    if(area != null) {
+                        
+                        double areaInMetre = areaMeasure.AreaValue / 1000000;
+                        textBlock.Text += areaInMetre;
+                    }
 
-            foreach (var window in windows)
-            {
-                textBlock.Text += window.Name + "\t" + window.Description + "\t";
 
-                foreach (var relation in window.Decomposes)
-                {
-                    textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
-                }
-                textBlock.Text += "\n";
-            }
-            textBlock.Text += "\nDoors: \n\n";
-
-            foreach (var door in doors)
-            {
-                textBlock.Text += door.Name + "\t" + door.GetMaterial() + "\t";
-
-                foreach (var relation in door.Decomposes)
-                {
-                    textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
                 }
                 textBlock.Text += "\n";
             }
@@ -124,7 +106,7 @@ namespace TUM.CMS.VplControl.Test.Nodes
 
 
 
-
+ 
         }
 
         public override void SerializeNetwork(XmlWriter xmlWriter)
@@ -143,7 +125,7 @@ namespace TUM.CMS.VplControl.Test.Nodes
 
         public override Node Clone()
         {
-            return new IfcBuildingPartsNode(HostCanvas)
+            return new IfcReadSpacesNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left

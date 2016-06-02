@@ -14,7 +14,7 @@ using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Diagnostics;
 
-namespace TUM.CMS.VplControl.Test.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcMapsNode : Node
     {
