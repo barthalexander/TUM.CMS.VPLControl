@@ -24,7 +24,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace TUM.CMS.VplControl.Test.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcFilterNode : Node
     {

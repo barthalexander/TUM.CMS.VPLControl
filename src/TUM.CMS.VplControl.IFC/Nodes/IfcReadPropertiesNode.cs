@@ -28,7 +28,7 @@ using Xbim.Ifc2x3.Extensions;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-namespace TUM.CMS.VplControl.Test.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcReadPropertiesNode : Node
     {

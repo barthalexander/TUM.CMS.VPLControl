@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUM.CMS.NodeClassGenerator"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUM.CMS.VplControl.Energy", "TUM.CMS.VplControl.Energy\TUM.CMS.VplControl.Energy.csproj", "{41C13B58-2D10-4780-8473-3F6BE8EB6C66}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUM.CMS.VplControl.IFC", "TUM.CMS.VplControl.IFC\TUM.CMS.VplControl.IFC.csproj", "{AB1F1045-D87B-471C-B4CC-BB8008F719F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,14 @@ Global
 		{41C13B58-2D10-4780-8473-3F6BE8EB6C66}.Release|Any CPU.Build.0 = Release|Any CPU
 		{41C13B58-2D10-4780-8473-3F6BE8EB6C66}.Release|x64.ActiveCfg = Release|Any CPU
 		{41C13B58-2D10-4780-8473-3F6BE8EB6C66}.Release|x64.Build.0 = Release|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Debug|x64.Build.0 = Debug|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Release|x64.ActiveCfg = Release|Any CPU
+		{AB1F1045-D87B-471C-B4CC-BB8008F719F7}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

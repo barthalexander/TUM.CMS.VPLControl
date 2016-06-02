@@ -20,7 +20,7 @@ using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.Extensions;
 
-namespace TUM.CMS.VplControl.Test.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcReadSpacesNode : Node
     {

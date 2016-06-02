@@ -6,6 +6,7 @@ using TUM.CMS.VplControl.Utilities;
 using TUM.CMS.VplControl.Watch3D.Nodes;
 using TUM.CMS.VPL.Scripting.Nodes;
 using TUM.CMS.VplControl.Energy.Nodes;
+using TUM.CMS.VplControl.IFC.Nodes;
 using System.Diagnostics;
 using System.Windows.Controls;
 
@@ -34,8 +35,11 @@ namespace TUM.CMS.VplControl.Test
             VplControl.ExternalNodeTypes.AddRange(
                 ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(EnergyNode)), "TUM.CMS.VplControl.Energy.Nodes")
                        .ToList());
-
+            VplControl.ExternalNodeTypes.AddRange(
+                ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(IfcMapsNode)), "TUM.CMS.VplControl.IFC.Nodes")
+                       .ToList());
             
+
             VplControl.ExternalNodeTypes.Add(typeof(ScriptingNode));
             // VplControl.ExternalNodeTypes.Add(typeof(Watch3DNode));
 

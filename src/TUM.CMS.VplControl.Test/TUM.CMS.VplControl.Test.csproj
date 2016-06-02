@@ -154,14 +154,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Nodes\FacultyNode.cs" />
-    <Compile Include="Nodes\IfcReadPropertiesNode.cs" />
-    <Compile Include="Nodes\IfcFilterNode.cs" />
-    <Compile Include="Nodes\IfcParseNode.cs" />
-    <Compile Include="Nodes\IfcMapsNode.cs" />
-    <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
-    <Compile Include="Nodes\IfcReadSpaceNode.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />
-    <Compile Include="Nodes\IfcReaderNode.cs" />
     <Compile Include="Nodes\ListIfcNode.cs" />
     <Compile Include="Nodes\OrderNode.cs" />
     <Compile Include="Nodes\SqrtNode.cs" />
@@ -204,10 +197,17 @@
       <Project>{41c13b58-2d10-4780-8473-3f6be8eb6c66}</Project>
       <Name>TUM.CMS.VplControl.Energy</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TUM.CMS.VplControl.IFC\TUM.CMS.VplControl.IFC.csproj">
+      <Project>{ab1f1045-d87b-471c-b4cc-bb8008f719f7}</Project>
+      <Name>TUM.CMS.VplControl.IFC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TUM.CMS.VplControl.Watch3D\TUM.CMS.VplControl.Watch3D.csproj">
       <Project>{39c73fb5-d284-409d-835a-803090e867c9}</Project>
       <Name>TUM.CMS.VplControl.Watch3D</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Xbim.Geometry.3.1.14\build\net40\Xbim.Geometry.targets" Condition="Exists('..\packages\Xbim.Geometry.3.1.14\build\net40\Xbim.Geometry.targets')" />

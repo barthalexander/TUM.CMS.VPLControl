@@ -12,15 +12,17 @@ using Xbim.Presentation;
 using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using System.Linq;
+using System.Diagnostics;
 
-namespace TUM.CMS.VplControl.Test.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcMapsNode : Node
     {
-        private Frame maps;
+        private WebBrowser maps;
         public XbimModel xModel;
         public IfcMapsNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
+           
             IsResizeable = true;
             var textBlock = new TextBlock
             {
@@ -32,18 +34,23 @@ namespace TUM.CMS.VplControl.Test.Nodes
 
             AddInputPortToNode("Object", typeof(string));
 
-           
+            var appName = Process.GetCurrentProcess().ProcessName + ".exe";
+            SetIE9KeyforWebBrowserControl(appName);
 
-            maps = new Frame
+
+            maps = new WebBrowser
             {
                 MinWidth = 600,
                 MinHeight = 450
+
             };
+
+            
+
             AddControlToNode(maps);
             AddControlToNode(textBlock);
 
 
-           
         }
 
        
@@ -60,6 +67,7 @@ namespace TUM.CMS.VplControl.Test.Nodes
                     var err = xModel.Validate(TextWriter.Null, ValidationFlags.All);
                     MessageBox.Show("ERROR in reading process!");
                 }
+               
 
                 try
                 {
@@ -102,6 +110,67 @@ namespace TUM.CMS.VplControl.Test.Nodes
                 Left = Left
             };
         }
+        private void SetIE9KeyforWebBrowserControl(string appName)
+        {
+            RegistryKey Regkey = null;
+            try
+            {
+
+                //For 64 bit Machine 
+                if (Environment.Is64BitOperatingSystem)
+                    Regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\MAIN\\FeatureControl\\FEATURE_BROWSER_EMULATION", true);
+                else  //For 32 bit Machine 
+                    Regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", true);
+
+                //If the path is not correct or 
+                //If user't have priviledges to access registry 
+                if (Regkey == null)
+                {
+                    MessageBox.Show("Application Settings Failed - Address Not found");
+                    return;
+                }
+
+                string FindAppkey = Convert.ToString(Regkey.GetValue(appName));
+
+                //Check if key is already present 
+                if (FindAppkey == "9999")
+                {
+                    Console.WriteLine("Required Application Settings Present");
+                    Regkey.Close();
+                    return;
+                }
+
+                //If key is not present add the key , Kev value 9999-Decimal 
+                if (string.IsNullOrEmpty(FindAppkey) || FindAppkey != "9999")
+                {
+                    Regkey.SetValue(appName, unchecked((int)0x270F), RegistryValueKind.DWord);
+                }
+                
+                //check for the key after adding 
+                FindAppkey = Convert.ToString(Regkey.GetValue(appName));
+
+                if (FindAppkey == "9999")
+                    Console.WriteLine("Application Settings Applied Successfully");
+                else
+                    MessageBox.Show("Application Settings for IFC Maps Node Failed \n Please check your Browser Version");
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Application Settings Failed");
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                //Close the Registry 
+                if (Regkey != null)
+                    Regkey.Close();
+            }
+
+
+        }
+
 
     }
-}
+    }
