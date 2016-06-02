@@ -39,8 +39,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Esent.Interop, Version=1.9.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\ManagedEsent.1.9.2.0\lib\net40\Esent.Interop.dll</HintPath>
+    <Reference Include="Esent.Interop, Version=1.9.3.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\ManagedEsent.1.9.3.3\lib\net40\Esent.Interop.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="HelixToolkit, Version=2015.1.629.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
@@ -145,6 +145,7 @@
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
     <Compile Include="Nodes\IfcFilterNode.cs" />
     <Compile Include="Nodes\IfcMapsNode.cs" />
+    <Compile Include="Nodes\IfcParseGeometryNode.cs" />
     <Compile Include="Nodes\IfcParseNode.cs" />
     <Compile Include="Nodes\IfcReaderNode.cs" />
     <Compile Include="Nodes\IfcReadPropertiesNode.cs" />
