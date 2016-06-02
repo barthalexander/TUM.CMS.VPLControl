@@ -123,7 +123,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override Node Clone()
         {
-            return new IfcReadSpaceNode(HostCanvas)
+            return new IfcReadSpacesNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left
