@@ -74,9 +74,7 @@ namespace TUM.CMS.VplControl.Test.Nodes
             if (textBlock == null) return;
             textBlock.Text = "";
 
-            var ifcwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
-            // Xbim.XbimExtensions.Interfaces.IModel ifcWall = ifcwall;
-            //xModel.InsertCopy(ifcwall,XbimReadWriteTransaction);
+            
             List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.IfcProducts.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
             foreach (var space in spaces)
             {
@@ -125,7 +123,7 @@ namespace TUM.CMS.VplControl.Test.Nodes
 
         public override Node Clone()
         {
-            return new IfcReadSpacesNode(HostCanvas)
+            return new IfcReadSpaceNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left
