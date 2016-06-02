@@ -13,13 +13,16 @@ using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Windows.Media;
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc2x3.GeometricModelResource;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcParseNode : Node
+    public class IfcParseGeometryNode : Node
     {
         public XbimModel xModel;
-        public IfcParseNode(Core.VplControl hostCanvas) : base(hostCanvas)
+
+        public IfcParseGeometryNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             AddInputPortToNode("Test", typeof(string));
 
@@ -27,7 +30,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var label = new Label
             {
-                Content = "IFC File Reading",
+                Content = "IFC File Rading",
                 Width = 100,
                 FontSize = 15,
                 HorizontalContentAlignment = HorizontalAlignment.Center
@@ -57,27 +60,40 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var path = Path.GetTempPath();
                 xModel = new XbimModel();
                 xModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
-                xModel.Close();
 
-                OutputPorts[0].Data = path + "temp_reader" + number + ".xbim";
-                var textBlock = ControlElements[1] as TextBlock;
-                textBlock.Background = Brushes.White;
-                textBlock.Text = "File is Valid!";
+                IXbimSolid solid;
+                XbimGeometryEngine _xbimGeometryCreator = new XbimGeometryEngine();
+                if(xModel.Instances.OfType<IfcExtrudedAreaSolid>() != null)
+                {
+                    var instance = xModel.Instances.OfType<IfcExtrudedAreaSolid>().FirstOrDefault();
+                    solid = _xbimGeometryCreator.CreateSolid(instance);
+                }
+
+
+
+               // XbimShapeGeometry fbrep = _xbimGeometryCreator.CreateShapeGeometry(solid, 0.01, 10);
+               // XbimMeshGeometry3D mesh = new XbimMeshGeometry3D();
+               // mesh.Read(fbrep.ShapeData);
+               // 
+               // foreach (var vertex in mesh.Positions)
+               // {
+               //     Console.WriteLine(vertex.X + ", " + vertex.Y + ", " + vertex.Z);
+               // }
+               // 
+               // for (int i = 0; i < mesh.TriangleIndices.Count; i += 3)
+               // {
+               //     Console.WriteLine(mesh.TriangleIndices[i] + ", " + mesh.TriangleIndices[i + 1] + ", " + mesh.TriangleIndices[i + 2]);
+               // }
+               // 
+               // Console.ReadLine();
+
+
             }
-            else
-            {
-                var textBlock = ControlElements[1] as TextBlock;
-                textBlock.Background = Brushes.Red;
-                textBlock.Text = "Please select a true File!";
-            }
-            
-
-
         }
 
         public override Node Clone()
         {
-            return new IfcParseNode(HostCanvas)
+            return new IfcParseGeometryNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left
