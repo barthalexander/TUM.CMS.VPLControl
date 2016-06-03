@@ -4,25 +4,14 @@
 //Of course it can combine more filters, though I think it's better not too rash to do so 
 //before we discuss the current platform with our tutors Cornelius and Dominic. 
 //Yini Wang
-using System;
-using System.Windows;
 using System.Windows.Controls;
 using System.Xml;
 using TUM.CMS.VplControl.Core;
 using System.Collections.Generic;
-using System.IO;
-using System.Windows.Input;
-using Microsoft.Win32;
 using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
-using Xbim.Ifc;
 
-using System.ComponentModel;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
