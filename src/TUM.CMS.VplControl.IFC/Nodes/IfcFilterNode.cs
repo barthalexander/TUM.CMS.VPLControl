@@ -41,6 +41,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var label3 = new Label { Content = "Wall height filter:" };
             var label4 = new Label { Content = "Wall type filter:" };
             var label5 = new Label { Content = "Column load bearing filter:" };
+            var labelPropertySet = new Label {Content="Property Set" };
             var comboBox = new ComboBox { };
             comboBox.SelectionChanged += comboBox_SelectionChanged;
             var comboBox2 = new ComboBox { };
@@ -89,7 +90,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var res = xModel.Open(InputPorts[0].Data.ToString(), XbimDBAccess.ReadWrite);
 
-
+            
             var comboBox = ControlElements[2] as ComboBox;
             if (comboBox == null) return;
             var comboBox2 = ControlElements[4] as ComboBox;
@@ -100,10 +101,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (comboBox4 == null) return;
 
 
-
+           
+           
 
 
             var ifcwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+            var searchID=ifcwall[0].GlobalId;
+            List<Xbim.Ifc2x3.SharedBldgElements.IfcWall> filteredList = ifcwall.Where(x => x.GlobalId == searchID).ToList();
 
             //wall height filter:
             List<Xbim.Ifc2x3.PropertyResource.IfcProperty> wallHeight=new List<Xbim.Ifc2x3.PropertyResource.IfcProperty> { };
@@ -243,7 +247,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             comboBox.SelectedIndex = 0;
            
             
-
+            
         }
 
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
