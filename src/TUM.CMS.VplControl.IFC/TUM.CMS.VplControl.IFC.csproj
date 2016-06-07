@@ -7,8 +7,8 @@
     <ProjectGuid>{AB1F1045-D87B-471C-B4CC-BB8008F719F7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TUM.CMS.Vpl.Control.IFC</RootNamespace>
-    <AssemblyName>TUM.CMS.Vpl.Control.IFC</AssemblyName>
+    <RootNamespace>TUM.CMS.VplControl.IFC</RootNamespace>
+    <AssemblyName>TUM.CMS.VplControl.IFC</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -39,8 +39,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Esent.Interop, Version=1.9.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\ManagedEsent.1.9.2.0\lib\net40\Esent.Interop.dll</HintPath>
+    <Reference Include="Esent.Interop, Version=1.9.3.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\ManagedEsent.1.9.3.3\lib\net40\Esent.Interop.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="HelixToolkit, Version=2015.1.629.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
@@ -145,6 +145,7 @@
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
     <Compile Include="Nodes\IfcFilterNode.cs" />
     <Compile Include="Nodes\IfcMapsNode.cs" />
+    <Compile Include="Nodes\IfcParseGeometryNode.cs" />
     <Compile Include="Nodes\IfcParseNode.cs" />
     <Compile Include="Nodes\IfcReaderNode.cs" />
     <Compile Include="Nodes\IfcReadPropertiesNode.cs" />

@@ -27,7 +27,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var label = new Label
             {
-                Content = "IFC File Rading",
+                Content = "IFC File Reading",
                 Width = 100,
                 FontSize = 15,
                 HorizontalContentAlignment = HorizontalAlignment.Center
