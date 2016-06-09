@@ -4,15 +4,20 @@ using Xbim.Ifc2x3.UtilityResource;
 
 namespace TUM.CMS.VplControl.IFC.Utilities
 {
-    class ModelInfo
+    public class ModelInfo
     {
-        public Guid ModelId;
+        public string ModelId { get; set; }
         public List<IfcGloballyUniqueId> ElementIds;
 
-        public ModelInfo()
+        public ModelInfo(String filePath)
         {
             ElementIds = new List<IfcGloballyUniqueId>();
-            ModelId = Guid.NewGuid();
+            ModelId = filePath;
+        }
+
+        public void AddElementIds(string id)
+        {
+            ElementIds.Add(id);
         }
     }
 }

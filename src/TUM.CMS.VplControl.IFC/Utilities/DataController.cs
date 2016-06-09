@@ -9,11 +9,11 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         // Singleton
         private static DataController _instance;
         private static readonly object Padlock = new object();
-        public Dictionary<Guid, XbimModel> modelStorage;
+        public Dictionary<string, XbimModel> modelStorage;
 
         private DataController()
         {
-            modelStorage = new Dictionary<Guid, XbimModel>();
+            modelStorage = new Dictionary<string, XbimModel>();
         }
 
         public static DataController Instance
@@ -30,36 +30,36 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         /// <summary>
         /// TODO
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="fileString"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool AddModel(Guid id, XbimModel model)
+        public bool AddModel(string fileString, XbimModel model)
         {
-            modelStorage.Add(id, model);
+            modelStorage.Add(fileString, model);
             return true;
         }
 
         /// <summary>
         /// TODO
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="model"></param>
+        /// <param name="fileString"></param>
         /// <returns></returns>
-        public bool RemoveModel(Guid id, XbimModel model)
+        public bool RemoveModel(string fileString)
         {
+            modelStorage.Remove(fileString);
             return true;
         }
 
         /// <summary>
-        /// TODO
+        /// 
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="filePath"></param>
         /// <returns></returns>
-        public XbimModel GetModel(Guid id)
+        public XbimModel GetModel(string filePath)
         {
-            // modelStorage[id].Open(path + "temp_reader" + number + ".xbim")
-            // return modelStorage[id];
-            return null;
+            modelStorage[filePath].Open(filePath);
+            return modelStorage[filePath];
+
         }
     }
 }

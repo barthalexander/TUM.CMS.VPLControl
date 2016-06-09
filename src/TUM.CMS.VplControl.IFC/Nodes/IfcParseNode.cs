@@ -24,7 +24,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             AddInputPortToNode("Test", typeof(string));
 
-            AddOutputPortToNode("Test", typeof(string));
+            AddOutputPortToNode("GUID", typeof(string));
 
             var label = new Label
             {
@@ -45,7 +45,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
 
-       
+        /// <summary>
+        /// Reads the file String and looks if its existing.
+        /// Create a new xModel inside the Temp Folder with a Random Number in the FileName
+        /// Safe the Model in an Dictonary (DataController)
+        /// 
+        /// Output is the GUID (FilePath)
+        /// </summary>
         public override void Calculate()
         {
             var file = InputPorts[0].Data.ToString();
@@ -59,9 +65,23 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 xModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
                 xModel.Close();
 
-                DataController.Instance.modelStorage.Add(Guid.NewGuid(), xModel);         
+                var fileString = path + "temp_reader" + number + ".xbim";
 
-               OutputPorts[0].Data = path + "temp_reader" + number + ".xbim";
+                DataController.Instance.AddModel(fileString, xModel);
+                
+
+
+
+                ModelInfo modelInfo = new ModelInfo(fileString);
+                xModel = DataController.Instance.GetModel(fileString);
+                List<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement> elements = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement>().ToList();
+                foreach (var element in elements)
+                {
+                    modelInfo.AddElementIds(element.GlobalId); 
+                }
+                
+                OutputPorts[0].Data = modelInfo;
+
                 var textBlock = ControlElements[1] as TextBlock;
                 textBlock.Background = Brushes.White;
                 textBlock.Text = "File is Valid!";
