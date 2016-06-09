@@ -18,12 +18,14 @@ using Xbim.Presentation;
 using Xbim.XbimExtensions;
 using Xbim.XbimExtensions.Interfaces;
 using XbimGeometry.Interfaces;
+using System.Windows.Input;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcParseGeometryNode : Node
     {
         private readonly HelixViewport3D _viewPort;
+        //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
         public XbimModel XModel;
 
         public IfcParseGeometryNode(Core.VplControl hostCanvas) : base(hostCanvas)
@@ -35,6 +37,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddOutputPortToNode("SelectedEntities", typeof(List<IfcGloballyUniqueId>));
 
             _viewPort = new HelixViewport3D();
+            //_viewPort.MouseDoubleClick += _viewPort_mouseclick;
 
             AddControlToNode(_viewPort);
         }
@@ -60,7 +63,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var res = XModel.Open(path + "temp_reader" + number + ".xbim", XbimDBAccess.ReadWrite);
 
             var context = new Xbim3DModelContext(XModel);
-                //upgrade to new geometry represenation, uses the default 3D model
+            //upgrade to new geometry represenation, uses the default 3D model
             context.CreateContext(XbimGeometryType.PolyhedronBinary);
 
             if (res == false)
@@ -74,12 +77,64 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 var m = new MeshGeometry3D();
                 GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
-
+                string itemtype = item.GetType().ToString();
+                DiffuseMaterial Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Violet));
+                
+                if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcBeam")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Yellow));
+                    
+                   
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcColumn")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
+                   
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Plum));
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcDoor")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.SeaGreen));
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcPlate")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.SpringGreen));
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcRoof")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Brown));
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcSlab")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Black));
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcStair")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Coral));
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcWall")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Gray));
+                }
+                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcWindow")
+                {
+                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.HotPink));
+                }
+               
                 var mb = new MeshBuilder(false, false);
-                VisualizeMesh(mb, m);
+                    VisualizeMesh(mb, m, Material1);
             }
+
+           
         }
 
+       // private void _viewPort_mouseclick(Object sender,MouseEventArgs e)
+        //{
+
+        //}
         public override Node Clone()
         {
             return new IfcParseGeometryNode(HostCanvas)
@@ -94,14 +149,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         /// <param name="meshBuilder"></param>
         /// <param name="mesh"></param>
-        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh)
+        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat)
         {
             // Output on console
             var points = new List<Point3D>();
 
             foreach (var item in mesh.Positions)
             {
-                points.Add(new Point3D {X = item.X, Y = item.Y, Z = item.Z});
+                points.Add(new Point3D { X = item.X, Y = item.Y, Z = item.Z });
             }
 
             for (var i = 0; i < mesh.TriangleIndices.Count; i += 3)
@@ -114,15 +169,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             // Create the Geometry
             var myGeometryModel = new GeometryModel3D
-            {
-                Material = new DiffuseMaterial(new SolidColorBrush(Colors.Aqua)),
-                BackMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red)),
+            {               
+                Material = mat,
+                //BackMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red)),
                 Geometry = meshBuilder.ToMesh(true)
                 // In case that you have to rotate the model ... 
                 // Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90))
             };
 
-            var element = new ModelUIElement3D {Model = myGeometryModel};
+            var element = new ModelUIElement3D { Model = myGeometryModel };
 
             // Add the Mesh to the ViewPort
             _viewPort.Children.Add(element);
@@ -147,12 +202,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 case 2:
                     var context = new Xbim3DModelContext(model);
 
-                    var productShape = context.ShapeInstancesOf((IfcProduct) item)
+                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
                         .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
                         .ToList();
                     if (!productShape.Any() && item is IfcFeatureElement)
                     {
-                        productShape = context.ShapeInstancesOf((IfcProduct) item)
+                        productShape = context.ShapeInstancesOf((IfcProduct)item)
                             .Where(
                                 s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
                             .ToList();
@@ -164,14 +219,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     {
                         IXbimShapeGeometryData shapeGeom =
                             context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
-                        switch ((XbimGeometryType) shapeGeom.Format)
+                        switch ((XbimGeometryType)shapeGeom.Format)
                         {
                             case XbimGeometryType.PolyhedronBinary:
                                 m.Read(shapeGeom.ShapeData,
                                     XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
                                 break;
                             case XbimGeometryType.Polyhedron:
-                                m.Read(((XbimShapeGeometry) shapeGeom).ShapeData,
+                                m.Read(((XbimShapeGeometry)shapeGeom).ShapeData,
                                     XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
                                 break;
                         }
