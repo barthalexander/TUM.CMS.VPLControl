@@ -75,7 +75,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public void ReadIfc(string modelid)
         {
            
-            xModel = DataController.Instance.GetModel(modelid);
+            xModel = DataController.Instance.GetModel(modelid, true);
 
             // xModel.Close();
 

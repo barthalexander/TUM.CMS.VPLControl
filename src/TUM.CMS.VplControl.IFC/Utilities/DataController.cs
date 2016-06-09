@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Xbim.IO;
+using Xbim.XbimExtensions;
 
 namespace TUM.CMS.VplControl.IFC.Utilities
 {
@@ -54,10 +55,18 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         /// 
         /// </summary>
         /// <param name="filePath"></param>
+        /// <param name="writeAccess"></param>
         /// <returns></returns>
-        public XbimModel GetModel(string filePath)
+        public XbimModel GetModel(string filePath, bool writeAccess = false)
         {
-            modelStorage[filePath].Open(filePath);
+            if (writeAccess == false)
+            {
+                modelStorage[filePath].Open(filePath);
+            }
+            else
+            {
+                modelStorage[filePath].Open(filePath, XbimDBAccess.ReadWrite);
+            }
             return modelStorage[filePath];
 
         }

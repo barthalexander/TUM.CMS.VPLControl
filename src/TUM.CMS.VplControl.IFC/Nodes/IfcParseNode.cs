@@ -41,11 +41,29 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Padding = new Thickness(5),
                 IsHitTestVisible = false
             };
+
+            var button = new Button { Content = "Clean Database" };
+            button.Click += button_Click;
+
             AddControlToNode(label);
             AddControlToNode(textBlock);
+            AddControlToNode(button);
 
         }
 
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            var models = DataController.Instance.modelStorage.ToList();
+            if (models.Count > 1)
+            {
+                for (int i = 0; i < models.Count - 1; i++)
+                {
+                    DataController.Instance.RemoveModel(models[i].Key);
+                }
+            }
+
+        }
+        
         private BackgroundWorker worker;
         /// <summary>
         /// Reads the file String and looks if its existing.
