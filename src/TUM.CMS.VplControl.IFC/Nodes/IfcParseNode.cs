@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,6 +46,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
 
+        private BackgroundWorker worker;
         /// <summary>
         /// Reads the file String and looks if its existing.
         /// Create a new xModel inside the Temp Folder with a Random Number in the FileName
@@ -55,36 +57,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public override void Calculate()
         {
             var file = InputPorts[0].Data.ToString();
-            if(file != null && File.Exists(file))
+            if (file != "" && File.Exists(file))
             {
-                Random zufall = new Random();
-                int number = zufall.Next(1, 1000);
-
-                var path = Path.GetTempPath();
-                xModel = new XbimModel();
-                xModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
-                xModel.Close();
-
-                var fileString = path + "temp_reader" + number + ".xbim";
-
-                DataController.Instance.AddModel(fileString, xModel);
-                
-
-
-
-                ModelInfo modelInfo = new ModelInfo(fileString);
-                xModel = DataController.Instance.GetModel(fileString);
-                List<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement> elements = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement>().ToList();
-                foreach (var element in elements)
-                {
-                    modelInfo.AddElementIds(element.GlobalId); 
-                }
-                
-                OutputPorts[0].Data = modelInfo;
-
-                var textBlock = ControlElements[1] as TextBlock;
-                textBlock.Background = Brushes.White;
-                textBlock.Text = "File is Valid!";
+                worker = new BackgroundWorker();
+                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                worker.RunWorkerAsync(file);
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
             }
             else
             {
@@ -92,10 +70,50 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 textBlock.Background = Brushes.Red;
                 textBlock.Text = "Please select a true File!";
             }
-            
+
 
 
         }
+
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var file = e.Argument.ToString();
+            Random zufall = new Random();
+            int number = zufall.Next(1, 1000);
+
+            var path = Path.GetTempPath();
+            xModel = new XbimModel();
+            xModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
+            xModel.Close();
+
+            var fileString = path + "temp_reader" + number + ".xbim";
+
+            DataController.Instance.AddModel(fileString, xModel);
+
+
+
+            ModelInfo modelInfo = new ModelInfo(fileString);
+            xModel = DataController.Instance.GetModel(fileString);
+            List<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement> elements = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement>().ToList();
+            foreach (var element in elements)
+            {
+                modelInfo.AddElementIds(element.GlobalId);
+            }
+            e.Result = modelInfo;
+        }
+
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            OutputPorts[0].Data = e.Result;
+            var textBlock = ControlElements[1] as TextBlock;
+            textBlock.Background = Brushes.White;
+            textBlock.Text = "File is Valid!";
+        }
+
+
+
+            
+       
 
         public override Node Clone()
         {
