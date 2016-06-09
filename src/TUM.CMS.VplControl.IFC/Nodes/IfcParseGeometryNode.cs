@@ -18,7 +18,6 @@ using Xbim.Presentation;
 using Xbim.XbimExtensions;
 using Xbim.XbimExtensions.Interfaces;
 using XbimGeometry.Interfaces;
-using System.Windows.Input;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {

@@ -13,6 +13,7 @@ using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Windows.Media;
+using TUM.CMS.VplControl.IFC.Utilities;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -42,7 +43,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddControlToNode(label);
             AddControlToNode(textBlock);
 
-
         }
 
        
@@ -59,7 +59,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 xModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
                 xModel.Close();
 
-                OutputPorts[0].Data = path + "temp_reader" + number + ".xbim";
+                DataController.Instance.modelStorage.Add(Guid.NewGuid(), xModel);         
+
+               OutputPorts[0].Data = path + "temp_reader" + number + ".xbim";
                 var textBlock = ControlElements[1] as TextBlock;
                 textBlock.Background = Brushes.White;
                 textBlock.Text = "File is Valid!";
