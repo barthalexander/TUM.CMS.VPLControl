@@ -72,19 +72,22 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 MessageBox.Show("ERROR in reading process!");
             }
 
-            // Loop through Entities and visualze them in the viewport
-            foreach (var item in XModel.Instances.OfType<IfcProduct>())
+                // Loop through Entities and visualze them in the viewport
+                foreach (var item in XModel.Instances.OfType<IfcProduct>())
             {
                 var m = new MeshGeometry3D();
                 GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
+                var mat = GetStyleFromXbimModel(item);
+
                 string itemtype = item.GetType().ToString();
                 DiffuseMaterial Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Violet));
-                
+
+                var test = item.ReferencedBy;
+
                 if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcBeam")
                 {
                     Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Yellow));
-                    
-                   
+                 
                 }
                 else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcColumn")
                 {
@@ -125,7 +128,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                
                 var mb = new MeshBuilder(false, false);
-                    VisualizeMesh(mb, m, Material1);
+                    VisualizeMesh(mb, m, mat);
             }
 
            
@@ -151,6 +154,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="mesh"></param>
         public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat)
         {
+
             // Output on console
             var points = new List<Point3D>();
 
@@ -166,6 +170,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
 
             // TODO: Color has to be read! 
+            
 
             // Create the Geometry
             var myGeometryModel = new GeometryModel3D
@@ -184,6 +189,93 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             return true;
         }
+
+
+        public DiffuseMaterial GetStyleFromXbimModel(IPersistIfcEntity item)
+        {
+
+            var model = item.ModelOf as XbimModel;
+            if (model == null || !(item is IfcProduct))
+                return null;
+
+            switch (model.GeometrySupportLevel)
+            {
+                case 2:
+                    try
+                    {
+
+                    
+                    // Style
+                    Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
+                    Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
+                    Model3DGroup opaques = new Model3DGroup();
+                    Model3DGroup transparents = new Model3DGroup();
+
+                    var context = new Xbim3DModelContext(model);
+
+                    foreach (var style in context.SurfaceStyles())
+                    {
+                        WpfMaterial wpfMaterial = new WpfMaterial();
+                        wpfMaterial.CreateMaterial(style);
+                        styles.Add(style.DefinedObjectId, wpfMaterial);
+                        WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
+                        meshSets.Add(style.DefinedObjectId, mg);
+                        if (style.IsTransparent)
+                            transparents.Children.Add(mg);
+                        else
+                            opaques.Children.Add(mg);
+
+                    }
+
+                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
+                        .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                        .ToList();
+                    if (!productShape.Any() && item is IfcFeatureElement)
+                    {
+                        productShape = context.ShapeInstancesOf((IfcProduct)item)
+                            .Where(
+                                s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                            .ToList();
+                    }
+
+                    if (!productShape.Any())
+                        return null;
+
+                    var shapeInstance = productShape.FirstOrDefault();
+
+
+                    WpfMaterial material;
+                    styles.TryGetValue(shapeInstance.StyleLabel, out material);
+                    string stringMaterial = material.Description;
+                    string[] materialEntries = stringMaterial.Split(' ');
+                    double r, g, b, a;
+
+                    double.TryParse(materialEntries[1].Substring(2), out r);
+                    double.TryParse(materialEntries[2].Substring(2), out g);
+                    double.TryParse(materialEntries[3].Substring(2), out b);
+                    double.TryParse(materialEntries[4].Substring(2), out a);
+
+                    r *= 255;
+                    g *= 255;
+                    b *= 255;
+                    a *= 255;
+                    return new DiffuseMaterial(new SolidColorBrush(Color.FromArgb((byte)r, (byte)g, (byte)b, (byte)a)));
+
+                    }
+                    catch
+                    {
+                        return new DiffuseMaterial(new SolidColorBrush(Colors.Red)); ;
+                    }
+
+                    break;
+
+            }
+
+            return new DiffuseMaterial(new SolidColorBrush(Colors.Gray)); ;
+
+
+        }
+
 
         /// <summary>
         ///     Create MeshGeometry3D
@@ -213,12 +305,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             .ToList();
                     }
 
-                    if (!productShape.Any())
-                        return;
-                    foreach (var shapeInstance in productShape)
-                    {
-                        IXbimShapeGeometryData shapeGeom =
-                            context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
+
+                    foreach(var shapeInstance in productShape)
+                    { 
+                        IXbimShapeGeometryData shapeGeom = context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
                         switch ((XbimGeometryType)shapeGeom.Format)
                         {
                             case XbimGeometryType.PolyhedronBinary:
