@@ -12,6 +12,7 @@ using Xbim.Presentation;
 using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using System.Linq;
+using TUM.CMS.VplControl.IFC.Utilities;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -50,9 +51,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
        
         public override void Calculate()
         {
-            var file = InputPorts[0].Data.ToString();
-            if (file == null) return;
-            ReadIfc(file);
+            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+
+            if (modelid == null) return;
+            ReadIfc(modelid);
 
             // Ifc3DViewer.Model = _ifcReader.xModel
             // var m = new XbimModel();
@@ -70,18 +72,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
 
-        public void ReadIfc(string file)
+        public void ReadIfc(string modelid)
         {
            
-            xModel = new XbimModel();          
-            
-            var res = xModel.Open(file, XbimDBAccess.ReadWrite);
-
-            if (res == false)
-            {
-                var err = xModel.Validate(TextWriter.Null, ValidationFlags.All);
-                MessageBox.Show("ERROR in reading process!");
-            }
+            xModel = DataController.Instance.GetModel(modelid, true);
 
             // xModel.Close();
 

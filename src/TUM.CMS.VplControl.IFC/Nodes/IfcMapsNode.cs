@@ -13,6 +13,7 @@ using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Diagnostics;
+using TUM.CMS.VplControl.IFC.Utilities;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -56,19 +57,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
        
         public override void Calculate()
         {
-            var file = InputPorts[0].Data.ToString();
-            if (file != null && File.Exists(file))
+            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+
+            if (modelid != null && File.Exists(modelid))
             {
-                xModel = new XbimModel();
-                var res = xModel.Open(file, XbimDBAccess.Read);
-
-                if (res == false)
-                {
-                    var err = xModel.Validate(TextWriter.Null, ValidationFlags.All);
-                    MessageBox.Show("ERROR in reading process!");
-                }
+                xModel = DataController.Instance.GetModel(modelid);
                
-
                 try
                 {
                     var ifcsite = xModel.IfcProducts.OfType<Xbim.Ifc2x3.ProductExtension.IfcSite>().ToList();

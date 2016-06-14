@@ -16,14 +16,18 @@ using Xbim.Ifc;
 
 using System.ComponentModel;
 using System.Linq;
+using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.Extensions;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
+
     public class IfcReadSpacesNode : Node
     {
+        public XbimModel xModel;
+
         public IfcReadSpacesNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
@@ -63,10 +67,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         //}
         public override void Calculate()
         {
-           
-            XbimModel xModel = new XbimModel();
-           
-            var res = xModel.Open(InputPorts[0].Data.ToString(), XbimDBAccess.ReadWrite);
+
+            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            
+            xModel = DataController.Instance.GetModel(modelid);
 
             var scrollViewer = ControlElements[0] as ScrollViewer;
             if (scrollViewer == null) return;
