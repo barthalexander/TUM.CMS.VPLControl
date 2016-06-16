@@ -150,6 +150,7 @@
     <Compile Include="Nodes\IfcReaderNode.cs" />
     <Compile Include="Nodes\IfcReadPropertiesNode.cs" />
     <Compile Include="Nodes\IfcReadSpaceNode.cs" />
+    <Compile Include="Nodes\IfcSelectModel.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

@@ -51,6 +51,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
 
+        /// <summary>
+        /// Cleaning the DataController
+        /// 
+        /// When Reading Files, they are stored in the DataController.
+        /// To prevent a big DataController, the user can delete all stored Models except the actual Model
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_Click(object sender, RoutedEventArgs e)
         {
             var models = DataController.Instance.modelStorage.ToList();
@@ -64,7 +72,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
         
-        private BackgroundWorker worker;
+        private BackgroundWorker _worker;
         /// <summary>
         /// Reads the file String and looks if its existing.
         /// Create a new xModel inside the Temp Folder with a Random Number in the FileName
@@ -77,10 +85,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var file = InputPorts[0].Data.ToString();
             if (file != "" && File.Exists(file))
             {
-                worker = new BackgroundWorker();
-                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-                worker.RunWorkerAsync(file);
-                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+                _worker = new BackgroundWorker();
+                _worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                _worker.RunWorkerAsync(file);
+                _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
             }
             else
             {
@@ -92,7 +100,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
         }
-
+        
+        /// <summary>
+        /// Background Worker
+        /// 
+        /// Create xBIM File and Add it to the new DataController.
+        /// The xBIM File is therefor stored in a Database
+        /// 
+        /// The ModelId (FilePath) and the ElementList are stored in the ModelInfo Class
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">Value File is the FilePath</param>
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             var file = e.Argument.ToString();
@@ -120,6 +139,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             e.Result = modelInfo;
         }
 
+        /// <summary>
+        /// Its important to split the Creation of the xBIM File and the OutputPort
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">Result is the modelInfo Class</param>
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             OutputPorts[0].Data = e.Result;

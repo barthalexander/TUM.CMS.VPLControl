@@ -29,7 +29,9 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         }
 
         /// <summary>
-        /// TODO
+        /// Models will be added to the DataController.
+        /// 
+        /// GUID is the file Path.
         /// </summary>
         /// <param name="fileString"></param>
         /// <param name="model"></param>
@@ -41,7 +43,9 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         }
 
         /// <summary>
-        /// TODO
+        /// Models will be removed from the DataController.
+        /// 
+        /// Benefit: No big DataController
         /// </summary>
         /// <param name="fileString"></param>
         /// <returns></returns>
@@ -52,10 +56,14 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         }
 
         /// <summary>
+        /// Reading / Opening the xBIM File. 
         /// 
+        /// This Method must be implemented in each Node which needs this file
+        /// 
+        /// The Method differentiates between WriteAccess and ReadAccess
         /// </summary>
         /// <param name="filePath"></param>
-        /// <param name="writeAccess"></param>
+        /// <param name="writeAccess">Mostly the File must be only readable</param>
         /// <returns></returns>
         public XbimModel GetModel(string filePath, bool writeAccess = false)
         {
