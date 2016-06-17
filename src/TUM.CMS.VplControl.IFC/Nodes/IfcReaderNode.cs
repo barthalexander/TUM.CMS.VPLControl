@@ -1,38 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using Microsoft.Win32;
+﻿using System.ComponentModel;
 using TUM.CMS.VplControl.Core;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
-using Xbim.XbimExtensions;
 using XbimGeometry.Interfaces;
-using System.Linq;
 using TUM.CMS.VplControl.IFC.Utilities;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcReaderNode : Node
     {
-        private readonly TextBox _textBox;
         public XbimModel xModel;
         private DrawingControl3D drawingControl3D;
-        private DynamicProductSelectionControl productSelectionControl;
         public IfcReaderNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             IsResizeable = true;
 
-
             AddInputPortToNode("Object", typeof(object));
 
-
-            // Init
-            // productSelectionControl = new DynamicProductSelectionControl();
-            // AddControlToNode(productSelectionControl);
 
             // Init 3DController
             drawingControl3D = new DrawingControl3D
@@ -48,19 +33,57 @@ namespace TUM.CMS.VplControl.IFC.Nodes
            
         }
 
-       
+
+        /// <summary>
+        /// Running the Plotting Process for an IFC File.
+        /// Its important to run it with a Background Worker for no interruption.
+        /// 
+        /// ModelId is stored in the Class ModelInfo. 
+        /// Addiontional: ElementList is also stored in the Class ModelInfo
+        /// </summary>
         public override void Calculate()
         {
             var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
 
             if (modelid == null) return;
-            ReadIfc(modelid);
 
-            // Ifc3DViewer.Model = _ifcReader.xModel
-            // var m = new XbimModel();
-            // m.Open("temp.xbim");
-            // drawingControl3D.LoadGeometry(m);
-            // drawingControl3D.ShowAll();
+            BackgroundWorker worker = new BackgroundWorker();
+
+            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+            worker.RunWorkerAsync(modelid);
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+
+        }
+
+
+        /// <summary>
+        /// Background Worker for the Transformation of the xModel
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">ModelId: The Guid is the Filepath</param>
+        public void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var modelid = e.Argument.ToString();
+            xModel = DataController.Instance.GetModel(modelid, true);
+
+            var context = new Xbim3DModelContext(xModel);
+            context.CreateContext(XbimGeometryType.PolyhedronBinary);
+
+            e.Result = xModel;
+        }
+        /// <summary>
+        /// Transformatíon of the xModel must be completed to start the drawing control. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            xModel = (XbimModel) e.Result;
+            drawingControl3D.Model = xModel;
+            drawingControl3D.ShowAll();
+            drawingControl3D.ReloadModel();
+            drawingControl3D.LoadGeometry(xModel);
         }
 
         public override Node Clone()
@@ -70,38 +93,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Top = Top,
                 Left = Left
             };
-        }
-
-        public void ReadIfc(string modelid)
-        {
-           
-            xModel = DataController.Instance.GetModel(modelid, true);
-
-            // xModel.Close();
-
-            try
-            {
-
-                var context = new Xbim3DModelContext(xModel);
-                context.CreateContext(XbimGeometryType.PolyhedronBinary);
-                drawingControl3D.Model = xModel;
-                drawingControl3D.ShowAll();
-                drawingControl3D.ReloadModel();
-                drawingControl3D.LoadGeometry(xModel);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
-
-            // drawingControl3D.ShowAll();
-
-            // productSelectionControl.Model = xModel;
-
-            // xModel.Close();
-
-            // drawingControl3D.LoadGeometry(xModel);
-            // drawingControl3D.ShowAll();
         }
 
     }
