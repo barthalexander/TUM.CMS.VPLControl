@@ -50,6 +50,18 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xbim.Common">
+      <HintPath>..\..\..\XbimEssentials\Output\Debug\Xbim.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc.Extensions">
+      <HintPath>..\..\..\XbimEssentials\Output\Debug\Xbim.Ifc.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc2x3">
+      <HintPath>..\..\..\XbimEssentials\Output\Debug\Xbim.Ifc2x3.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.IO">
+      <HintPath>..\..\..\XbimEssentials\Output\Debug\Xbim.IO.dll</HintPath>
+    </Reference>
     <Reference Include="Xceed.Wpf.AvalonDock">
       <HintPath>..\packages\Extended.Wpf.Toolkit.2.5\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
     </Reference>
@@ -100,6 +112,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TUM.CMS.VplControl.IFC\TUM.CMS.VplControl.IFC.csproj">
+      <Project>{ab1f1045-d87b-471c-b4cc-bb8008f719f7}</Project>
+      <Name>TUM.CMS.VplControl.IFC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TUM.CMS.VplControl\TUM.CMS.VplControl.csproj">
       <Project>{593e9bfd-be78-4487-9e22-76ae7df0b84a}</Project>
       <Name>TUM.CMS.VplControl</Name>
