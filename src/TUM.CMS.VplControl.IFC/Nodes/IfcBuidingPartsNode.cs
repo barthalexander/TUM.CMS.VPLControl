@@ -19,18 +19,20 @@ using System.Linq;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.Extensions;
+using TUM.CMS.VplControl.IFC.Utilities;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcBuildingPartsNode : Node
     {
+        private XbimModel xModel;
+
         public IfcBuildingPartsNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
 
-            AddInputPortToNode("IfcFile", typeof(string));
+            AddInputPortToNode("IfcFile", typeof(object));
 
-            AddOutputPortToNode("FilteredProducts", typeof(object));
 
 
 
@@ -58,16 +60,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddControlToNode(new Label { Content = "IfcProductsNode" });
 
         }
-        //private void textBox_TextChanged(object sender, TextChangedEventArgs e)
-        //{
-        //    Calculate();
-        //}
+       
         public override void Calculate()
         {
-           
-            XbimModel xModel = new XbimModel();
-           
-            var res = xModel.Open(InputPorts[0].Data.ToString(), XbimDBAccess.ReadWrite);
+            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            if (modelid == null) return;
+            xModel = DataController.Instance.GetModel(modelid, true);
+
 
             var scrollViewer = ControlElements[0] as ScrollViewer;
             if (scrollViewer == null) return;
@@ -81,8 +80,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             List<Xbim.Ifc2x3.SharedBldgElements.IfcWall> walls = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
             List<Xbim.Ifc2x3.SharedBldgElements.IfcWindow> windows = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
             List<Xbim.Ifc2x3.SharedBldgElements.IfcDoor> doors = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
-            // Xbim.XbimExtensions.Interfaces.IModel ifcWall = ifcwall;
-            //xModel.InsertCopy(ifcwall,XbimReadWriteTransaction);
+            
             List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.IfcProducts.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
             textBlock.Text += "Walls: \n\n";
             foreach (var wall in walls)
@@ -126,21 +124,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
         }
-
-        public override void SerializeNetwork(XmlWriter xmlWriter)
-        {
-            base.SerializeNetwork(xmlWriter);
-
-            // add your xml serialization methods here
-        }
-
-        public override void DeserializeNetwork(XmlReader xmlReader)
-        {
-            base.DeserializeNetwork(xmlReader);
-
-            // add your xml deserialization methods here
-        }
-
+        
         public override Node Clone()
         {
             return new IfcBuildingPartsNode(HostCanvas)
