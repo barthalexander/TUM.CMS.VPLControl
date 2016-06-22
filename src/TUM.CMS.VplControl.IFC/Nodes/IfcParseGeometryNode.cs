@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -18,6 +20,10 @@ using Xbim.Presentation;
 using Xbim.XbimExtensions;
 using Xbim.XbimExtensions.Interfaces;
 using XbimGeometry.Interfaces;
+using TUM.CMS.VplControl.IFC.Utilities;
+using System.Windows.Input;
+using System.Windows.Threading;
+using System.Threading;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -25,118 +31,138 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         private readonly HelixViewport3D _viewPort;
         //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
-        public XbimModel XModel;
-
+        private XbimModel _xModel;
+        public List<ModelInfo> ModelList;
+        private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
+        private BackgroundWorker worker;
         public IfcParseGeometryNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             // Init UI
             IsResizeable = true;
 
-            AddInputPortToNode("Model", typeof(string));
-            AddOutputPortToNode("SelectedEntities", typeof(List<IfcGloballyUniqueId>));
+            AddInputPortToNode("Model", typeof(string), true);
+            AddOutputPortToNode("FilteredElements", typeof(object));
 
-            _viewPort = new HelixViewport3D();
+            _viewPort = new HelixViewport3D
+            {
+                MinWidth = 520,
+                MinHeight = 520
+            };
+
             //_viewPort.MouseDoubleClick += _viewPort_mouseclick;
 
             AddControlToNode(_viewPort);
         }
 
+
         public override void Calculate()
         {
+            OutputPorts[0].Data = null;
             // Init the viewport
+
             _viewPort.Children.Clear();
             _viewPort.Children.Add(new SunLight());
-
-            var file = InputPorts[0].Data.ToString();
-
-            if (file == null || !File.Exists(file)) return;
-
-            var zufall = new Random();
-            var number = zufall.Next(1, 1000);
-
-            var path = Path.GetTempPath();
-            XModel = new XbimModel();
-            XModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
-            XModel.Close();
-
-            var res = XModel.Open(path + "temp_reader" + number + ".xbim", XbimDBAccess.ReadWrite);
-
-            var context = new Xbim3DModelContext(XModel);
-            //upgrade to new geometry represenation, uses the default 3D model
-            context.CreateContext(XbimGeometryType.PolyhedronBinary);
-
-            if (res == false)
+            ModelList = new List<ModelInfo>();
+            Type t = InputPorts[0].Data.GetType();
+            if (t.IsGenericType)
             {
-                var err = XModel.Validate(TextWriter.Null, ValidationFlags.All);
-                MessageBox.Show("ERROR in reading process!");
+                var collection = InputPorts[0].Data as ICollection;
+                if (collection != null)
+                    foreach (var model in collection)
+                    {
+                        var modelId = ((ModelInfo)(model)).ModelId;
+                        _xModel = DataController.Instance.GetModel(modelId, true);
+
+                        ModelList.Add(new ModelInfo(modelId));
+                        int indexOfModel = 0;
+                        foreach (var item in ModelList)
+                        {
+                            if (item.ModelId == modelId)
+                            {
+                                indexOfModel = ModelList.IndexOf(item);
+                                break;
+                            }
+                        }
+
+                        var context = new Xbim3DModelContext(_xModel);
+                        //upgrade to new geometry represenation, uses the default 3D model
+                        context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                        worker_DoWork(_xModel, indexOfModel);
+
+                        // worker = new BackgroundWorker();
+
+                        // worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                        //  worker.RunWorkerAsync(xModel);
+                        //  worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+
+                    }
             }
-
-                // Loop through Entities and visualze them in the viewport
-                foreach (var item in XModel.Instances.OfType<IfcProduct>())
+            else
             {
-                var m = new MeshGeometry3D();
-                GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
-                var mat = GetStyleFromXbimModel(item);
+                var file = InputPorts[0].Data.ToString();
 
-                string itemtype = item.GetType().ToString();
-                DiffuseMaterial Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Violet));
+                var modelId = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+                if (modelId == null) return;
+                int indexOfModel = 0;
+                foreach (var item in ModelList)
+                {
+                    if (item.ModelId == modelId)
+                    {
+                        indexOfModel = ModelList.IndexOf(item);
+                        break;
+                    }
+                }
+                _xModel = DataController.Instance.GetModel(modelId, true);
 
-                var test = item.ReferencedBy;
+                ModelList.Add(new ModelInfo(modelId));
 
-                if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcBeam")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Yellow));
-                 
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcColumn")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
-                   
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Plum));
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcDoor")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.SeaGreen));
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcPlate")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.SpringGreen));
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcRoof")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Brown));
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcSlab")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Black));
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcStair")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Coral));
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcWall")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.Gray));
-                }
-                else if (item.GetType().ToString() == "Xbim.Ifc2x3.SharedBldgElements.IfcWindow")
-                {
-                    Material1 = new DiffuseMaterial(new SolidColorBrush(Colors.HotPink));
-                }
-               
-                var mb = new MeshBuilder(false, false);
-                    VisualizeMesh(mb, m, mat);
+                var context = new Xbim3DModelContext(_xModel);
+                //upgrade to new geometry represenation, uses the default 3D model
+                context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                worker_DoWork(_xModel, indexOfModel);
+                
+
+                /*worker = new BackgroundWorker();
+
+                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                worker.RunWorkerAsync(xModel);
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);*/
+
+
+
+
             }
 
            
         }
 
-       // private void _viewPort_mouseclick(Object sender,MouseEventArgs e)
-        //{
 
-        //}
+
+        private void worker_DoWork(XbimModel xModel, int indexOfModel)
+        {
+            // Loop through Entities and visualze them in the viewport
+
+           // xModel = (XbimModel) e.Argument;
+            foreach (var item in xModel.Instances.OfType<IfcProduct>())
+            {
+                var m = new MeshGeometry3D();
+                GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
+                var mat = GetStyleFromXbimModel(item);
+
+                var mb = new MeshBuilder(false, false);
+
+                VisualizeMesh(mb, m, mat, item, indexOfModel);
+               // e.Result = xModel;
+            }
+
+        }
+       /* private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            xModel.Close();
+        }*/
+
+
+       
         public override Node Clone()
         {
             return new IfcParseGeometryNode(HostCanvas)
@@ -151,7 +177,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         /// <param name="meshBuilder"></param>
         /// <param name="mesh"></param>
-        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat)
+        /// <param name="mat"></param>
+        /// <param name="itemModel"></param>
+        /// <param name="indexOfModel"></param>
+        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat, IfcProduct itemModel, int indexOfModel)
         {
 
             // Output on console
@@ -175,21 +204,88 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var myGeometryModel = new GeometryModel3D
             {               
                 Material = mat,
-                //BackMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red)),
+                BackMaterial = mat,
                 Geometry = meshBuilder.ToMesh(true)
                 // In case that you have to rotate the model ... 
                 // Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90))
             };
 
             var element = new ModelUIElement3D { Model = myGeometryModel };
+            element.MouseDown += (sender1, e1) => OnElementMouseDown(sender1, e1, this, itemModel, indexOfModel);
+            
 
             // Add the Mesh to the ViewPort
-            _viewPort.Children.Add(element);
-
+           
+                _viewPort.Children.Add(element);
+                // Do all UI related work here...
+            
+            
+           
+            
             return true;
         }
+        /// <summary>
+        /// On Mouse Select Event
+        /// 
+        /// Output is an List of IDs (ModelInfo)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <param name="ifcParseGeometryNode"></param>
+        /// <param name="itemModel"></param>
+        /// <param name="indexOfModel"></param>
+        protected void OnElementMouseDown(object sender, MouseButtonEventArgs e, IfcParseGeometryNode ifcParseGeometryNode, IfcProduct itemModel, int indexOfModel)
+        {
+            // Check null expression
+            // if (e == null) throw new ArgumentNullException(nameof(e));
+            // 1-CLick event
+            if (e.LeftButton != MouseButtonState.Pressed)
+                return;
+           
+            // Get sender
+            var element = sender as ModelUIElement3D;
 
+            // Check Type
+            if (element != null)
+            {
+                var geometryModel3D = element.Model as GeometryModel3D;
+                if (geometryModel3D == null)
+                    return;
 
+                // If it is already selected ... Deselect
+                if (ModelList[indexOfModel].ElementIds.Contains(itemModel.GlobalId))
+                {
+                    geometryModel3D.Material = geometryModel3D.BackMaterial;
+                    ModelList[indexOfModel].ElementIds.Remove(itemModel.GlobalId);
+                }
+                // If not ... Select!
+                else
+                {
+                    ModelList[indexOfModel].AddElementIds(itemModel.GlobalId);
+                    geometryModel3D.Material = _selectionMaterial;
+                }
+            }
+            if (ModelList.Count == 1)
+            {
+                OutputPorts[0].Data = ModelList[0];
+            }
+            // Set selected models to Output ...  
+            if (ModelList.Count > 1)
+            {
+                OutputPorts[0].Data = ModelList;
+            }
+
+            e.Handled = true;
+        }
+        
+        
+        /// <summary>
+        /// Get Style if each Item
+        /// 
+        /// TODO: Exception Error 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public DiffuseMaterial GetStyleFromXbimModel(IPersistIfcEntity item)
         {
 
@@ -202,72 +298,79 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 case 2:
                     try
                     {
+                        // Style
+                        Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
+                        Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
+                        Model3DGroup opaques = new Model3DGroup();
+                        Model3DGroup transparents = new Model3DGroup();
 
-                    
-                    // Style
-                    Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
-                    Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
-                    Model3DGroup opaques = new Model3DGroup();
-                    Model3DGroup transparents = new Model3DGroup();
+                        var context = new Xbim3DModelContext(model);
 
-                    var context = new Xbim3DModelContext(model);
+                        foreach (var style in context.SurfaceStyles())
+                        {
+                            WpfMaterial wpfMaterial = new WpfMaterial();
+                            wpfMaterial.CreateMaterial(style);
+                            styles.Add(style.DefinedObjectId, wpfMaterial);
+                            WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
+                            meshSets.Add(style.DefinedObjectId, mg);
+                            if (style.IsTransparent)
+                                transparents.Children.Add(mg);
+                            else
+                                opaques.Children.Add(mg);
 
-                    foreach (var style in context.SurfaceStyles())
-                    {
-                        WpfMaterial wpfMaterial = new WpfMaterial();
-                        wpfMaterial.CreateMaterial(style);
-                        styles.Add(style.DefinedObjectId, wpfMaterial);
-                        WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
-                        meshSets.Add(style.DefinedObjectId, mg);
-                        if (style.IsTransparent)
-                            transparents.Children.Add(mg);
-                        else
-                            opaques.Children.Add(mg);
+                        }
 
-                    }
-
-                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
-                        .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                        .ToList();
-                    if (!productShape.Any() && item is IfcFeatureElement)
-                    {
-                        productShape = context.ShapeInstancesOf((IfcProduct)item)
-                            .Where(
-                                s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                        var productShape = context.ShapeInstancesOf((IfcProduct)item)
+                            .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
                             .ToList();
-                    }
+                        if (!productShape.Any() && item is IfcFeatureElement)
+                        {
+                            productShape = context.ShapeInstancesOf((IfcProduct)item)
+                                .Where(
+                                    s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                                .ToList();
+                        }
 
-                    if (!productShape.Any())
-                        return null;
+                        if (!productShape.Any())
+                            return null;
 
-                    var shapeInstance = productShape.FirstOrDefault();
+                        var shapeInstance = productShape.FirstOrDefault();
 
 
-                    WpfMaterial material;
-                    styles.TryGetValue(shapeInstance.StyleLabel, out material);
-                    string stringMaterial = material.Description;
-                    string[] materialEntries = stringMaterial.Split(' ');
-                    double r, g, b, a;
+                        WpfMaterial material;
+                        styles.TryGetValue(shapeInstance.StyleLabel, out material);
 
-                    double.TryParse(materialEntries[1].Substring(2), out r);
-                    double.TryParse(materialEntries[2].Substring(2), out g);
-                    double.TryParse(materialEntries[3].Substring(2), out b);
-                    double.TryParse(materialEntries[4].Substring(2), out a);
+                        if (material != null)
+                        {
+                            string stringMaterial = material.Description;
+                            string[] materialEntries = stringMaterial.Split(' ');
+                            double r, g, b, a;
 
-                    r *= 255;
-                    g *= 255;
-                    b *= 255;
-                    a *= 255;
-                    return new DiffuseMaterial(new SolidColorBrush(Color.FromArgb((byte)r, (byte)g, (byte)b, (byte)a)));
+                            double.TryParse(materialEntries[1].Substring(2), out r);
+                            double.TryParse(materialEntries[2].Substring(2), out g);
+                            double.TryParse(materialEntries[3].Substring(2), out b);
+                            double.TryParse(materialEntries[4].Substring(2), out a);
 
+                            r *= 255;
+                            g *= 255;
+                            b *= 255;
+                            a *= 255;
+                            return
+                                new DiffuseMaterial(
+                                    new SolidColorBrush(Color.FromArgb((byte) r, (byte) g, (byte) b, (byte) a)));
+                        }
+                        else
+                        {
+                            return new DiffuseMaterial(new SolidColorBrush(Colors.Red));
+                        }
                     }
                     catch
                     {
-                        return new DiffuseMaterial(new SolidColorBrush(Colors.Red)); ;
+                        return new DiffuseMaterial(new SolidColorBrush(Colors.Red));
                     }
 
                     break;
-
+               
             }
 
             return new DiffuseMaterial(new SolidColorBrush(Colors.Gray)); ;
