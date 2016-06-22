@@ -23,6 +23,7 @@ using XbimGeometry.Interfaces;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Threading;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -30,11 +31,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         private readonly HelixViewport3D _viewPort;
         //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
-        private XbimModel xModel;
-        public List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> SelectedModels;
+        private XbimModel _xModel;
+        public List<ModelInfo> ModelList;
         private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
         private BackgroundWorker worker;
-
         public IfcParseGeometryNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             // Init UI
@@ -50,7 +50,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
 
             //_viewPort.MouseDoubleClick += _viewPort_mouseclick;
-            SelectedModels = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>();
 
             AddControlToNode(_viewPort);
         }
@@ -63,50 +62,75 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             _viewPort.Children.Clear();
             _viewPort.Children.Add(new SunLight());
-
+            ModelList = new List<ModelInfo>();
             Type t = InputPorts[0].Data.GetType();
             if (t.IsGenericType)
             {
                 var collection = InputPorts[0].Data as ICollection;
-                foreach (var model in collection)
-                {
-                    var modelid = ((ModelInfo)(model)).ModelId;
-                    xModel = DataController.Instance.GetModel(modelid, true);
+                if (collection != null)
+                    foreach (var model in collection)
+                    {
+                        var modelId = ((ModelInfo)(model)).ModelId;
+                        _xModel = DataController.Instance.GetModel(modelId, true);
 
-                    var context = new Xbim3DModelContext(xModel);
-                    //upgrade to new geometry represenation, uses the default 3D model
-                    context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                        ModelList.Add(new ModelInfo(modelId));
+                        int indexOfModel = 0;
+                        foreach (var item in ModelList)
+                        {
+                            if (item.ModelId == modelId)
+                            {
+                                indexOfModel = ModelList.IndexOf(item);
+                                break;
+                            }
+                        }
 
-                    worker = new BackgroundWorker();
+                        var context = new Xbim3DModelContext(_xModel);
+                        //upgrade to new geometry represenation, uses the default 3D model
+                        context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                        worker_DoWork(_xModel, indexOfModel);
 
-                    worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-                    worker.RunWorkerAsync(xModel);
-                    worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+                        // worker = new BackgroundWorker();
 
-                }
+                        // worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                        //  worker.RunWorkerAsync(xModel);
+                        //  worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+
+                    }
             }
             else
             {
                 var file = InputPorts[0].Data.ToString();
 
-                var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
-                if (modelid == null) return;
+                var modelId = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+                if (modelId == null) return;
+                int indexOfModel = 0;
+                foreach (var item in ModelList)
+                {
+                    if (item.ModelId == modelId)
+                    {
+                        indexOfModel = ModelList.IndexOf(item);
+                        break;
+                    }
+                }
+                _xModel = DataController.Instance.GetModel(modelId, true);
 
-                xModel = DataController.Instance.GetModel(modelid, true);
+                ModelList.Add(new ModelInfo(modelId));
 
-                var context = new Xbim3DModelContext(xModel);
+                var context = new Xbim3DModelContext(_xModel);
                 //upgrade to new geometry represenation, uses the default 3D model
                 context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                worker_DoWork(_xModel, indexOfModel);
+                
 
-                worker = new BackgroundWorker();
+                /*worker = new BackgroundWorker();
 
                 worker.DoWork += new DoWorkEventHandler(worker_DoWork);
                 worker.RunWorkerAsync(xModel);
-                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);*/
 
-               
-                
-                
+
+
+
             }
 
            
@@ -114,11 +138,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        private void worker_DoWork(XbimModel xModel, int indexOfModel)
         {
             // Loop through Entities and visualze them in the viewport
 
-            xModel = (XbimModel) e.Argument;
+           // xModel = (XbimModel) e.Argument;
             foreach (var item in xModel.Instances.OfType<IfcProduct>())
             {
                 var m = new MeshGeometry3D();
@@ -127,21 +151,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 var mb = new MeshBuilder(false, false);
 
-                VisualizeMesh(mb, m, mat, item.GlobalId);
-                e.Result = xModel;
+                VisualizeMesh(mb, m, mat, item, indexOfModel);
+               // e.Result = xModel;
             }
 
         }
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+       /* private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             xModel.Close();
-        }
+        }*/
 
 
-        // private void _viewPort_mouseclick(Object sender,MouseEventArgs e)
-        //{
-
-        //}
+       
         public override Node Clone()
         {
             return new IfcParseGeometryNode(HostCanvas)
@@ -156,7 +177,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         /// <param name="meshBuilder"></param>
         /// <param name="mesh"></param>
-        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat, IfcGloballyUniqueId globalId)
+        /// <param name="mat"></param>
+        /// <param name="itemModel"></param>
+        /// <param name="indexOfModel"></param>
+        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat, IfcProduct itemModel, int indexOfModel)
         {
 
             // Output on console
@@ -180,38 +204,44 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var myGeometryModel = new GeometryModel3D
             {               
                 Material = mat,
-                //BackMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red)),
+                BackMaterial = mat,
                 Geometry = meshBuilder.ToMesh(true)
                 // In case that you have to rotate the model ... 
                 // Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90))
             };
 
             var element = new ModelUIElement3D { Model = myGeometryModel };
-            element.MouseDown += (sender1, e1) => OnElementMouseDown(sender1, e1, this, globalId);
+            element.MouseDown += (sender1, e1) => OnElementMouseDown(sender1, e1, this, itemModel, indexOfModel);
+            
+
             // Add the Mesh to the ViewPort
-            if (Application.Current.Dispatcher.CheckAccess())
-            {
+           
                 _viewPort.Children.Add(element);
-            }
-            else
-            {
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => {
-                    _viewPort.Children.Add(element);
-                }));
-            }
+                // Do all UI related work here...
+            
+            
+           
             
             return true;
         }
-
-        protected void OnElementMouseDown(object sender, MouseButtonEventArgs e, IfcParseGeometryNode ifcParseGeometryNode, IfcGloballyUniqueId globalId)
+        /// <summary>
+        /// On Mouse Select Event
+        /// 
+        /// Output is an List of IDs (ModelInfo)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <param name="ifcParseGeometryNode"></param>
+        /// <param name="itemModel"></param>
+        /// <param name="indexOfModel"></param>
+        protected void OnElementMouseDown(object sender, MouseButtonEventArgs e, IfcParseGeometryNode ifcParseGeometryNode, IfcProduct itemModel, int indexOfModel)
         {
             // Check null expression
             // if (e == null) throw new ArgumentNullException(nameof(e));
-
             // 1-CLick event
             if (e.LeftButton != MouseButtonState.Pressed)
                 return;
-
+           
             // Get sender
             var element = sender as ModelUIElement3D;
 
@@ -223,28 +253,39 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     return;
 
                 // If it is already selected ... Deselect
-                if (SelectedModels.Contains(globalId))
+                if (ModelList[indexOfModel].ElementIds.Contains(itemModel.GlobalId))
                 {
                     geometryModel3D.Material = geometryModel3D.BackMaterial;
-                    SelectedModels.Remove(globalId);
+                    ModelList[indexOfModel].ElementIds.Remove(itemModel.GlobalId);
                 }
                 // If not ... Select!
                 else
                 {
-                    SelectedModels.Add(globalId);
+                    ModelList[indexOfModel].AddElementIds(itemModel.GlobalId);
                     geometryModel3D.Material = _selectionMaterial;
                 }
             }
-
-            // Set selected models to Output ...  
-            if (SelectedModels != null && SelectedModels.Count != 0)
+            if (ModelList.Count == 1)
             {
-                OutputPorts[0].Data = SelectedModels;
+                OutputPorts[0].Data = ModelList[0];
+            }
+            // Set selected models to Output ...  
+            if (ModelList.Count > 1)
+            {
+                OutputPorts[0].Data = ModelList;
             }
 
             e.Handled = true;
         }
-
+        
+        
+        /// <summary>
+        /// Get Style if each Item
+        /// 
+        /// TODO: Exception Error 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public DiffuseMaterial GetStyleFromXbimModel(IPersistIfcEntity item)
         {
 
@@ -257,72 +298,79 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 case 2:
                     try
                     {
+                        // Style
+                        Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
+                        Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
+                        Model3DGroup opaques = new Model3DGroup();
+                        Model3DGroup transparents = new Model3DGroup();
 
-                    
-                    // Style
-                    Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
-                    Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
-                    Model3DGroup opaques = new Model3DGroup();
-                    Model3DGroup transparents = new Model3DGroup();
+                        var context = new Xbim3DModelContext(model);
 
-                    var context = new Xbim3DModelContext(model);
+                        foreach (var style in context.SurfaceStyles())
+                        {
+                            WpfMaterial wpfMaterial = new WpfMaterial();
+                            wpfMaterial.CreateMaterial(style);
+                            styles.Add(style.DefinedObjectId, wpfMaterial);
+                            WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
+                            meshSets.Add(style.DefinedObjectId, mg);
+                            if (style.IsTransparent)
+                                transparents.Children.Add(mg);
+                            else
+                                opaques.Children.Add(mg);
 
-                    foreach (var style in context.SurfaceStyles())
-                    {
-                        WpfMaterial wpfMaterial = new WpfMaterial();
-                        wpfMaterial.CreateMaterial(style);
-                        styles.Add(style.DefinedObjectId, wpfMaterial);
-                        WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
-                        meshSets.Add(style.DefinedObjectId, mg);
-                        if (style.IsTransparent)
-                            transparents.Children.Add(mg);
-                        else
-                            opaques.Children.Add(mg);
+                        }
 
-                    }
-
-                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
-                        .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                        .ToList();
-                    if (!productShape.Any() && item is IfcFeatureElement)
-                    {
-                        productShape = context.ShapeInstancesOf((IfcProduct)item)
-                            .Where(
-                                s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                        var productShape = context.ShapeInstancesOf((IfcProduct)item)
+                            .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
                             .ToList();
-                    }
+                        if (!productShape.Any() && item is IfcFeatureElement)
+                        {
+                            productShape = context.ShapeInstancesOf((IfcProduct)item)
+                                .Where(
+                                    s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                                .ToList();
+                        }
 
-                    if (!productShape.Any())
-                        return null;
+                        if (!productShape.Any())
+                            return null;
 
-                    var shapeInstance = productShape.FirstOrDefault();
+                        var shapeInstance = productShape.FirstOrDefault();
 
 
-                    WpfMaterial material;
-                    styles.TryGetValue(shapeInstance.StyleLabel, out material);
-                    string stringMaterial = material.Description;
-                    string[] materialEntries = stringMaterial.Split(' ');
-                    double r, g, b, a;
+                        WpfMaterial material;
+                        styles.TryGetValue(shapeInstance.StyleLabel, out material);
 
-                    double.TryParse(materialEntries[1].Substring(2), out r);
-                    double.TryParse(materialEntries[2].Substring(2), out g);
-                    double.TryParse(materialEntries[3].Substring(2), out b);
-                    double.TryParse(materialEntries[4].Substring(2), out a);
+                        if (material != null)
+                        {
+                            string stringMaterial = material.Description;
+                            string[] materialEntries = stringMaterial.Split(' ');
+                            double r, g, b, a;
 
-                    r *= 255;
-                    g *= 255;
-                    b *= 255;
-                    a *= 255;
-                    return new DiffuseMaterial(new SolidColorBrush(Color.FromArgb((byte)r, (byte)g, (byte)b, (byte)a)));
+                            double.TryParse(materialEntries[1].Substring(2), out r);
+                            double.TryParse(materialEntries[2].Substring(2), out g);
+                            double.TryParse(materialEntries[3].Substring(2), out b);
+                            double.TryParse(materialEntries[4].Substring(2), out a);
 
+                            r *= 255;
+                            g *= 255;
+                            b *= 255;
+                            a *= 255;
+                            return
+                                new DiffuseMaterial(
+                                    new SolidColorBrush(Color.FromArgb((byte) r, (byte) g, (byte) b, (byte) a)));
+                        }
+                        else
+                        {
+                            return new DiffuseMaterial(new SolidColorBrush(Colors.Red));
+                        }
                     }
                     catch
                     {
-                        return new DiffuseMaterial(new SolidColorBrush(Colors.Red)); ;
+                        return new DiffuseMaterial(new SolidColorBrush(Colors.Red));
                     }
 
                     break;
-
+               
             }
 
             return new DiffuseMaterial(new SolidColorBrush(Colors.Gray)); ;
