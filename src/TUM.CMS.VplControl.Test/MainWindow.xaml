@@ -18,7 +18,7 @@
             <ColumnDefinition Width="1*" x:Name="colFive" />
         </Grid.ColumnDefinitions>
 
-        <Menu VerticalAlignment="Top" Margin="0,0,-0.4,0" Grid.ColumnSpan="5" >
+        <Menu Name="MainMenu" VerticalAlignment="Top" Margin="0,0,-0.4,0" Grid.ColumnSpan="5" >
             <Menu.ItemsPanel>
                 <ItemsPanelTemplate>
                     <DockPanel HorizontalAlignment="Stretch"/>
@@ -36,6 +36,10 @@
                 <MenuItem Header="Enable Debugging" IsCheckable="True" Checked="MenuItem_Show_Click" Unchecked="MenuItem_Hide_Click"/>
 
               
+            </MenuItem>
+            <MenuItem Name="Nodes" Header="Nodes">
+
+
             </MenuItem>
             <MenuItem Header="_Help" HorizontalAlignment="Right" FlowDirection="RightToLeft">
                 <MenuItem Header="Website" HorizontalAlignment="Right" Width="140" Click="MenuItem_Click"/>

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using TUM.CMS.VplControl.Core;
@@ -9,6 +10,7 @@ using TUM.CMS.VplControl.Energy.Nodes;
 using TUM.CMS.VplControl.IFC.Nodes;
 using System.Diagnostics;
 using System.Windows.Controls;
+using PropertyTools.Wpf;
 
 namespace TUM.CMS.VplControl.Test
 {
@@ -45,8 +47,31 @@ namespace TUM.CMS.VplControl.Test
 
             VplControl.NodeTypeMode = NodeTypeModes.All;
 
+            var group = VplControl.ExternalNodeTypes.GroupBy(u => u.Namespace).Select(grp => grp.ToList()).ToList();
+            
+            foreach (var item in group)
+            {
+                var namespaceNameList = item[0].Namespace.Split('.');
+                var namespaceName = namespaceNameList[3];
+                if (namespaceNameList[3] == "")
+                    namespaceName = namespaceNameList[2];
 
-            VplPropertyGrid.SelectedObject = VplControl;
+                MenuItem tempItem = new MenuItem();
+                tempItem.Header = namespaceName;
+                tempItem.Name = namespaceName;
+                Nodes.Items.Add(tempItem);
+                foreach (var item1 in item)
+                {
+                    if (!item1.Name.Contains("<"))
+                    {
+                        MenuItem tempItem1 = new MenuItem();
+                        tempItem1.Header = item1.Name;
+                        tempItem1.Click += NodeItem_Click;
+                        tempItem.Items.Add(tempItem1);
+                    }
+                   
+                }
+            }
         }
         public TUM.CMS.VplControl.Core.VplControl HostCanvas { get; private set; }
         private void MenuItem_New_Click(object sender, RoutedEventArgs e)
@@ -109,7 +134,12 @@ namespace TUM.CMS.VplControl.Test
             colThree.Width = new GridLength(77.555);
             colFour.Width = new GridLength(5);
         }
+        private void NodeItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem obMenuItem = e.OriginalSource as MenuItem;
+            // var result = VplControl.ExternalNodeTypes.Find(x => x.Name == obMenuItem.Header.ToString());
+            MessageBox.Show(string.Format("{0} just said Hi!", obMenuItem.Header));
+        }
 
-       
     }
 }
