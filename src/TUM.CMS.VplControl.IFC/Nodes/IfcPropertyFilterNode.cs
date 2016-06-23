@@ -19,6 +19,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     public class IfcPropertyFilterNode : Node
     {
         public XbimModel xModel;
+        
         public IfcPropertyFilterNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
@@ -66,12 +67,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var textBox = ControlElements[5] as TextBox;
             if (textBox == null) return;
             var button = ControlElements[6] as Button;
-            if (button == null) return;
-            var comboBox = ControlElements[2] as ComboBox;
-            if (comboBox == null) return;
-            var comboBoxPropertySet = ControlElements[4] as ComboBox;
+            if (button == null) return;            
+            var comboBoxPropertySet = ControlElements[1] as ComboBox;
             if (comboBoxPropertySet == null) return;
-            var comboBoxProperties = ControlElements[6] as ComboBox;
+            var comboBoxProperties = ControlElements[3] as ComboBox;
             if (comboBoxProperties == null) return;            
             if (comboBoxProperties.Items.Count == 0) return;
 
@@ -81,16 +80,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
                         
-            var selectedIfcProducts = ((ComboboxItem)(comboBox.SelectedItem)).Value;
+            var selectedItemIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
+            if (selectedItemIds == null) return;
 
             List<double> propertyValueDoubles = new List<double> { };
-            List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+            List<bool> propertyValueBools = new List<bool> { };
+            List<string> propertyValueStrings = new List<string> { };
 
          
-            for(int i=0;i<(selectedIfcProducts as IList).Count;i++ )
+            for(int i=0;i<selectedItemIds.Count;i++ )
             {
-                var selectedProduct = (selectedIfcProducts as IList)[i] as IfcElement;
-                searchIDs.Add(selectedProduct.GlobalId);
+                var selectedProduct = xModel.IfcProducts.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);                            
                 var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
                 var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
                 string propertyType = oneProperty.GetType().ToString();
@@ -105,15 +105,25 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         double propertyValueDouble = (double)propertyValueTrue;
                         propertyValueDoubles.Add(propertyValueDouble);
                     }
+                    if (propertyValueType=="Boolean")
+                    {
+                        bool propertyValueBool = (bool)propertyValueTrue;
+                        propertyValueBools.Add(propertyValueBool);
+                    }
+                    if(propertyValueType == "String")
+                    {
+                        string propertyValueString = (string)propertyValueTrue;
+                        propertyValueStrings.Add(propertyValueString);
+                    }
 
                 }
                 else { return; }
             }
-        
 
-           
+            
 
             List<double> propertyValueDoublesSelected = new List<double> { };
+            List<bool> propertyValueBoolsSelected = new List<bool> { };
             List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDsSelected = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
 
             string toDetect = textBox.Text;
@@ -129,7 +139,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     if(propertyValueDoubles[i]<s)
                     {
                         propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(searchIDs[i]);
+                        searchIDsSelected.Add(selectedItemIds[i]);
                         
                     }
                 }
@@ -145,7 +155,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     if (propertyValueDoubles[i] > s)
                     {
                         propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(searchIDs[i]);
+                        searchIDsSelected.Add(selectedItemIds[i]);
                     }
                 }
             }
@@ -160,12 +170,28 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     if (propertyValueDoubles[i] == s)
                     {
                         propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(searchIDs[i]);
+                        searchIDsSelected.Add(selectedItemIds[i]);
                     }
                 }
             }
 
-            OutputPorts[0].Data = searchIDsSelected;
+            if(toDetect=="True"||toDetect=="False")
+            {
+                for (int i = 0; i < propertyValueBools.Count; i++)
+                {
+                    string trueorfalse = propertyValueBools[i].ToString();
+                    if (propertyValueBools[i].ToString ()== toDetect)
+                    {
+                        propertyValueBoolsSelected.Add(propertyValueBools[i]);
+                        searchIDsSelected.Add(selectedItemIds[i]);
+                    }
+                }
+            }
+
+            var outputInfo = (ModelInfo)(InputPorts[0].Data);
+            outputInfo.ElementIds = searchIDsSelected;
+            OutputPorts[0].Data = outputInfo;
+            
 
 
 
@@ -255,7 +281,95 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         private void comboBoxProperties_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-   
+            var textBox = ControlElements[5] as TextBox;
+            if (textBox == null) return;
+            var comboBoxPropertySet = ControlElements[1] as ComboBox;
+            if (comboBoxPropertySet == null) return;
+            var comboBoxProperties = ControlElements[3] as ComboBox;
+            if (comboBoxProperties == null) return;
+            if (comboBoxProperties.Items.Count == 0) return;
+
+            var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
+            var property = selectedItem.Value as Xbim.Ifc2x3.PropertyResource.IfcProperty;
+            if (property == null) return;
+
+            var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
+
+            var selectedItemIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
+            if (selectedItemIds == null) return;
+
+            List<double> propertyValueDoubles = new List<double> { };
+            List<bool> propertyValueBools = new List<bool> { };
+            List<string> propertyValueStrings = new List<string> { };
+
+
+            for (int j = 0; j < selectedItemIds.Count; j++)
+            {
+                var selectedProduct = xModel.IfcProducts.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[j]);
+                var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
+                var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
+                string propertyType = oneProperty.GetType().ToString();
+                if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
+                {
+                    var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var propertyValue = property2.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                    object propertyValueTrue = property2.NominalValue.Value;
+                    string propertyValueType = propertyValue.UnderlyingSystemType.Name;
+                    if (propertyValueType == "Double")
+                    {
+                        double propertyValueDouble = (double)propertyValueTrue;
+                        propertyValueDoubles.Add(propertyValueDouble);
+                        textBox.Text = "Double: give range";
+                    }
+                    if (propertyValueType == "Boolean")
+                    {
+                        bool propertyValueBool = (bool)propertyValueTrue;
+                        propertyValueBools.Add(propertyValueBool);
+                        textBox.Text = "Boolean: True or False";
+                    }
+                    if (propertyValueType == "String")
+                    {
+                        string propertyValueString = (string)propertyValueTrue;
+                        propertyValueStrings.Add(propertyValueString);
+
+                        //print only different value of 'string' to the textbox
+                        List<bool> diffString = new List<bool> { };
+
+                        for (int i = 0; i < propertyValueStrings.Count; i++)
+                        {
+                            diffString.Add(true);
+                        }
+
+                        for (int i = 0; i < propertyValueStrings.Count; i++)
+                        {
+                            for (int k = i + 1; k < propertyValueStrings.Count; k++)
+                            {
+                                if (diffString[i] == true)
+                                {
+                                    if (propertyValueStrings[i] == propertyValueStrings[k]) { diffString[i] = false; }
+
+                                }
+                            }
+                        }
+
+
+                        textBox.Text = "String: has ";
+                        for (int i = 0; i < diffString.Count; i++)
+                        {
+                            if (diffString[i] == true)
+                            {
+                                textBox.Text += propertyValueStrings[i];
+
+                            }
+                        }
+
+                    }
+
+                }
+                else { return; }
+            }
+
+
         }
 
 
