@@ -188,10 +188,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
             }
 
-            var outputInfo = (ModelInfo)(InputPorts[0].Data);
-            outputInfo.ElementIds = searchIDsSelected;
+            //var outputInfo = (ModelInfo)(InputPorts[0].Data);
+            //outputInfo.ElementIds = searchIDsSelected;
+            //OutputPorts[0].Data = outputInfo;
+
+            ModelInfo outputInfo = new ModelInfo(((ModelInfo)(InputPorts[0].Data)).ModelId);
+            foreach (var item in searchIDsSelected)
+            {
+                outputInfo.AddElementIds(item);
+            }
             OutputPorts[0].Data = outputInfo;
-            
+
 
 
 
@@ -215,6 +222,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            OutputPorts[0].Data = null;
             var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
             if (modelid == null) return;
             xModel = DataController.Instance.GetModel(modelid);

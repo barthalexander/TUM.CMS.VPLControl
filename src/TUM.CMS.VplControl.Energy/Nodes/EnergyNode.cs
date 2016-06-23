@@ -55,7 +55,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         public EnergyNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
-            AddInputPortToNode("text", typeof(string));
+            AddInputPortToNode("text", typeof(object));
             AddOutputPortToNode("text", typeof(string));
 
             var label_l = new Label { Content = "Τhermal conductivity λ" };

@@ -31,7 +31,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             : base(hostCanvas)
         {
 
-            AddInputPortToNode("IfcFile", typeof(object));
+            AddInputPortToNode("IfcFile", typeof(ModelInfo));
 
 
 

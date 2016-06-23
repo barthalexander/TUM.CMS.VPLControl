@@ -26,161 +26,30 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             : base(hostCanvas)
         {
 
-            AddInputPortToNode("IfcFile", typeof(string));
+            AddInputPortToNode("IfcFile", typeof(object));
 
             AddOutputPortToNode("FilteredProducts", typeof(object));
 
           
             var label = new Label { Content ="filtered products"};
             var labelProducts = new Label { Content = "product filter:"};           
-            //var labelPropertySet = new Label {Content="Property Set filter:" };
-            //var labelProperties = new Label { Content = "property filter:" };
-            //var labelPropertyValue = new Label { Content = "Property Value" };
+   
             var comboBox = new ComboBox
             {
                 
             };
             comboBox.SelectionChanged += comboBox_SelectionChanged;
 
-          //  var comboBoxPropertySet = new ComboBox { };
-           // comboBoxPropertySet.SelectionChanged += comboBoxPropertySet_SelectionChanged;
-
-          //  var comboBoxProperties = new ComboBox { };
-            //comboBoxProperties.SelectionChanged += comboBoxProperties_SelectionChanged;
-
-            
-
-            //var textBox = new TextBox { };
-            //textBox.TextChanged += textBox_TextChanged;
-
-            //var button = new Button { Content ="filter according to textBox"};
-            //button.Click += button_Click;
             
 
             AddControlToNode(label);
             AddControlToNode(labelProducts);
             AddControlToNode(comboBox);
-           /* AddControlToNode(labelPropertySet);
-            AddControlToNode(comboBoxPropertySet);
-            AddControlToNode(labelProperties);
-            AddControlToNode(comboBoxProperties);
-            AddControlToNode(labelPropertyValue);            
-            AddControlToNode(textBox);
-            AddControlToNode(button);*/
+
     
 
         }
 
-       /* private void button_Click(object sender, RoutedEventArgs e)
-        {
-            var textBox = ControlElements[8] as TextBox;
-            if (textBox == null) return;
-            var button = ControlElements[9] as Button;
-            if (button == null) return;
-            var comboBox = ControlElements[2] as ComboBox;
-            if (comboBox == null) return;
-            var comboBoxPropertySet = ControlElements[4] as ComboBox;
-            if (comboBoxPropertySet == null) return;
-            var comboBoxProperties = ControlElements[6] as ComboBox;
-            if (comboBoxProperties == null) return;            
-            if (comboBoxProperties.Items.Count == 0) return;
-
-            var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
-            var property = selectedItem.Value as Xbim.Ifc2x3.PropertyResource.IfcProperty;
-            if (property == null) return;
-
-            var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
-                        
-            var selectedIfcProducts = ((ComboboxItem)(comboBox.SelectedItem)).Value;
-
-            List<double> propertyValueDoubles = new List<double> { };
-            List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
-
-         
-            for(int i=0;i<(selectedIfcProducts as IList).Count;i++ )
-            {
-                var selectedProduct = (selectedIfcProducts as IList)[i] as IfcElement;
-                searchIDs.Add(selectedProduct.GlobalId);
-                var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
-                var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
-                string propertyType = oneProperty.GetType().ToString();
-                if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
-                {
-                    var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var propertyValue = property2.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
-                    object propertyValueTrue = property2.NominalValue.Value;
-                    string propertyValueType = propertyValue.UnderlyingSystemType.Name;
-                    if (propertyValueType == "Double")
-                    {
-                        double propertyValueDouble = (double)propertyValueTrue;
-                        propertyValueDoubles.Add(propertyValueDouble);
-                    }
-
-                }
-                else { return; }
-            }
-        
-
-            
-          
-
-            List<double> propertyValueDoublesSelected = new List<double> { };
-            List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDsSelected = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
-
-            string toDetect = textBox.Text;
-            string ss;
-            double s;
-            if (toDetect.Contains("<"))
-            {
-                int j = toDetect.IndexOf("<");
-                ss = toDetect.Substring(j+1, toDetect.Length - 1);
-                s = double.Parse(ss);
-                for(int i = 0; i < propertyValueDoubles.Count; i++)
-                {
-                    if(propertyValueDoubles[i]<s)
-                    {
-                        propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(searchIDs[i]);
-                        
-                    }
-                }
-            }
-
-            if (toDetect.Contains(">"))
-            {
-                int j = toDetect.IndexOf(">");
-                ss = toDetect.Substring(j+1, toDetect.Length - 1);
-                s = double.Parse(ss);
-                for (int i = 0; i < propertyValueDoubles.Count; i++)
-                {
-                    if (propertyValueDoubles[i] > s)
-                    {
-                        propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(searchIDs[i]);
-                    }
-                }
-            }
-
-            if (toDetect.Contains("="))
-            {
-                int j = toDetect.IndexOf("=");
-                ss = toDetect.Substring(j+1, toDetect.Length - 1);
-                s = double.Parse(ss);
-                for (int i = 0; i < propertyValueDoubles.Count; i++)
-                {
-                    if (propertyValueDoubles[i] == s)
-                    {
-                        propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(searchIDs[i]);
-                    }
-                }
-            }
-
-            OutputPorts[0].Data = searchIDsSelected;
-
-
-
-        }*/
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -200,166 +69,162 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
-
+            OutputPorts[0].Data = null;
             var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
 
             if (modelid == null) return;
-            outputInfo = (ModelInfo)(InputPorts[0].Data);
+            outputInfo = new ModelInfo(modelid);
+            //outputInfo = (ModelInfo) (InputPorts[0].Data);
             xModel = DataController.Instance.GetModel(modelid);
 
             var comboBox = ControlElements[2] as ComboBox;
-            if (comboBox == null) return;
+            if (comboBox != null && comboBox.Items.Count > 0)
+            {
+                comboBox.SelectedItem = -1;
+                comboBox.Items.Clear();
+            }            
             
-            //var res = xModel.Open(InputPorts[0].Data.ToString(), XbimDBAccess.ReadWrite);
+                var ifcwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+                var ifcbeam = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
+                var ifccolumn = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList();
+                var ifcslab = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList();
+                var ifcwindow = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
+                var ifcstair = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcStair>().ToList();
+                var ifcroof = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRoof>().ToList();
+                var ifcramp = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRamp>().ToList();
+                var ifcplate = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcPlate>().ToList();
+                var ifcdoor = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
+                var ifccurtainwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall>().ToList();
 
-            var ifcwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
-            var ifcbeam = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
-            var ifccolumn = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList();
-            var ifcslab = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList();
-            var ifcwindow = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
-            var ifcstair = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcStair>().ToList();
-            var ifcroof = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRoof>().ToList();
-            var ifcramp = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRamp>().ToList();
-            var ifcplate = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcPlate>().ToList();
-            var ifcdoor = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
-            var ifccurtainwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall>().ToList();
+                List<IfcGloballyUniqueId> ifcFilteredIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
 
-            List<IfcGloballyUniqueId> ifcFilteredIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
-            List<IfcGloballyUniqueId> ifcWallsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcBeamsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcColumnsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcSlabsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcWindowsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcStairsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcRoofsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcRampsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcPlatesFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcDoorsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> ifcCurtainwallsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcWallsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcBeamsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcColumnsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcSlabsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcWindowsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcStairsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcRoofsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcRampsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcPlatesFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcDoorsFiltered = new List<IfcGloballyUniqueId> { };
+                List<IfcGloballyUniqueId> ifcCurtainwallsFiltered = new List<IfcGloballyUniqueId> { };
 
 
-            foreach (var item in ifcwall)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcwall)
                 {
-                    ifcWallsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcWallsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
 
-            foreach (var item in ifcbeam)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcbeam)
                 {
-                    ifcBeamsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcBeamsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifccolumn)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifccolumn)
                 {
-                    ifcColumnsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcColumnsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifcslab)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcslab)
                 {
-                    ifcSlabsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcSlabsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifcwindow)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcwindow)
                 {
-                    ifcWindowsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcWindowsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifcstair)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcstair)
                 {
-                    ifcStairsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcStairsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifcroof)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcroof)
                 {
-                    ifcRoofsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcRoofsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifcramp)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcramp)
                 {
-                    ifcRampsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcRampsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifcplate)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcplate)
                 {
-                    ifcPlatesFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcPlatesFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifcdoor)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifcdoor)
                 {
-                    ifcDoorsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcDoorsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
-            foreach (var item in ifccurtainwall)
-            {
-                if (ifcFilteredIds.Contains(item.GlobalId))
+                foreach (var item in ifccurtainwall)
                 {
-                    ifcCurtainwallsFiltered.Add(item.GlobalId);
+                    if (ifcFilteredIds.Contains(item.GlobalId))
+                    {
+                        ifcCurtainwallsFiltered.Add(item.GlobalId);
+                    }
                 }
-            }
 
 
-            /* List<string> diffType = new List<string> { };
-             for (int i = 0; i < ifcFilteredIds.Count; i++)
-             {
-                 var oneProduct = ifcProducts.Find(x => x.GlobalId == ifcFilteredIds[i]);
-                 var type = oneProduct.GetType().ToString();
-                 if (!diffType.Contains(type)) diffType.Add(type);
-             }*/
+           
 
 
 
 
 
 
-            ComboboxItem ifcwalls = new ComboboxItem() { Text = "ifcwall", Value = ifcWallsFiltered };
-            ComboboxItem ifcbeams = new ComboboxItem() { Text = "ifcbeam", Value = ifcBeamsFiltered };
-            ComboboxItem ifccolumns = new ComboboxItem() { Text = "ifccolumn", Value = ifcColumnsFiltered };
-            ComboboxItem ifcslabs = new ComboboxItem() { Text = "ifcslab", Value = ifcSlabsFiltered };
-            ComboboxItem ifcwindows = new ComboboxItem() { Text = "ifcwindow", Value = ifcWindowsFiltered };
-            ComboboxItem ifcstairs = new ComboboxItem() { Text = "ifcstair", Value = ifcStairsFiltered };
-            ComboboxItem ifcroofs = new ComboboxItem() { Text = "ifcroof", Value = ifcRoofsFiltered };
-            ComboboxItem ifcramps = new ComboboxItem() { Text = "ifcramp", Value = ifcRampsFiltered };
-            ComboboxItem ifcplates = new ComboboxItem() { Text = "ifcplate", Value = ifcPlatesFiltered };
-            ComboboxItem ifcdoors = new ComboboxItem() { Text = "ifcdoor", Value = ifcDoorsFiltered };
-            ComboboxItem ifccurtainwalls = new ComboboxItem() { Text = "ifccurtainwall", Value = ifcCurtainwallsFiltered };
+                ComboboxItem ifcwalls = new ComboboxItem() { Text = "ifcwall", Value = ifcWallsFiltered };
+                ComboboxItem ifcbeams = new ComboboxItem() { Text = "ifcbeam", Value = ifcBeamsFiltered };
+                ComboboxItem ifccolumns = new ComboboxItem() { Text = "ifccolumn", Value = ifcColumnsFiltered };
+                ComboboxItem ifcslabs = new ComboboxItem() { Text = "ifcslab", Value = ifcSlabsFiltered };
+                ComboboxItem ifcwindows = new ComboboxItem() { Text = "ifcwindow", Value = ifcWindowsFiltered };
+                ComboboxItem ifcstairs = new ComboboxItem() { Text = "ifcstair", Value = ifcStairsFiltered };
+                ComboboxItem ifcroofs = new ComboboxItem() { Text = "ifcroof", Value = ifcRoofsFiltered };
+                ComboboxItem ifcramps = new ComboboxItem() { Text = "ifcramp", Value = ifcRampsFiltered };
+                ComboboxItem ifcplates = new ComboboxItem() { Text = "ifcplate", Value = ifcPlatesFiltered };
+                ComboboxItem ifcdoors = new ComboboxItem() { Text = "ifcdoor", Value = ifcDoorsFiltered };
+                ComboboxItem ifccurtainwalls = new ComboboxItem() { Text = "ifccurtainwall", Value = ifcCurtainwallsFiltered };
 
-            if (ifcWallsFiltered.Count != 0) { comboBox.Items.Add(ifcwalls); }
-            if (ifcBeamsFiltered.Count != 0) { comboBox.Items.Add(ifcbeams); }
-            if (ifcColumnsFiltered.Count != 0) { comboBox.Items.Add(ifccolumns); }
-            if (ifcSlabsFiltered.Count != 0) { comboBox.Items.Add(ifcslabs); }
-            if (ifcWindowsFiltered.Count != 0) { comboBox.Items.Add(ifcwindows); }
-            if (ifcStairsFiltered.Count != 0) { comboBox.Items.Add(ifcstairs); }
-            if (ifcRoofsFiltered.Count != 0) { comboBox.Items.Add(ifcroofs); }
-            if (ifcRampsFiltered.Count != 0) { comboBox.Items.Add(ifcramps); }
-            if (ifcPlatesFiltered.Count != 0) { comboBox.Items.Add(ifcplates); }
-            if (ifcDoorsFiltered.Count != 0) { comboBox.Items.Add(ifcdoors); }
-            if (ifcCurtainwallsFiltered.Count != 0) { comboBox.Items.Add(ifccurtainwalls); }
-
-
-            comboBox.SelectedIndex = 0;
+                if (ifcWallsFiltered.Count != 0) { comboBox.Items.Add(ifcwalls); }
+                if (ifcBeamsFiltered.Count != 0) { comboBox.Items.Add(ifcbeams); }
+                if (ifcColumnsFiltered.Count != 0) { comboBox.Items.Add(ifccolumns); }
+                if (ifcSlabsFiltered.Count != 0) { comboBox.Items.Add(ifcslabs); }
+                if (ifcWindowsFiltered.Count != 0) { comboBox.Items.Add(ifcwindows); }
+                if (ifcStairsFiltered.Count != 0) { comboBox.Items.Add(ifcstairs); }
+                if (ifcRoofsFiltered.Count != 0) { comboBox.Items.Add(ifcroofs); }
+                if (ifcRampsFiltered.Count != 0) { comboBox.Items.Add(ifcramps); }
+                if (ifcPlatesFiltered.Count != 0) { comboBox.Items.Add(ifcplates); }
+                if (ifcDoorsFiltered.Count != 0) { comboBox.Items.Add(ifcdoors); }
+                if (ifcCurtainwallsFiltered.Count != 0) { comboBox.Items.Add(ifccurtainwalls); }
 
 
-
+                comboBox.SelectedItem = null;
+            
         }
 
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -370,8 +235,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
             List<IfcGloballyUniqueId> searchIDs = ((ComboboxItem)(comboBox.SelectedItem)).Value;
-            
-            outputInfo.ElementIds = searchIDs;
+            outputInfo.ElementIds.Clear();
+            foreach (var item in searchIDs)
+            {
+                outputInfo.AddElementIds(item);
+            }
+            // outputInfo.ElementIds = searchIDs;
             OutputPorts[0].Data = outputInfo ;
             
             //List<Xbim.Ifc2x3.Kernel.IfcPropertySet> PropertySet = new List<Xbim.Ifc2x3.Kernel.IfcPropertySet> { };
@@ -398,87 +267,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             comboBoxPropertySet.SelectedIndex = 0;
             */
         }
-
-        /*private void comboBoxPropertySet_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var comboBoxPropertySet = ControlElements[4] as ComboBox;
-            if (comboBoxPropertySet == null) return;
-            var comboBoxProperties = ControlElements[6] as ComboBox;
-            if (comboBoxProperties == null) return;
-
-            comboBoxProperties.Items.Clear();
-
-            if (comboBoxPropertySet.Items.Count == 0) return;
-
-            var selectedItem = (ComboboxItem)(comboBoxPropertySet.SelectedItem);
-            var propertySet = selectedItem.Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
-            if (propertySet == null) return;
-            var hasProperties=propertySet.HasProperties.ToList();
-           
-            
-            for (int i = 0; i < hasProperties.Count; i++)
-            {
-                ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };           
-                comboBoxProperties.Items.Add(oneHasProperties);
-            }
-
-            comboBoxProperties.SelectedIndex = 0;
-
-
-        }*/
-
-        /*private void comboBoxProperties_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var comboBox = ControlElements[2] as ComboBox;
-            if (comboBox == null) return;
-            var comboBoxPropertySet = ControlElements[4] as ComboBox;
-            if (comboBoxPropertySet == null) return;
-            var comboBoxProperties = ControlElements[6] as ComboBox;
-            if (comboBoxProperties == null) return;            
-            var textBox = ControlElements[8] as TextBox;
-            if (textBox == null) return;
-
-
-            if (comboBoxProperties.Items.Count == 0) return;
-
-            var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
-            var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
-            
-            var selectedProducts = ((ComboboxItem)(comboBox.SelectedItem)).Value as List<Xbim.Ifc2x3.SharedBldgElements.IfcWall>;
-
-            if (selectedProducts.Count == 0) return;
-            if (selectedPropertySet == null) return;
-
-            var property = selectedItem.Value as Xbim.Ifc2x3.PropertyResource.IfcProperty;
-            if (property == null) return;
-
-            List<double> propertyValueDoubles = new List<double> { };
-
-            for(int i=0;i<selectedProducts.Count;i++)
-            {
-                var propertySet=selectedProducts[i].PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
-                var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
-                string propertyType = oneProperty.GetType().ToString();
-                if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
-                {
-                    var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var propertyValue = property2.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
-                    object propertyValueTrue = property2.NominalValue.Value;                    
-                    string propertyValueType = propertyValue.UnderlyingSystemType.Name;
-                    if (propertyValueType == "Double")
-                    {                        
-                        double propertyValueDouble = (double)propertyValueTrue;
-                        propertyValueDoubles.Add(propertyValueDouble);
-                    }
-
-                }
-               else { return; }
-            }
-            
-
- 
-        }*/
-
 
 
         public override void SerializeNetwork(XmlWriter xmlWriter)

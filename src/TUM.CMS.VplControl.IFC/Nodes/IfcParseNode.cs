@@ -15,6 +15,7 @@ using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Windows.Media;
 using TUM.CMS.VplControl.IFC.Utilities;
+using Xbim.Ifc2x3.Kernel;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -25,7 +26,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             AddInputPortToNode("Test", typeof(string));
 
-            AddOutputPortToNode("GUID", typeof(string));
+            AddOutputPortToNode("GUID", typeof(object));
 
             var label = new Label
             {
@@ -131,7 +132,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             ModelInfo modelInfo = new ModelInfo(fileString);
             xModel = DataController.Instance.GetModel(fileString);
-            List<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement> elements = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement>().ToList();
+            List<IfcProduct> elements = xModel.IfcProducts.OfType<IfcProduct>().ToList();
             foreach (var element in elements)
             {
                 modelInfo.AddElementIds(element.GlobalId);

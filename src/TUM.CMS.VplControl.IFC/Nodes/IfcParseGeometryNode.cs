@@ -40,7 +40,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // Init UI
             IsResizeable = true;
 
-            AddInputPortToNode("Model", typeof(string), true);
+            AddInputPortToNode("Model", typeof(object), true);
             AddOutputPortToNode("FilteredElements", typeof(object));
 
             _viewPort = new HelixViewport3D
@@ -71,6 +71,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     foreach (var model in collection)
                     {
                         var modelId = ((ModelInfo)(model)).ModelId;
+                        var elementIdsList = ((ModelInfo)(model)).ElementIds;
                         _xModel = DataController.Instance.GetModel(modelId, true);
 
                         ModelList.Add(new ModelInfo(modelId));
@@ -87,7 +88,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         var context = new Xbim3DModelContext(_xModel);
                         //upgrade to new geometry represenation, uses the default 3D model
                         context.CreateContext(XbimGeometryType.PolyhedronBinary);
-                        worker_DoWork(_xModel, indexOfModel);
+                        worker_DoWork(_xModel, indexOfModel, elementIdsList);
 
                         // worker = new BackgroundWorker();
 
@@ -102,6 +103,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var file = InputPorts[0].Data.ToString();
 
                 var modelId = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+                var elementIdsList = ((ModelInfo) (InputPorts[0].Data)).ElementIds;
                 if (modelId == null) return;
                 int indexOfModel = 0;
                 foreach (var item in ModelList)
@@ -119,7 +121,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var context = new Xbim3DModelContext(_xModel);
                 //upgrade to new geometry represenation, uses the default 3D model
                 context.CreateContext(XbimGeometryType.PolyhedronBinary);
-                worker_DoWork(_xModel, indexOfModel);
+                worker_DoWork(_xModel, indexOfModel, elementIdsList);
                 
 
                 /*worker = new BackgroundWorker();
@@ -138,20 +140,24 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
-        private void worker_DoWork(XbimModel xModel, int indexOfModel)
+        private void worker_DoWork(XbimModel xModel, int indexOfModel, List<IfcGloballyUniqueId> elementIdsList)
         {
             // Loop through Entities and visualze them in the viewport
-
+            var res = new HashSet<IfcGloballyUniqueId>(elementIdsList);
            // xModel = (XbimModel) e.Argument;
             foreach (var item in xModel.Instances.OfType<IfcProduct>())
             {
-                var m = new MeshGeometry3D();
-                GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
-                var mat = GetStyleFromXbimModel(item);
+                if (res.Contains(item.GlobalId))
+                {
+                    var m = new MeshGeometry3D();
+                    GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
+                    var mat = GetStyleFromXbimModel(item);
 
-                var mb = new MeshBuilder(false, false);
+                    var mb = new MeshBuilder(false, false);
 
-                VisualizeMesh(mb, m, mat, item, indexOfModel);
+                    VisualizeMesh(mb, m, mat, item, indexOfModel);
+                }
+                
                // e.Result = xModel;
             }
 
