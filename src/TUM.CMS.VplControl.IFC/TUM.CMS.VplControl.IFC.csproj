@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
+    <Compile Include="Nodes\IfcPartialModel.cs" />
     <Compile Include="Nodes\IfcPropertyFilterNode.cs" />
     <Compile Include="Nodes\IfcFilterNode.cs" />
     <Compile Include="Nodes\IfcMapsNode.cs" />
