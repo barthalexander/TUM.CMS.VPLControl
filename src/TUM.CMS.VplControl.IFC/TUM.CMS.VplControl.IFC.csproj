@@ -152,6 +152,7 @@
     <Compile Include="Nodes\IfcReaderNode.cs" />
     <Compile Include="Nodes\IfcReadPropertiesNode.cs" />
     <Compile Include="Nodes\IfcReadSpaceNode.cs" />
+    <Compile Include="Nodes\IfcMergeModel.cs" />
     <Compile Include="Nodes\IfcSelectModel.cs" />
     <Compile Include="Nodes\IfcElementList.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />

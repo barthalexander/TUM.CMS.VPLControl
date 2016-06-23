@@ -10,15 +10,12 @@ namespace TUM.CMS.VplControl.Nodes.Input
     public class FilePathNode : Node
     {
         private readonly TextBlock textBlock;
-
+        private string file;
         public FilePathNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
             AddOutputPortToNode("String", typeof (string));
 
-            var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
 
             textBlock = new TextBlock {MinWidth = 120, MaxWidth = 300, IsHitTestVisible = false};
 
@@ -26,10 +23,8 @@ namespace TUM.CMS.VplControl.Nodes.Input
             button.Click += button_Click;
             button.Width = 50;
 
-            grid.Children.Add(textBlock);
-            grid.Children.Add(button);
-
-            AddControlToNode(grid);
+            AddControlToNode(textBlock);
+            AddControlToNode(button);
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
@@ -43,7 +38,8 @@ namespace TUM.CMS.VplControl.Nodes.Input
 
             if (openFileDialog.ShowDialog() == true)
             {
-                textBlock.Text = openFileDialog.FileName;
+                textBlock.Text = openFileDialog.SafeFileName;
+                file = openFileDialog.FileName;
                 Calculate();
             }
         }
@@ -57,7 +53,11 @@ namespace TUM.CMS.VplControl.Nodes.Input
 
         public override void Calculate()
         {
-            OutputPorts[0].Data = textBlock.Text;
+            if (!string.IsNullOrEmpty(file))
+            {
+                OutputPorts[0].Data = file;
+            }
+            
         }
 
         public override void SerializeNetwork(XmlWriter xmlWriter)

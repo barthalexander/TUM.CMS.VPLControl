@@ -78,20 +78,20 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             var models = DataController.Instance.modelStorage.ToList();
             var comboBoxModels = ControlElements[1] as ComboBox;
-
-            comboBoxModels.Items.Clear();
-
-            for (int i = 0; i < models.Count; i++)
+            if (comboBoxModels != null)
             {
-                var model = models[i].Key;
-                string modelName = i + " " + models[i].Value.IfcProject.Name;
-                ComboboxItem modelItem = new ComboboxItem() { Text = modelName, Value = model };
+                comboBoxModels.SelectedItem = -1;
+                comboBoxModels.Items.Clear();
 
-                comboBoxModels.Items.Add(modelItem);
+                for (int i = 0; i < models.Count; i++)
+                {
+                    var model = models[i].Key;
+                    string modelName = i + " " + models[i].Value.IfcProject.Name;
+                    ComboboxItem modelItem = new ComboboxItem() { Text = modelName, Value = model };
+
+                    comboBoxModels.Items.Add(modelItem);
+                }
             }
-            
-
-
         }
 
         public override Node Clone()
