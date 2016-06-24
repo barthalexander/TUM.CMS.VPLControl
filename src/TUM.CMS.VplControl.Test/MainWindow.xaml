@@ -39,6 +39,8 @@
             </MenuItem>
             <MenuItem Name="Nodes" Header="Nodes">
 
+                <MenuItem Header="Select Showable Nodes" Name="SelectShownNodes"></MenuItem>
+
 
             </MenuItem>
             <MenuItem Header="_Help" HorizontalAlignment="Right" FlowDirection="RightToLeft">

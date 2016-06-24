@@ -28,30 +28,54 @@ namespace TUM.CMS.VplControl.Core
 
             AddControlToNode(listBox);
 
-
-            switch (hostCanvas.NodeTypeMode)
+                      
+            if (hostCanvas.NodesFilterted)
             {
-                case NodeTypeModes.OnlyInternalTypes:
-                    tempTypeList.AddRange(
-                        ClassUtility.GetTypesInNamespace(Assembly.GetExecutingAssembly(), "TUM.CMS.VplControl.Nodes")
-                            .ToList());
-                    break;
-                case NodeTypeModes.OnlyExternalTypes:
-                    tempTypeList.AddRange(hostCanvas.ExternalNodeTypes);
-                    break;
-                case NodeTypeModes.All:
-                    tempTypeList.AddRange(
-                        ClassUtility.GetTypesInNamespace(Assembly.GetExecutingAssembly(), "TUM.CMS.VplControl.Nodes")
-                            .ToList());
-                    tempTypeList.AddRange(hostCanvas.ExternalNodeTypes);
-                    break;
+                foreach (var item in hostCanvas.ExternalNodeTypes)
+                {
+                    if (item.Namespace.Contains(hostCanvas.NodesFilterName))
+                    {
+                        tempTypeList.Add(item);
+                    }
+                }
+            }
+            else
+            {
+                switch (hostCanvas.NodeTypeMode)
+                {
+                    case NodeTypeModes.OnlyInternalTypes:
+                        tempTypeList.AddRange(
+                            ClassUtility.GetTypesInNamespace(Assembly.GetExecutingAssembly(), "TUM.CMS.VplControl.Nodes")
+                                .ToList());
+                        break;
+                    case NodeTypeModes.OnlyExternalTypes:
+                        tempTypeList.AddRange(hostCanvas.ExternalNodeTypes);
+                        break;
+                    case NodeTypeModes.All:
+                        tempTypeList.AddRange(
+                            ClassUtility.GetTypesInNamespace(Assembly.GetExecutingAssembly(), "TUM.CMS.VplControl.Nodes")
+                                .ToList());
+                        tempTypeList.AddRange(hostCanvas.ExternalNodeTypes);
+                        break;
+                }
             }
 
             tempTypeList = tempTypeList.OrderBy(x => x.Name).ToList();
 
 
             foreach (var type in tempTypeList.Where(type => !type.IsAbstract))
-                typeList.Add(type);
+            {
+                if(type.Name.Contains('<') || type.Name.Contains("ComboboxItem"))
+                {
+
+                }
+                else
+                {
+                    typeList.Add(type);
+                }
+                    
+            }
+                
 
             listBox.ItemsSource = typeList;
             searchTextBox.PreviewKeyDown += searchTextBox_KeyDown;

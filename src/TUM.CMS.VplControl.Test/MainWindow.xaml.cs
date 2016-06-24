@@ -46,33 +46,60 @@ namespace TUM.CMS.VplControl.Test
             // VplControl.ExternalNodeTypes.Add(typeof(Watch3DNode));
 
             VplControl.NodeTypeMode = NodeTypeModes.All;
+            //VplControl.NodeTypeMode = NodeTypeModes.OnlyInternalTypes;
+            VplControl.NodesFilterted = false;
 
-            var group = VplControl.ExternalNodeTypes.GroupBy(u => u.Namespace).Select(grp => grp.ToList()).ToList();
-            
-            foreach (var item in group)
+            var groupNamespaces = VplControl.ExternalNodeTypes.GroupBy(u => u.Namespace).Select(grp => grp.ToList()).ToList();
+
+            Separator separator = new Separator();
+            Nodes.Items.Add(separator);
+
+            foreach (var namespaceItem in groupNamespaces)
             {
-                var namespaceNameList = item[0].Namespace.Split('.');
+                var namespaceNameList = namespaceItem[0].Namespace.Split('.');
                 var namespaceName = namespaceNameList[3];
                 if (namespaceNameList[3] == "")
                     namespaceName = namespaceNameList[2];
 
-                MenuItem tempItem = new MenuItem();
-                tempItem.Header = namespaceName;
-                tempItem.Name = namespaceName;
-                Nodes.Items.Add(tempItem);
-                foreach (var item1 in item)
+                MenuItem namespaceMenuItem = new MenuItem();
+                namespaceMenuItem.Header = namespaceName;
+                namespaceMenuItem.Name = namespaceName;
+                Nodes.Items.Add(namespaceMenuItem);
+                foreach (var item in namespaceItem)
                 {
-                    if (!item1.Name.Contains("<"))
+                    if (!item.Name.Contains("<"))
                     {
                         MenuItem tempItem1 = new MenuItem();
-                        tempItem1.Header = item1.Name;
+                        tempItem1.Header = item.Name;
                         tempItem1.Click += NodeItem_Click;
-                        tempItem.Items.Add(tempItem1);
+                        namespaceMenuItem.Items.Add(tempItem1);
                     }
                    
                 }
             }
+
+            foreach (var namespaceItem in groupNamespaces)
+            {
+                var namespaceNameList = namespaceItem[0].Namespace.Split('.');
+                var namespaceName = namespaceNameList[3];
+                if (namespaceNameList[3] == "")
+                    namespaceName = namespaceNameList[2];
+
+                MenuItem namespaceMenuItem = new MenuItem();
+                namespaceMenuItem.Header = namespaceName;
+                namespaceMenuItem.Click += ChangeNodesFilter_Click;
+                SelectShownNodes.Items.Add(namespaceMenuItem);
+            }
+
+            Separator separator1 = new Separator();
+            SelectShownNodes.Items.Add(separator1);
+
+            MenuItem namespaceMenuItem1 = new MenuItem();
+            namespaceMenuItem1.Header = "All";
+            namespaceMenuItem1.Click += ChangeNodesFilter_Click;
+            SelectShownNodes.Items.Add(namespaceMenuItem1);
         }
+
         public TUM.CMS.VplControl.Core.VplControl HostCanvas { get; private set; }
         private void MenuItem_New_Click(object sender, RoutedEventArgs e)
         {
@@ -141,5 +168,19 @@ namespace TUM.CMS.VplControl.Test
             MessageBox.Show(string.Format("{0} just said Hi!", obMenuItem.Header));
         }
 
+        private void ChangeNodesFilter_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem obMenuItem = e.OriginalSource as MenuItem;
+            if(obMenuItem.Header.ToString() == "All")
+            {
+                VplControl.NodesFilterted = false;
+            }
+            else
+            {
+                VplControl.NodesFilterted = true;
+                VplControl.NodesFilterName = obMenuItem.Header.ToString();
+            }
+            
+        }
     }
 }

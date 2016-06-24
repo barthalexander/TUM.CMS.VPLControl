@@ -36,6 +36,8 @@ namespace TUM.CMS.VplControl.Core
         private TrulyObservableCollection<Node> tempCollection;
         public Line TempLine;
         internal Port TempStartPort;
+        public bool NodesFilterted;
+        public string NodesFilterName;
 
         public VplControl()
         {
