@@ -24,6 +24,7 @@ using TUM.CMS.VplControl.IFC.Utilities;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -33,6 +34,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
         private XbimModel _xModel;
         public List<ModelInfo> ModelList;
+        public List<ModelInfo> ModelListAll;
         private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
         private BackgroundWorker worker;
         public IfcParseGeometryNode(Core.VplControl hostCanvas) : base(hostCanvas)
@@ -49,20 +51,32 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 MinHeight = 520
             };
 
+            RadioButton radioButton_1 = new RadioButton { Content = "pass all" };
+            RadioButton radioButton_2 = new RadioButton { Content = "pass selected", IsChecked = true };
+            
+            
+
             //_viewPort.MouseDoubleClick += _viewPort_mouseclick;
 
             AddControlToNode(_viewPort);
+            AddControlToNode(radioButton_1);
+            AddControlToNode(radioButton_2);
         }
 
 
         public override void Calculate()
         {
             OutputPorts[0].Data = null;
+            var button_1 = ControlElements[1] as RadioButton;
+            if (button_1 == null) return;
+            var button_2 = ControlElements[2] as RadioButton;
+            if (button_2 == null) return;
             // Init the viewport
 
             _viewPort.Children.Clear();
             _viewPort.Children.Add(new SunLight());
             ModelList = new List<ModelInfo>();
+            ModelListAll = new List<ModelInfo>();
             Type t = InputPorts[0].Data.GetType();
             if (t.IsGenericType)
             {
@@ -75,6 +89,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         _xModel = DataController.Instance.GetModel(modelId, true);
 
                         ModelList.Add(new ModelInfo(modelId));
+                        ModelListAll.Add(new ModelInfo(modelId));
                         int indexOfModel = 0;
                         foreach (var item in ModelList)
                         {
@@ -84,12 +99,20 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                 break;
                             }
                         }
+                        foreach (var item in ModelListAll)
+                        {
+                            if (item.ModelId == modelId)
+                            {
+                                indexOfModel = ModelListAll.IndexOf(item);
+                                break;
+                            }
+                        }
 
                         var context = new Xbim3DModelContext(_xModel);
                         //upgrade to new geometry represenation, uses the default 3D model
                         context.CreateContext(XbimGeometryType.PolyhedronBinary);
                         worker_DoWork(_xModel, indexOfModel, elementIdsList);
-
+                        button_1.Checked += (sender, e) => button_1_Checked(sender, e, elementIdsList, indexOfModel);
                         // worker = new BackgroundWorker();
 
                         // worker.DoWork += new DoWorkEventHandler(worker_DoWork);
@@ -103,7 +126,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var file = InputPorts[0].Data.ToString();
 
                 var modelId = ((ModelInfo)(InputPorts[0].Data)).ModelId;
-                var elementIdsList = ((ModelInfo) (InputPorts[0].Data)).ElementIds;
+                var elementIdsList = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
                 if (modelId == null) return;
                 int indexOfModel = 0;
                 foreach (var item in ModelList)
@@ -114,15 +137,23 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         break;
                     }
                 }
+                foreach (var item in ModelListAll)
+                {
+                    if (item.ModelId == modelId)
+                    {
+                        indexOfModel = ModelListAll.IndexOf(item);
+                        break;
+                    }
+                }
                 _xModel = DataController.Instance.GetModel(modelId, true);
 
                 ModelList.Add(new ModelInfo(modelId));
-
+                ModelListAll.Add(new ModelInfo(modelId));
                 var context = new Xbim3DModelContext(_xModel);
                 //upgrade to new geometry represenation, uses the default 3D model
                 context.CreateContext(XbimGeometryType.PolyhedronBinary);
                 worker_DoWork(_xModel, indexOfModel, elementIdsList);
-                
+                button_1.Checked += (sender,e)=>button_1_Checked(sender, e, elementIdsList, indexOfModel);              
 
                 /*worker = new BackgroundWorker();
 
@@ -133,12 +164,29 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
-            }
 
-           
+            }
         }
 
+             
+            
 
+        private void button_1_Checked(object sender, RoutedEventArgs e, List<IfcGloballyUniqueId> elementIdsList, int indexOfModel )
+        {
+            
+            if (ModelListAll.Count == 1)
+            {
+                ModelListAll[0].ElementIds = elementIdsList;
+                OutputPorts[0].Data = ModelListAll[0];             
+            }
+
+            if (ModelListAll.Count > 1)
+            {
+                ModelListAll[indexOfModel].ElementIds = elementIdsList;
+                OutputPorts[0].Data = ModelListAll;
+               
+            }
+        }
 
         private void worker_DoWork(XbimModel xModel, int indexOfModel, List<IfcGloballyUniqueId> elementIdsList)
         {
@@ -188,6 +236,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="indexOfModel"></param>
         public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat, IfcProduct itemModel, int indexOfModel)
         {
+            
 
             // Output on console
             var points = new List<Point3D>();
@@ -216,14 +265,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 // Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90))
             };
 
-            var element = new ModelUIElement3D { Model = myGeometryModel };
-            element.MouseDown += (sender1, e1) => OnElementMouseDown(sender1, e1, this, itemModel, indexOfModel);
-            
-
-            // Add the Mesh to the ViewPort
            
+                var element = new ModelUIElement3D { Model = myGeometryModel };
+                element.MouseDown += (sender1, e1) => OnElementMouseDown(sender1, e1, this, itemModel, indexOfModel);
+
+
+                // Add the Mesh to the ViewPort
+
                 _viewPort.Children.Add(element);
-                // Do all UI related work here...
+
+                // Do all UI related work here... }
+            
+            
             
             
            
@@ -270,21 +323,35 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     ModelList[indexOfModel].AddElementIds(itemModel.GlobalId);
                     geometryModel3D.Material = _selectionMaterial;
                 }
-            }
-            if (ModelList.Count == 1)
+            }           
+
+            var button_2 = ControlElements[2] as RadioButton;
+            if (button_2 == null) return;
+            if((bool)button_2.IsChecked)
+            {
+                if (ModelList.Count == 1)
             {
                 OutputPorts[0].Data = ModelList[0];
+
             }
             // Set selected models to Output ...  
             if (ModelList.Count > 1)
             {
                 OutputPorts[0].Data = ModelList;
+
             }
 
+            }
+            
+           // button_2.Checked += (sender2,e2)=>button_2_Checked(sender2,e2,indexOfModel);
+            
             e.Handled = true;
         }
-        
-        
+        private void button_2_Checked(object sender2, RoutedEventArgs e2,int indexOfModel)
+        {
+            
+        }
+
         /// <summary>
         /// Get Style if each Item
         /// 

@@ -224,8 +224,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             OutputPorts[0].Data = null;
             var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+
             if (modelid == null) return;
+            ModelInfo outputInfo = new ModelInfo(modelid);            
             xModel = DataController.Instance.GetModel(modelid);
+          
 
             var comboBoxPropertySet = ControlElements[1] as ComboBox;
             if (comboBoxPropertySet == null) return;
