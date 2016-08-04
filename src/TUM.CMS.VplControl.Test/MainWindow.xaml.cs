@@ -182,5 +182,15 @@ namespace TUM.CMS.VplControl.Test
             }
             
         }
+
+        private void OpenTemplateNode(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Do you want to override your workspace?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                VplControl.DeserializeNetwork(@"Templates\ParseGeo.vplxml");
+            }
+            
+        }
     }
 }

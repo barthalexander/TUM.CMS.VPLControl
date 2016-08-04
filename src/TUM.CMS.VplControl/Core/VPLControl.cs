@@ -833,7 +833,7 @@ namespace TUM.CMS.VplControl.Core
             File.WriteAllText(filePath, sb.ToString());
         }
 
-        internal void DeserializeNetwork(string filePath)
+        public void DeserializeNetwork(string filePath)
         {
             NewFile();
 
