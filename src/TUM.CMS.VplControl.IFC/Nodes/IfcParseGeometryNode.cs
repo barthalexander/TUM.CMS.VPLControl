@@ -205,6 +205,20 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                     VisualizeMesh(mb, m, mat, item, indexOfModel);
                 }
+
+                // Show whole building with opacity 0.03
+                else
+                {
+                    var m = new MeshGeometry3D();
+                    GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
+
+                    
+                    var mat = GetStyleFromXbimModel(item, 0.03);
+
+                    var mb = new MeshBuilder(false, false);
+
+                    VisualizeMesh(mb, m, mat, item, indexOfModel);
+                }
                 
                // e.Result = xModel;
             }
@@ -254,8 +268,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             // TODO: Color has to be read! 
             
-
             // Create the Geometry
+
+
             var myGeometryModel = new GeometryModel3D
             {               
                 Material = mat,
@@ -359,13 +374,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public DiffuseMaterial GetStyleFromXbimModel(IPersistIfcEntity item)
+        public DiffuseMaterial GetStyleFromXbimModel(IPersistIfcEntity item, double opacity = 1)
         {
 
             var model = item.ModelOf as XbimModel;
             if (model == null || !(item is IfcProduct))
                 return null;
-
+            SolidColorBrush fillColor = new SolidColorBrush();
             switch (model.GeometrySupportLevel)
             {
                 case 2:
@@ -428,25 +443,32 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             g *= 255;
                             b *= 255;
                             a *= 255;
-                            return
-                                new DiffuseMaterial(
-                                    new SolidColorBrush(Color.FromArgb((byte) r, (byte) g, (byte) b, (byte) a)));
+                            fillColor = new SolidColorBrush(Color.FromArgb((byte)r, (byte)g, (byte)b, (byte)a));
+                            fillColor.Opacity = opacity;
+                            return new DiffuseMaterial(fillColor);
                         }
                         else
                         {
-                            return new DiffuseMaterial(new SolidColorBrush(Colors.Red));
+                            fillColor = new SolidColorBrush(Colors.Gray);
+                            fillColor.Opacity = opacity;
+                            return new DiffuseMaterial(fillColor);
                         }
                     }
                     catch
                     {
-                        return new DiffuseMaterial(new SolidColorBrush(Colors.Red));
+                        fillColor = new SolidColorBrush(Colors.Gray);
+                        fillColor.Opacity = opacity;
+                        return new DiffuseMaterial(fillColor);
                     }
 
                     break;
                
             }
 
-            return new DiffuseMaterial(new SolidColorBrush(Colors.Gray)); ;
+            fillColor = new SolidColorBrush(Colors.Gray);
+            fillColor.Opacity = opacity;
+            return new DiffuseMaterial(fillColor);
+            
 
 
         }
