@@ -75,7 +75,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 return;
             xModel = DataController.Instance.GetModel(modelid);
             var ifcDoor = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
-            Console.WriteLine("ifcDoor has " + ifcDoor.Count + " elements");//how many doors?--> 13 doors (Xbim Xplorer says there are only 7...)
+            Console.WriteLine("ifcDoor has " + ifcDoor.Count + " elements");
 
             List<double> ifcDoorThickness = new List<double> { };
             for (int i = 0; i < ifcDoor.Count; i++)
