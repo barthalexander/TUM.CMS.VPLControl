@@ -155,6 +155,7 @@
     <Compile Include="Nodes\IfcMergeModel.cs" />
     <Compile Include="Nodes\IfcSelectModel.cs" />
     <Compile Include="Nodes\IfcElementList.cs" />
+    <Compile Include="Nodes\IfcThermalNode.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
