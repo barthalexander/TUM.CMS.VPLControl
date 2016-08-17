@@ -29,7 +29,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             AddInputPortToNode("text", typeof(string));//the ifc parsed file
             AddOutputPortToNode("text", typeof(List<double>));//List with doors thermal transmittance
 
-            var label_l = new Label { Content = "λ" };
+            var label_l = new Label { Content = "Τhermal conductivity λ" };
             AddControlToNode(label_l);  //#0
             // var textBox_l = new TextBox { MinWidth = 300, MaxWidth = 500, IsHitTestVisible = false };
             var textBox_l = new TextBox { };
@@ -62,7 +62,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             if (textBox_l_in == null || comboBox_in == null)
                 return;     //if λ or Rse do not have values yet, we cannot do the calculation...
 
-            l = Double.Parse(textBox_l_in.Text);
+            l = Double.Parse(textBox_l_in.Text.Replace(",", "."));
             Console.WriteLine("l = " + l);
             ComboboxItem Selection = (ComboboxItem)(comboBox_in.SelectedItem);
             Console.WriteLine("Combobox's selection is " + Selection.Text + " that is " + Selection.Value);
@@ -75,26 +75,39 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 return;
             xModel = DataController.Instance.GetModel(modelid);
             var ifcDoor = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
-            Console.WriteLine("ifcDoor has " + ifcDoor.Count + " elements");//how many doors?--> 13 doors
-    
+            Console.WriteLine("ifcDoor has " + ifcDoor.Count + " elements");//how many doors?--> 13 doors (Xbim Xplorer says there are only 7...)
+
             List<double> ifcDoorThickness = new List<double> { };
             for (int i = 0; i < ifcDoor.Count; i++)
             {
-                var ifcDoorVolume = ifcDoor[i].PropertySets.ToList()[1].HasProperties.ToList()[2];//is it the right property..?
-                var ifcDoorArea = ifcDoor[i].PropertySets.ToList()[1].HasProperties.ToList()[0];//is it the right property..?
-                var volume = ifcDoorVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
-                object volumeValueTrue = volume.NominalValue.Value;
-                double volumeVal = (double)volumeValueTrue;
-                var area = ifcDoorArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
-                object areaValueTrue = area.NominalValue.Value;
-                double areaVal = (double)areaValueTrue;//seems like it s NOT the right property...
-                ifcDoorThickness.Add(volumeVal / areaVal);
+                Console.WriteLine("###" + ifcDoor[i].Tag + "###" + ifcDoor[i].GetType() + "###");
+                try
+                {
+                    var ifcDoorVolume = ifcDoor[i].PropertySets.ToList()[2].HasProperties.ToList()[2];//is it the right property..?-->Yes (Volumen)
+                    var ifcDoorArea = ifcDoor[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcDoorVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                    object volumeValueTrue = volume.NominalValue.Value;
+                    double volumeVal = (double)volumeValueTrue;
+                    var area = ifcDoorArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                    Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
+                    object areaValueTrue = area.NominalValue.Value;
+                    double areaVal = (double)areaValueTrue;//
+                    ifcDoorThickness.Add(volumeVal / areaVal);
+                }
+                catch (System.InvalidCastException castwrong)
+                {
+                    Console.WriteLine(ifcDoor[i].Tag + " although being " + ifcDoor[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                }
+                catch (System.ArgumentOutOfRangeException notenough)
+                {
+                    Console.WriteLine(ifcDoor[i].Tag + " although being " + ifcDoor[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                }
             }
             //create a new List which will contain all doors' thermal trasmittances
             DoorsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcDoorThickness.Count + " doors elements.");
+            Console.WriteLine("Total of " + ifcDoorThickness.Count + " door-elements with their Properties in place...");
             for (int i = 0; i < ifcDoorThickness.Count; i++)
             {
                 double denominator = Rsi + ifcDoorThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
