@@ -157,6 +157,7 @@
     <Compile Include="Nodes\IfcElementList.cs" />
     <Compile Include="Nodes\IfcThermalNode.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />
+    <Compile Include="Nodes\IfcMvdXMLReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
