@@ -173,6 +173,17 @@
     </Compile>
     <Compile Include="Utilities\DataController.cs" />
     <Compile Include="Utilities\ModelInfo.cs" />
+    <Compile Include="Utilities\MvdXMLReader.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\AttributeRule.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\Concept.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\ConceptRoot.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\ConceptTemplate.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\Definition.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\EntityRule.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\ExchangeRequirement.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\ModelView.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\Requirement.cs" />
+    <Compile Include="Utilities\mvdXMLReaderClasses\Templates.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
