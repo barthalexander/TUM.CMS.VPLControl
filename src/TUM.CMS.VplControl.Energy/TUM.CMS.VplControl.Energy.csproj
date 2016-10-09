@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Nodes\EnergyDoors.cs" />
+    <Compile Include="Nodes\EnergyThermalNode.cs" />
     <Compile Include="Nodes\EnergyWindows.cs" />
     <Compile Include="Nodes\EnergyWalls.cs" />
     <Compile Include="Nodes\EnergyNode.cs" />

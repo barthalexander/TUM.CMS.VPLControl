@@ -89,7 +89,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var selectedProduct = xModel.IfcProducts.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);
 
                 var propertySets = selectedProduct.PropertySets.ToList() as List<Xbim.Ifc2x3.Kernel.IfcPropertySet>;
-              
+
                 bool found = false; int ii = 0;
                 //Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue TTProperty = null;
                 Xbim.XbimExtensions.SelectTypes.IfcValue TTValue = null;
@@ -129,7 +129,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             else
             {
-                labelMessage.Content = "ThermalTransmitance NOT available.";                                                     
+                labelMessage.Content = "ThermalTransmitance NOT available.";
             }
 
         }
