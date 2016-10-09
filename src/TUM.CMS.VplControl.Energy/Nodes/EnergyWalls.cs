@@ -62,7 +62,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             if (textBox_l_in == null || comboBox_in == null)
                 return;     //if λ or Rse do not have values yet, we cannot do the calculation...
 
-            l = Double.Parse(textBox_l_in.Text);
+            l = Double.Parse(textBox_l_in.Text.Replace(",", "."));
             Console.WriteLine("l = " + l);
             ComboboxItem Selection = (ComboboxItem)(comboBox_in.SelectedItem);
             Console.WriteLine("Combobox's selection is " + Selection.Text + " that is " + Selection.Value);
