@@ -61,7 +61,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var path = Path.GetTempPath();
             XModel = new XbimModel();
-            XModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
+            XModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");//?
             XModel.Close();//?
 
             var res = XModel.Open(path + "temp_reader" + number + ".xbim", XbimDBAccess.ReadWrite);
@@ -81,7 +81,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             //get all colors available in a list
             var _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
             Console.WriteLine("Total of " + _Colors.Count + " Colors available!!");
-            DiffuseMaterial NoTTMaterial = new DiffuseMaterial(new SolidColorBrush((Color)_Colors[_Colors.Count - 1].Value));//in case of no TT being available the Color used will be the last one in the list
+            //Console.WriteLine("The one we use in case of TT not being available is "+ _Colors[_Colors.Count- 1].ToString());
+            //DiffuseMaterial NoTTMaterial = new DiffuseMaterial(new SolidColorBrush((Color)_Colors[_Colors.Count-1].Value));//in case of no TT being available the Color used will be the last one in the list
+            DiffuseMaterial NoTTMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
             // Loop through Entities and visualize them in the viewport
             int count = 0;
             Console.WriteLine("The elements r in total " + XModel.Instances.OfType<IfcProduct>().Count() + ".");
