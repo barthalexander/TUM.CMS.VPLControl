@@ -10,11 +10,16 @@ namespace TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses
     {
         public string entityName { get; set; }
         public string cardinality { get; set; }
-        List<AttributeRule> attributeRules = new List<AttributeRule>();
+        private List<AttributeRule> attributeRules = new List<AttributeRule>();
 
         public void addAttributeRule(AttributeRule attributeRule)
         {
             attributeRules.Add(attributeRule);
+        }
+
+        public List<AttributeRule> getAttributeRules()
+        {
+            return attributeRules;
         }
     }
 }

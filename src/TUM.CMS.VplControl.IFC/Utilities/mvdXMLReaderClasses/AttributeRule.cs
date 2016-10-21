@@ -16,5 +16,10 @@ namespace TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses
         {
             entityRules.Add(entityRule);
         }
+
+        public List<EntityRule> getEntityRules()
+        {
+            return entityRules;
+        }
     }
 }

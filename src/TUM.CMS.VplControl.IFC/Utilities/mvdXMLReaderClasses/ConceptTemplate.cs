@@ -54,5 +54,13 @@ namespace TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses
         {
             return subTemplates;
         }
+        public Dictionary<string, ConceptTemplate> getConceptTemplateses()
+        {
+            return subConceptTemplateses;
+        }
+        public List<AttributeRule> getAttributeRules()
+        {
+            return attributeRules;
+        }
     }
 }
