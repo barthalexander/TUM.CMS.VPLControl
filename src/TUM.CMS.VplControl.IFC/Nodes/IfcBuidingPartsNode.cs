@@ -1,23 +1,9 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Xml;
 using TUM.CMS.VplControl.Core;
 using System.Collections.Generic;
-using System.IO;
-using System.Windows.Input;
-using Microsoft.Win32;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
-using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 using Xbim.Ifc;
-
-using System.ComponentModel;
 using System.Linq;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.Extensions;
 using TUM.CMS.VplControl.IFC.Utilities;
 
@@ -25,7 +11,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcBuildingPartsNode : Node
     {
-        private XbimModel xModel;
+        private IfcStore xModel;
 
         public IfcBuildingPartsNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
@@ -75,13 +61,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             textBlock.Text = "";
 
            
-        
 
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcWall> walls = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcWindow> windows = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcDoor> doors = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
+            List<Xbim.Ifc2x3.SharedBldgElements.IfcWall> walls = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+            List<Xbim.Ifc2x3.SharedBldgElements.IfcWindow> windows = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
+            List<Xbim.Ifc2x3.SharedBldgElements.IfcDoor> doors = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
             
-            List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.IfcProducts.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
+            List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
             textBlock.Text += "Walls: \n\n";
             foreach (var wall in walls)
             {
@@ -117,14 +102,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 textBlock.Text += "\n";
             }
-
-
-
-
-
-
+            DataController.Instance.CloseModel(xModel);
         }
-        
+
         public override Node Clone()
         {
             return new IfcBuildingPartsNode(HostCanvas)

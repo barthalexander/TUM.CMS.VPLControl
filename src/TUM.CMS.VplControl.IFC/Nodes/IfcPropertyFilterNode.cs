@@ -13,12 +13,13 @@ using System.Windows;
 using System.Reflection;
 using Xbim.Ifc2x3.ProductExtension;
 using System.IO;
+using Xbim.Ifc;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcPropertyFilterNode : Node
     {
-        public XbimModel xModel;
+        public IfcStore xModel;
         
         public IfcPropertyFilterNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
@@ -90,14 +91,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
          
             for(int i=0;i<selectedItemIds.Count;i++ )
             {
-                var selectedProduct = xModel.IfcProducts.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);                            
+                var selectedProduct = xModel.Instances.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);                            
                 var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
                 var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
                 string propertyType = oneProperty.GetType().ToString();
                 if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
                 {
                     var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var propertyValue = property2.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                    var propertyValue = property2.NominalValue;
                     object propertyValueTrue = property2.NominalValue.Value;
                     string propertyValueType = propertyValue.UnderlyingSystemType.Name;
                     if (propertyValueType == "Double")
@@ -241,7 +242,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // IfcPersistedEntityAttribute attr = (IfcPersistedEntityAttribute)Attribute.GetCustomAttribute(info, typeof(IfcPersistedEntityAttribute));
 
            
-           var selectedProduct = xModel.IfcProducts.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
+           var selectedProduct = xModel.Instances.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
 
             
 
@@ -316,14 +317,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             for (int j = 0; j < selectedItemIds.Count; j++)
             {
-                var selectedProduct = xModel.IfcProducts.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[j]);
+                var selectedProduct = xModel.Instances.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[j]);
                 var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
                 var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
                 string propertyType = oneProperty.GetType().ToString();
                 if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
                 {
                     var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var propertyValue = property2.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                    var propertyValue = property2.NominalValue;
                     object propertyValueTrue = property2.NominalValue.Value;
                     string propertyValueType = propertyValue.UnderlyingSystemType.Name;
                     if (propertyValueType == "Double")

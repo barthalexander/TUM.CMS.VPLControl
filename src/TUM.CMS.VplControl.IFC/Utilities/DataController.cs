@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Xbim.Common;
+using Xbim.Ifc;
 using Xbim.IO;
+using Xbim.IO.Esent;
 using Xbim.XbimExtensions;
 
 namespace TUM.CMS.VplControl.IFC.Utilities
@@ -10,11 +13,11 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         // Singleton
         private static DataController _instance;
         private static readonly object Padlock = new object();
-        public Dictionary<string, XbimModel> modelStorage;
+        public Dictionary<string, IfcStore> ModelStorage;
 
         private DataController()
         {
-            modelStorage = new Dictionary<string, XbimModel>();
+            ModelStorage = new Dictionary<string, IfcStore>();
         }
 
         public static DataController Instance
@@ -36,9 +39,9 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         /// <param name="fileString"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool AddModel(string fileString, XbimModel model)
+        public bool AddModel(string fileString, IfcStore model)
         {
-            modelStorage.Add(fileString, model);
+            ModelStorage.Add(fileString, model);
             return true;
         }
 
@@ -51,7 +54,7 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         /// <returns></returns>
         public bool RemoveModel(string fileString)
         {
-            modelStorage.Remove(fileString);
+            ModelStorage.Remove(fileString);
             return true;
         }
 
@@ -65,18 +68,26 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         /// <param name="filePath"></param>
         /// <param name="writeAccess">Mostly the File must be only readable</param>
         /// <returns></returns>
-        public XbimModel GetModel(string filePath, bool writeAccess = false)
+        public IfcStore GetModel(string filePath, bool writeAccess = false)
         {
             if (writeAccess == false)
             {
-                modelStorage[filePath].Open(filePath);
+                return IfcStore.Open(filePath,null ,false);
             }
             else
             {
-                modelStorage[filePath].Open(filePath, XbimDBAccess.ReadWrite);
+                return IfcStore.Open(filePath);
             }
-            return modelStorage[filePath];
+        }
 
+        public void CloseModel(IfcStore xModel)
+        {
+            xModel.Close();
+        }
+
+        public IModel GetIModel(string filePath)
+        {
+            return ModelStorage[filePath].ReferencingModel;
         }
     }
 }

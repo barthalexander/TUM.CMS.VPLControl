@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using Microsoft.Win32;
+﻿using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
+using Xbim.Ifc;
 using Xbim.Presentation;
-using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcTreeNode : Node
     {
         private readonly TextBox _textBox;
-        public XbimModel xModel;
+        public IfcStore xModel;
 
         private XbimTreeview treeview;
         // private DynamicProductSelectionControl productSelectionControl;

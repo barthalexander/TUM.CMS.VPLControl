@@ -13,6 +13,7 @@ using System.Windows;
 using System.Reflection;
 using Xbim.Ifc2x3.ProductExtension;
 using System.IO;
+using Xbim.Ifc;
 using Xbim.Ifc2x3.UtilityResource;
 using Xbim.Ifc2x3.SharedBldgElements;
 
@@ -20,7 +21,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcFilterNode : Node
     {
-        public XbimModel xModel;
+        public IfcStore xModel;
         public ModelInfo outputInfo; 
         public IfcFilterNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
@@ -83,18 +84,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 comboBox.SelectedItem = -1;
                 comboBox.Items.Clear();
             }            
-            
-                var ifcwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
-                var ifcbeam = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
-                var ifccolumn = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList();
-                var ifcslab = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList();
-                var ifcwindow = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
-                var ifcstair = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcStair>().ToList();
-                var ifcroof = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRoof>().ToList();
-                var ifcramp = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRamp>().ToList();
-                var ifcplate = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcPlate>().ToList();
-                var ifcdoor = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
-                var ifccurtainwall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall>().ToList();
+                var ifcwall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+                var ifcbeam = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
+                var ifccolumn = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList();
+                var ifcslab = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList();
+                var ifcwindow = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
+                var ifcstair = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcStair>().ToList();
+                var ifcroof = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRoof>().ToList();
+                var ifcramp = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRamp>().ToList();
+                var ifcplate = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcPlate>().ToList();
+                var ifcdoor = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
+                var ifccurtainwall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall>().ToList();
 
                 List<IfcGloballyUniqueId> ifcFilteredIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
 

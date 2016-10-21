@@ -11,7 +11,6 @@ using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 using Xbim.Ifc;
 
 using System.ComponentModel;
@@ -20,13 +19,15 @@ using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.Extensions;
+using Xbim.Ifc2x3.Interfaces;
+using IIfcPhysicalSimpleQuantity = Xbim.Ifc4.Interfaces.IIfcPhysicalSimpleQuantity;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
 
     public class IfcReadSpacesNode : Node
     {
-        public XbimModel xModel;
+        public IfcStore xModel;
 
         public IfcReadSpacesNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
@@ -79,7 +80,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             textBlock.Text = "";
 
             
-            List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.IfcProducts.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
+            List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
             foreach (var space in spaces)
             {
                 textBlock.Text += space.Name + "\t" + space.LongName + "\t";
@@ -91,7 +92,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 {
                     textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
                     Console.WriteLine(string.Format("\tStorey = {0}", relation.RelatingObject.Name));
-                    Xbim.Ifc2x3.QuantityResource.IfcPhysicalSimpleQuantity area = space.GetElementPhysicalSimpleQuantity("GSA Space Areas", "GSA BIM Area");
+                    IIfcPhysicalSimpleQuantity area = space.GetElementPhysicalSimpleQuantity("GSA Space Areas", "GSA BIM Area");
                     Xbim.Ifc2x3.QuantityResource.IfcQuantityArea areaMeasure = area as Xbim.Ifc2x3.QuantityResource.IfcQuantityArea;
                     if(area != null) {
                         

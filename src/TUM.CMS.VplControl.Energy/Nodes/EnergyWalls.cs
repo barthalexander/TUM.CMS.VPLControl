@@ -8,6 +8,8 @@ using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.IO;
 using System.Windows;
 using System.Windows.Controls;
+using Xbim.Ifc;
+using Xbim.Ifc2x3.MeasureResource;
 
 
 namespace TUM.CMS.VplControl.Energy.Nodes
@@ -21,7 +23,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
         public double l;
         public double Rse;
-        public XbimModel xModel;
+        public IfcStore xModel;
         public List<double> WallsThermalT;
 
         public EnergyWalls(Core.VplControl hostCanvas) : base(hostCanvas)
@@ -74,20 +76,20 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             if (modelid == null)
                 return;
             xModel = DataController.Instance.GetModel(modelid);
-            var ifcWall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+            var ifcWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
             Console.WriteLine("ifcWall has " + ifcWall.Count + " elements");//12 walls
      
             List<double> ifcWallThickness = new List<double> { };
             for (int i = 0; i < ifcWall.Count; i++)
             {
-                var ifcWallVolume = ifcWall[i].PropertySets.ToList()[1].HasProperties.ToList()[2];//?
+                var ifcWallVolume = ifcWall[i].PropertySets.ToList()[1].HasProperties.ToList()[1];//?
                 var ifcWallArea = ifcWall[i].PropertySets.ToList()[1].HasProperties.ToList()[0];//?
                 var volume = ifcWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var volumeValue = volume.NominalValue as IfcValue;
                 object volumeValueTrue = volume.NominalValue.Value;
                 double volumeVal = (double)volumeValueTrue;
                 var area = ifcWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var areaValue = area.NominalValue as IfcValue;
                 object areaValueTrue = area.NominalValue.Value;
                 double areaVal = (double)areaValueTrue;
                 ifcWallThickness.Add(volumeVal / areaVal);

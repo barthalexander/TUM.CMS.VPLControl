@@ -9,22 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml;
 using TUM.CMS.VplControl.Core;
-using System.Collections.Generic;
-using System.IO;
-using System.Windows.Input;
-using Microsoft.Win32;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
-using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
-using Xbim.Ifc;
-
-using System.ComponentModel;
 using System.Linq;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.ProductExtension;
-using Xbim.Ifc2x3.Extensions;
 using System.Collections;
 using System.Text.RegularExpressions;
 

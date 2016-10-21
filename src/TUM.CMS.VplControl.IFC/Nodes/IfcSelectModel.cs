@@ -8,17 +8,17 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
+using Xbim.Ifc;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcSelectModel : Node
     {
-        private XbimModel xModel;
+        private IfcStore xModel;
 
         // private DynamicProductSelectionControl productSelectionControl;
         public IfcSelectModel(Core.VplControl hostCanvas) : base(hostCanvas)
@@ -76,7 +76,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         public override void Calculate()
         {
-            var models = DataController.Instance.modelStorage.ToList();
+            var models = DataController.Instance.ModelStorage.ToList();
             var comboBoxModels = ControlElements[1] as ComboBox;
             if (comboBoxModels != null)
             {
@@ -86,7 +86,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 for (int i = 0; i < models.Count; i++)
                 {
                     var model = models[i].Key;
-                    string modelName = i + " " + models[i].Value.IfcProject.Name;
+                    string modelName = i + " " + models[i].Value.Header.Name;
                     ComboboxItem modelItem = new ComboboxItem() { Text = modelName, Value = model };
 
                     comboBoxModels.Items.Add(modelItem);

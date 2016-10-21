@@ -3,14 +3,16 @@ using TUM.CMS.VplControl.Core;
 using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
-using XbimGeometry.Interfaces;
 using TUM.CMS.VplControl.IFC.Utilities;
+using Xbim.Common.Geometry;
+using Xbim.Ifc;
+using Xbim.Ifc2x3.IO;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcReaderNode : Node
     {
-        public XbimModel xModel;
+        public IfcStore xModel;
         private DrawingControl3D drawingControl3D;
         public IfcReaderNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
@@ -68,7 +70,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             xModel = DataController.Instance.GetModel(modelid, true);
 
             var context = new Xbim3DModelContext(xModel);
-            context.CreateContext(XbimGeometryType.PolyhedronBinary);
+            context.CreateContext();
 
             e.Result = xModel;
         }
@@ -79,7 +81,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="e"></param>
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            xModel = (XbimModel) e.Result;
+            xModel = (IfcStore) e.Result;
             drawingControl3D.Model = xModel;
             drawingControl3D.ShowAll();
             drawingControl3D.ReloadModel();

@@ -8,26 +8,24 @@ using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf;
 using TUM.CMS.VplControl.Core;
 using Xbim.Common.Geometry;
-using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.UtilityResource;
-using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
-using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
-using XbimGeometry.Interfaces;
-using System.Windows.Input;
 using System.Reflection;
 using System.Collections;
+using Xbim.Common.Enumerations;
+using Xbim.Ifc;
+using Xbim.Ifc2x3.IO;
+using Xbim.IO.Esent;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcEnergyVisualizeTT : Node
     {
         private readonly HelixViewport3D _viewPort;
-        public XbimModel XModel;
+        public IfcStore XModel;
 
         public IfcEnergyVisualizeTT(Core.VplControl hostCanvas) : base(hostCanvas)
         {
@@ -60,21 +58,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var number = zufall.Next(1, 1000);
 
             var path = Path.GetTempPath();
-            XModel = new XbimModel();
-            XModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");//?
+            XModel = IfcStore.Open(file);
+
             XModel.Close();//?
 
-            var res = XModel.Open(path + "temp_reader" + number + ".xbim", XbimDBAccess.ReadWrite);
 
             var context = new Xbim3DModelContext(XModel);
             //upgrade to new geometry representation, use the default 3D model
-            context.CreateContext(XbimGeometryType.PolyhedronBinary);
+            context.CreateContext();
 
-            if (res == false)
-            {
-                var err = XModel.Validate(TextWriter.Null, ValidationFlags.All);
-                MessageBox.Show("ERROR in reading process!");
-            }
+         
 
             //in TTValueColor hashTable we will have <TT,Material(Color)> key-value pairs
             Hashtable TTValueColor = new Hashtable();
@@ -91,30 +84,30 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 // Console.WriteLine(count++);
 
-                var m = new MeshGeometry3D();
-                GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
-                // string itemtype = item.GetType().ToString();//...
-
-                double TT = GetTTifExists(item);//it TT-property does not exist, it returns -1
-                                                // Console.WriteLine("TT = "+TT);
-                DiffuseMaterial Material = null;
-                if (TTValueColor.ContainsKey(TT))
-                    Material = TTValueColor[TT] as DiffuseMaterial;
-                else  //new TT - Material(Color) pair
-                {
-                    if (TT == -1)//the TT-Material pair when TT is not available...
-                    {
-                        Material = NoTTMaterial;
-                    }
-                    else
-                    {
-                        Material = new DiffuseMaterial(new SolidColorBrush((Color)_Colors[TTValueColor.Count].Value));
-                    }
-                    TTValueColor.Add(TT, Material);
-                }
-
-                var mb = new MeshBuilder(false, false);
-                VisualizeMesh(mb, m, Material);
+//                var m = new MeshGeometry3D();
+//                GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
+//                // string itemtype = item.GetType().ToString();//...
+//
+//                double TT = GetTTifExists(item);//it TT-property does not exist, it returns -1
+//                                                // Console.WriteLine("TT = "+TT);
+//                DiffuseMaterial Material = null;
+//                if (TTValueColor.ContainsKey(TT))
+//                    Material = TTValueColor[TT] as DiffuseMaterial;
+//                else  //new TT - Material(Color) pair
+//                {
+//                    if (TT == -1)//the TT-Material pair when TT is not available...
+//                    {
+//                        Material = NoTTMaterial;
+//                    }
+//                    else
+//                    {
+//                        Material = new DiffuseMaterial(new SolidColorBrush((Color)_Colors[TTValueColor.Count].Value));
+//                    }
+//                    TTValueColor.Add(TT, Material);
+//                }
+//
+//                var mb = new MeshBuilder(false, false);
+//                VisualizeMesh(mb, m, Material);
 
             }
             Console.WriteLine("The colors that have actually been used r " + TTValueColor.Keys.Count + " (distinct TT-Values).");
@@ -211,60 +204,60 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="m"></param>
         /// <param name="item"></param>
         /// <param name="wcsTransform"></param>
-        public void GetGeometryFromXbimModel(MeshGeometry3D m, IPersistIfcEntity item, XbimMatrix3D wcsTransform)
-        {
-            var model = item.ModelOf as XbimModel;
-            if (model == null || !(item is IfcProduct))
-                return;
-
-            switch (model.GeometrySupportLevel)
-            {
-                case 2:
-                    var context = new Xbim3DModelContext(model);
-
-                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
-                        .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                        .ToList();
-                    if (!productShape.Any() && item is IfcFeatureElement)
-                    {
-                        productShape = context.ShapeInstancesOf((IfcProduct)item)
-                            .Where(
-                                s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                            .ToList();
-                    }
-
-                    if (!productShape.Any())
-                        return;
-                    foreach (var shapeInstance in productShape)
-                    {
-                        IXbimShapeGeometryData shapeGeom =
-                            context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
-                        switch ((XbimGeometryType)shapeGeom.Format)
-                        {
-                            case XbimGeometryType.PolyhedronBinary:
-                                m.Read(shapeGeom.ShapeData,
-                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-                                break;
-                            case XbimGeometryType.Polyhedron:
-                                m.Read(((XbimShapeGeometry)shapeGeom).ShapeData,
-                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-                                break;
-                        }
-                    }
-                    break;
-                case 1:
-                    var xm3D = new XbimMeshGeometry3D();
-                    var geomDataSet = model.GetGeometryData(item.EntityLabel, XbimGeometryType.TriangulatedMesh);
-                    foreach (var geomData in geomDataSet)
-                    {
-#pragma warning disable 618
-                        var gd = geomData.TransformBy(wcsTransform);
-#pragma warning restore 618
-                        xm3D.Add(gd);
-                    }
-                    m.Add(xm3D);
-                    break;
-            }
-        }
+//        public void GetGeometryFromXbimModel(MeshGeometry3D m, IPersistIfcEntity item, XbimMatrix3D wcsTransform)
+//        {
+//            var model = item.ModelOf as XbimModel;
+//            if (model == null || !(item is IfcProduct))
+//                return;
+//
+//            switch (model.GeometrySupportLevel)
+//            {
+//                case 2:
+//                    var context = new Xbim3DModelContext(model);
+//
+//                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
+//                        .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+//                        .ToList();
+//                    if (!productShape.Any() && item is IfcFeatureElement)
+//                    {
+//                        productShape = context.ShapeInstancesOf((IfcProduct)item)
+//                            .Where(
+//                                s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+//                            .ToList();
+//                    }
+//
+//                    if (!productShape.Any())
+//                        return;
+//                    foreach (var shapeInstance in productShape)
+//                    {
+//                        IXbimShapeGeometryData shapeGeom =
+//                            context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
+//                        switch ((XbimGeometryType)shapeGeom.Format)
+//                        {
+//                            case XbimGeometryType.PolyhedronBinary:
+//                                m.Read(shapeGeom.ShapeData,
+//                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+//                                break;
+//                            case XbimGeometryType.Polyhedron:
+//                                m.Read(((XbimShapeGeometry)shapeGeom).ShapeData,
+//                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+//                                break;
+//                        }
+//                    }
+//                    break;
+//                case 1:
+//                    var xm3D = new XbimMeshGeometry3D();
+//                    var geomDataSet = model.GetGeometryData(item.EntityLabel, XbimGeometryType.TriangulatedMesh);
+//                    foreach (var geomData in geomDataSet)
+//                    {
+//#pragma warning disable 618
+//                        var gd = geomData.TransformBy(wcsTransform);
+//#pragma warning restore 618
+//                        xm3D.Add(gd);
+//                    }
+//                    m.Add(xm3D);
+//                    break;
+//            }
+//        }
     }
 }

@@ -11,17 +11,23 @@ using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Windows.Media;
 using TUM.CMS.VplControl.IFC.Utilities;
+using Xbim.Common;
+using Xbim.Common.Metadata;
+using Xbim.Common.Step21;
+using Xbim.Ifc;
 using Xbim.Ifc2x3.Kernel;
+using Xbim.Ifc2x3.ProductExtension;
+using Xbim.Ifc2x3.SharedBldgElements;
+using Xbim.XbimExtensions.DataProviders;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcParseNode : Node
     {
-        public XbimModel xModel;
+        public IfcStore xModel;
         public IfcParseNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             AddInputPortToNode("Test", typeof(string));
@@ -31,7 +37,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var label = new Label
             {
                 Content = "IFC File Reading",
-                Width = 100,
+                Width = 130,
                 FontSize = 15,
                 HorizontalContentAlignment = HorizontalAlignment.Center
             };
@@ -62,7 +68,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="e"></param>
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            var models = DataController.Instance.modelStorage.ToList();
+            var models = DataController.Instance.ModelStorage.ToList();
             if (models.Count > 1)
             {
                 for (int i = 0; i < models.Count - 1; i++)
@@ -119,25 +125,54 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             Random zufall = new Random();
             int number = zufall.Next(1, 1000);
 
-            var path = Path.GetTempPath();
-            xModel = new XbimModel();
-            xModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
+            string result = Path.GetTempPath();
+            string copyFile = result + "copy" + number + ".ifc";
+            while (File.Exists(copyFile))
+            {
+                number = zufall.Next(1, 1000);
+                copyFile = result + "copy" + number + ".ifc";
+            }
+
+            var newModel = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+
+            using (xModel = IfcStore.Open(file))
+            {
+                PropertyTranformDelegate propTransform = delegate(ExpressMetaProperty prop, object toCopy)
+                {
+                    var value = prop.PropertyInfo.GetValue(toCopy, null);
+                    return value;
+                };
+
+                using (var txn = newModel.BeginTransaction())
+                {
+                    var copied = new XbimInstanceHandleMap(xModel, newModel);
+                    foreach (var item in xModel.Instances.OfType<IfcProduct>())
+                    {
+                        newModel.InsertCopy(item, copied, propTransform, false, false);
+                    }
+                    txn.Commit();
+                    newModel.SaveAs(copyFile);
+                }
+                newModel.Close();
+            }
+
+
             xModel.Close();
 
-            var fileString = path + "temp_reader" + number + ".xbim";
-
-            DataController.Instance.AddModel(fileString, xModel);
+            DataController.Instance.AddModel(copyFile, xModel);
 
 
 
-            ModelInfo modelInfo = new ModelInfo(fileString);
-            xModel = DataController.Instance.GetModel(fileString);
-            List<IfcProduct> elements = xModel.IfcProducts.OfType<IfcProduct>().ToList();
+            ModelInfo modelInfo = new ModelInfo(copyFile);
+            xModel = DataController.Instance.GetModel(copyFile);
+            List<IfcProduct> elements = xModel.Instances.OfType<IfcProduct>().ToList();
             foreach (var element in elements)
             {
                 modelInfo.AddElementIds(element.GlobalId);
             }
             e.Result = modelInfo;
+
+           
         }
 
         /// <summary>
@@ -148,10 +183,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="e">Result is the modelInfo Class</param>
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            OutputPorts[0].Data = e.Result;
-            var textBlock = ControlElements[1] as TextBlock;
-            textBlock.Background = Brushes.White;
-            textBlock.Text = "File is Valid!";
+            try
+            {
+                OutputPorts[0].Data = e.Result;
+                var textBlock = ControlElements[1] as TextBlock;
+                textBlock.Background = Brushes.White;
+                textBlock.Text = "File is Valid!";
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine("An error occurred: '{0}'", exception);
+            }
+            DataController.Instance.CloseModel(xModel);
+            
         }
 
 

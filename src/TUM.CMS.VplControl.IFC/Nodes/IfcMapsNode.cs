@@ -10,17 +10,17 @@ using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 using System.Linq;
 using System.Diagnostics;
 using TUM.CMS.VplControl.IFC.Utilities;
+using Xbim.Ifc;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcMapsNode : Node
     {
         private WebBrowser maps;
-        public XbimModel xModel;
+        public IfcStore xModel;
         public IfcMapsNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
            
@@ -65,18 +65,21 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                
                 try
                 {
-                    var ifcsite = xModel.IfcProducts.OfType<Xbim.Ifc2x3.ProductExtension.IfcSite>().ToList();
-                    var ifcRefLong = ifcsite[0].RefLongitude.ToString();
-                    var ifcRefLat = ifcsite[0].RefLatitude.ToString();
-                    string[] separators = { ",", ".", "!", "?", ";", ":", " " };
-                    string[] ifcRefLat_temp = ifcRefLat.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-                    string[] ifcRefLong_temp = ifcRefLong.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-                    if (ifcRefLong != "" && ifcRefLat != "")
+                    var ifcsite = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSite>().ToList();
+
+                    List<long> ifcRefLong = new List<long>();
+                    List<long> ifcRefLat = new List<long>();
+
+                    ifcRefLong = ifcsite[0].RefLongitude;
+                    ifcRefLat = ifcsite[0].RefLatitude;
+
+                   
+                    if (ifcRefLong != null && ifcRefLat != null)
                     {
                         maps.Source = null;
-                        maps.Source = new Uri("https://www.google.de/maps/@" + ifcRefLat_temp[0] + "." + ifcRefLat_temp[1] + ifcRefLat_temp[2] + "," + ifcRefLong_temp[0] + "." + ifcRefLong_temp[1] + ifcRefLong_temp[2] + ",15z");
+                        maps.Source = new Uri("https://www.google.de/maps/@" + ifcRefLat[0] + "." + ifcRefLat[1] + ifcRefLat[2] + ifcRefLat[3] + "," + ifcRefLong[0] + "." + ifcRefLong[1] + ifcRefLong[2] + ifcRefLong[3] + ",15z");
                         var textBlock = ControlElements[1] as TextBlock;
-                        textBlock.Text = "Geo Coordinates: " + ifcRefLat_temp[0] + "." + ifcRefLat_temp[1] + ifcRefLat_temp[2] + "," + ifcRefLong_temp[0] + "." + ifcRefLong_temp[1] + ifcRefLong_temp[2];
+                        textBlock.Text = "Geo Coordinates: " + ifcsite[0].RefLatitude.Value.AsDouble + "," + ifcsite[0].RefLongitude.Value.AsDouble;
                     }
                     else
                     {

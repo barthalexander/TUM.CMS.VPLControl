@@ -8,7 +8,6 @@ using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf;
 using TUM.CMS.VplControl.Core;
 using Xbim.Common.Geometry;
-using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.UtilityResource;
@@ -16,18 +15,20 @@ using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
-using XbimGeometry.Interfaces;
 using System.Windows.Input;
 using System.Reflection;
 using System.Collections;
+using Xbim.Common.Enumerations;
+using Xbim.Ifc;
+using Xbim.Ifc2x3.IO;
+using Xbim.IO.Esent;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcEnergyCalculateVisualizeTT : Node
     {
         private readonly HelixViewport3D _viewPort;
-        public XbimModel XModel;
+        public IfcStore XModel;
 
         public IfcEnergyCalculateVisualizeTT(Core.VplControl hostCanvas) : base(hostCanvas)
         {
@@ -60,21 +61,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var number = zufall.Next(1, 1000);
 
             var path = Path.GetTempPath();
-            XModel = new XbimModel();
-            XModel.CreateFrom(file, path + "temp_reader" + number + ".xbim");
+            XModel = IfcStore.Open(file);
             XModel.Close();//?
 
-            var res = XModel.Open(path + "temp_reader" + number + ".xbim", XbimDBAccess.ReadWrite);
 
             var context = new Xbim3DModelContext(XModel);
             //upgrade to new geometry representation, use the default 3D model
-            context.CreateContext(XbimGeometryType.PolyhedronBinary);
+            context.CreateContext();
 
-            if (res == false)
-            {
-                var err = XModel.Validate(TextWriter.Null, ValidationFlags.All);
-                MessageBox.Show("ERROR in reading process!");
-            }
+            
 
             //in TTValueColor hashTable we will have <TT,Material(Color)> key-value pairs
             Hashtable TTValueColor = new Hashtable();
@@ -169,11 +164,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var ifcVolume = ifcProduct.PropertySets.ToList()[2].HasProperties.ToList()[2];//Volumen
                 var ifcArea = ifcProduct.PropertySets.ToList()[2].HasProperties.ToList()[0];//Flache
                 var volume = ifcVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var volumeValue = volume.NominalValue;
                 object volumeValueTrue = volume.NominalValue.Value;
                 double volumeVal = (double)volumeValueTrue;
                 var area = ifcArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var areaValue = area.NominalValue;
                 Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                 object areaValueTrue = area.NominalValue.Value;
                 double areaVal = (double)areaValueTrue;//
@@ -197,11 +192,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var ifcVolume = ifcProduct.PropertySets.ToList()[2].HasProperties.ToList()[2];//Volumen
                 var ifcArea = ifcProduct.PropertySets.ToList()[2].HasProperties.ToList()[0];//Flache
                 var volume = ifcVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var volumeValue = volume.NominalValue;
                 object volumeValueTrue = volume.NominalValue.Value;
                 double volumeVal = (double)volumeValueTrue;
                 var area = ifcArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var areaValue = area.NominalValue;
                 Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                 object areaValueTrue = area.NominalValue.Value;
                 double areaVal = (double)areaValueTrue;//
@@ -225,11 +220,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var ifcVolume = ifcProduct.PropertySets.ToList()[2].HasProperties.ToList()[2];//is it the right property..?-->Yes (Volumen)
                 var ifcArea = ifcProduct.PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
                 var volume = ifcVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var volumeValue = volume.NominalValue;
                 object volumeValueTrue = volume.NominalValue.Value;
                 double volumeVal = (double)volumeValueTrue;
                 var area = ifcArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var areaValue = area.NominalValue;
                 Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                 object areaValueTrue = area.NominalValue.Value;
                 double areaVal = (double)areaValueTrue;//
@@ -303,7 +298,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="m"></param>
         /// <param name="item"></param>
         /// <param name="wcsTransform"></param>
-        public void GetGeometryFromXbimModel(MeshGeometry3D m, IPersistIfcEntity item, XbimMatrix3D wcsTransform)
+        public void GetGeometryFromXbimModel(MeshGeometry3D m, IfcProduct item, XbimMatrix3D wcsTransform)
         {
             var model = item.ModelOf as XbimModel;
             if (model == null || !(item is IfcProduct))

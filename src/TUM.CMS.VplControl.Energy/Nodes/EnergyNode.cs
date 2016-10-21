@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using Xbim.Ifc2x3.ProductExtension;
 using System.IO;
+using Xbim.Ifc;
 
 
 namespace TUM.CMS.VplControl.Energy.Nodes
@@ -51,7 +52,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         public double l;
         public double Rse;
         public double d_sum;
-        public XbimModel xModel;
+        public IfcStore xModel;
         public EnergyNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
@@ -157,7 +158,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
             if (modelid == null) return;
             xModel = DataController.Instance.GetModel(modelid);
-            var ifcWall = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+            var ifcWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
             Console.WriteLine("ifcWall has " + ifcWall.Count + " elements");//12
             List<double> ifcWallThickness = new List<double> { };
             for (int i = 0; i < ifcWall.Count; i++)
@@ -165,11 +166,11 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 var ifcWallVolume = ifcWall[i].PropertySets.ToList()[1].HasProperties.ToList()[2];
                 var ifcWallArea = ifcWall[i].PropertySets.ToList()[1].HasProperties.ToList()[0];
                 var volume = ifcWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var volumeValue = volume.NominalValue;
                 object volumeValueTrue = volume.NominalValue.Value;
                 double volumeVal = (double)volumeValueTrue;
                 var area = ifcWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var areaValue = area.NominalValue;
                 object areaValueTrue = area.NominalValue.Value;
                 double areaVal = (double)areaValueTrue;
                 ifcWallThickness.Add(volumeVal / areaVal);
@@ -215,7 +216,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             if (modelid == null)
                 return;
             xModel = DataController.Instance.GetModel(modelid);
-            var ifcWin = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
+            var ifcWin = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
             Console.WriteLine("ifcWin has " + ifcWin.Count + " elements");//
             List<width_heigth> ifcWinWidthHeight = new List<width_heigth> { };
 

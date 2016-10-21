@@ -12,12 +12,14 @@ using System.Windows;
 using System.Reflection;
 using Xbim.Ifc2x3.ProductExtension;
 using System.IO;
+using Xbim.Ifc;
+using Xbim.Ifc2x3.MeasureResource;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcThermalNode : Node
     {
-        public XbimModel xModel;
+        public IfcStore xModel;
         private bool TT_available;
         private Hashtable TTValues;
 
@@ -55,7 +57,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (TT_available)
             {
                 Console.WriteLine("~~~ TT IS available ~~~");
-                var TT = TTValues[selectedElementGID] as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                var TT = TTValues[selectedElementGID] as IfcValue;
                 Console.WriteLine("~~~" + TT.Value + "~~~");
 
                 labelTTValue.Content = "Value: " + TT.Value;
@@ -86,13 +88,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 comboBoxElementsSet.Items.Add(selectedItemIds[i]);
                 Console.WriteLine("--" + selectedItemIds[i] + "--");
                 //now check TT-availability
-                var selectedProduct = xModel.IfcProducts.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);
+                var selectedProduct = xModel.Instances.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);
 
                 var propertySets = selectedProduct.PropertySets.ToList() as List<Xbim.Ifc2x3.Kernel.IfcPropertySet>;
 
                 bool found = false; int ii = 0;
                 //Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue TTProperty = null;
-                Xbim.XbimExtensions.SelectTypes.IfcValue TTValue = null;
+                IfcValue TTValue = null;
                 while (!found && ii < propertySets.Count)
                 {
                     var onepropertySet = propertySets[ii].HasProperties.ToList();

@@ -10,7 +10,6 @@ using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf;
 using TUM.CMS.VplControl.Core;
 using Xbim.Common.Geometry;
-using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.UtilityResource;
@@ -18,13 +17,15 @@ using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using Xbim.XbimExtensions.Interfaces;
-using XbimGeometry.Interfaces;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Threading;
 using System.Windows.Controls;
+using Xbim.Common;
+using Xbim.Ifc;
+using Xbim.Ifc2x3.Interfaces;
+using Xbim.Ifc2x3.IO;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -32,7 +33,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         private readonly HelixViewport3D _viewPort;
         //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
-        private XbimModel _xModel;
+        private IfcStore _xModel;
         public List<ModelInfo> ModelList;
         public List<ModelInfo> ModelListAll;
         private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
@@ -110,14 +111,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                         var context = new Xbim3DModelContext(_xModel);
                         //upgrade to new geometry represenation, uses the default 3D model
-                        context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                        context.CreateContext();
                         worker_DoWork(_xModel, indexOfModel, elementIdsList);
                         button_1.Checked += (sender, e) => button_1_Checked(sender, e, elementIdsList, indexOfModel);
-                        // worker = new BackgroundWorker();
+                         worker = new BackgroundWorker();
 
-                        // worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-                        //  worker.RunWorkerAsync(xModel);
-                        //  worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+//                         worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+//                          worker.RunWorkerAsync(xModel);
+//                          worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
 
                     }
             }
@@ -147,11 +148,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 _xModel = DataController.Instance.GetModel(modelId, true);
 
+                
+
+
                 ModelList.Add(new ModelInfo(modelId));
                 ModelListAll.Add(new ModelInfo(modelId));
                 var context = new Xbim3DModelContext(_xModel);
                 //upgrade to new geometry represenation, uses the default 3D model
-                context.CreateContext(XbimGeometryType.PolyhedronBinary);
+                context.CreateContext();
                 worker_DoWork(_xModel, indexOfModel, elementIdsList);
                 button_1.Checked += (sender,e)=>button_1_Checked(sender, e, elementIdsList, indexOfModel);              
 
@@ -188,11 +192,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
         }
 
-        private void worker_DoWork(XbimModel xModel, int indexOfModel, List<IfcGloballyUniqueId> elementIdsList)
+        private void worker_DoWork(IfcStore xModel, int indexOfModel, List<IfcGloballyUniqueId> elementIdsList)
         {
             // Loop through Entities and visualze them in the viewport
             var res = new HashSet<IfcGloballyUniqueId>(elementIdsList);
-           // xModel = (XbimModel) e.Argument;
+            // xModel = (IfcStore) e.Argument;
             foreach (var item in xModel.Instances.OfType<IfcProduct>())
             {
                 if (res.Contains(item.GlobalId))
@@ -200,6 +204,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     var m = new MeshGeometry3D();
                     GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
                     var mat = GetStyleFromXbimModel(item);
+                    // var mat = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
 
                     var mb = new MeshBuilder(false, false);
 
@@ -211,17 +216,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 {
                     var m = new MeshGeometry3D();
                     GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
-
-                    
-                    var mat = GetStyleFromXbimModel(item, 0.03);
+                    var mat = GetStyleFromXbimModel(item);
 
                     var mb = new MeshBuilder(false, false);
 
                     VisualizeMesh(mb, m, mat, item, indexOfModel);
                 }
                 
-               // e.Result = xModel;
-            }
+                // e.Result = xModel;
+             }
 
         }
        /* private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -248,7 +251,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="mat"></param>
         /// <param name="itemModel"></param>
         /// <param name="indexOfModel"></param>
-        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat, IfcProduct itemModel, int indexOfModel)
+        public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, IfcProduct itemModel, int indexOfModel)
         {
             
 
@@ -374,104 +377,120 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public DiffuseMaterial GetStyleFromXbimModel(IPersistIfcEntity item, double opacity = 1)
+        public Material GetStyleFromXbimModel(IfcProduct item, double opacity = 1)
         {
-
-            var model = item.ModelOf as XbimModel;
-            if (model == null || !(item is IfcProduct))
-                return null;
-            SolidColorBrush fillColor = new SolidColorBrush();
-            switch (model.GeometrySupportLevel)
+            var defautMaterial = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
+            Material mat = null;
+            Material material;
+            if (defautMaterial.TryGetValue(item.GetType().Name, out material))
             {
-                case 2:
-                    try
-                    {
-                        // Style
-                        Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
-                        Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
-                        Model3DGroup opaques = new Model3DGroup();
-                        Model3DGroup transparents = new Model3DGroup();
-
-                        var context = new Xbim3DModelContext(model);
-
-                        foreach (var style in context.SurfaceStyles())
-                        {
-                            WpfMaterial wpfMaterial = new WpfMaterial();
-                            wpfMaterial.CreateMaterial(style);
-                            styles.Add(style.DefinedObjectId, wpfMaterial);
-                            WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
-                            meshSets.Add(style.DefinedObjectId, mg);
-                            if (style.IsTransparent)
-                                transparents.Children.Add(mg);
-                            else
-                                opaques.Children.Add(mg);
-
-                        }
-
-                        var productShape = context.ShapeInstancesOf((IfcProduct)item)
-                            .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                            .ToList();
-                        if (!productShape.Any() && item is IfcFeatureElement)
-                        {
-                            productShape = context.ShapeInstancesOf((IfcProduct)item)
-                                .Where(
-                                    s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                                .ToList();
-                        }
-
-                        if (!productShape.Any())
-                            return null;
-
-                        var shapeInstance = productShape.FirstOrDefault();
-
-
-                        WpfMaterial material;
-                        styles.TryGetValue(shapeInstance.StyleLabel, out material);
-
-                        if (material != null)
-                        {
-                            string stringMaterial = material.Description;
-                            string[] materialEntries = stringMaterial.Split(' ');
-                            double r, g, b, a;
-
-                            double.TryParse(materialEntries[1].Substring(2), out r);
-                            double.TryParse(materialEntries[2].Substring(2), out g);
-                            double.TryParse(materialEntries[3].Substring(2), out b);
-                            double.TryParse(materialEntries[4].Substring(2), out a);
-
-                            r *= 255;
-                            g *= 255;
-                            b *= 255;
-                            a *= 255;
-                            fillColor = new SolidColorBrush(Color.FromArgb((byte)r, (byte)g, (byte)b, (byte)a));
-                            fillColor.Opacity = opacity;
-                            return new DiffuseMaterial(fillColor);
-                        }
-                        else
-                        {
-                            fillColor = new SolidColorBrush(Colors.Gray);
-                            fillColor.Opacity = opacity;
-                            return new DiffuseMaterial(fillColor);
-                        }
-                    }
-                    catch
-                    {
-                        fillColor = new SolidColorBrush(Colors.Gray);
-                        fillColor.Opacity = opacity;
-                        return new DiffuseMaterial(fillColor);
-                    }
-
-                    break;
-               
+                mat = material;
             }
-
-            fillColor = new SolidColorBrush(Colors.Gray);
-            fillColor.Opacity = opacity;
-            return new DiffuseMaterial(fillColor);
-            
-
-
+            else
+            {
+                mat = defautMaterial["IfcProduct"];
+            }
+            return mat;
         }
+//        public DiffuseMaterial GetStyleFromXbimModel(IPersistEntity item, double opacity = 1)
+//        {
+//
+//            var model = item.ModelOf as XbimModel;
+//            if (model == null || !(item is IfcProduct))
+//                return null;
+//            SolidColorBrush fillColor = new SolidColorBrush();
+//
+//            switch (model.GeometrySupportLevel)
+//            {
+//                case 2:
+//                    try
+//                    {
+//                        // Style
+//                        Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
+//                        Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
+//                        Model3DGroup opaques = new Model3DGroup();
+//                        Model3DGroup transparents = new Model3DGroup();
+//
+//                        var context = new Xbim3DModelContext(model);
+//                        context.
+//                        foreach (var style in context.SurfaceStyles)
+//                        {
+//                            WpfMaterial wpfMaterial = new WpfMaterial();
+//                            wpfMaterial.CreateMaterial(style);
+//                            styles.Add(style.DefinedObjectId, wpfMaterial);
+//                            WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
+//                            meshSets.Add(style.DefinedObjectId, mg);
+//                            if (style.IsTransparent)
+//                                transparents.Children.Add(mg);
+//                            else
+//                                opaques.Children.Add(mg);
+//
+//                        }
+//
+//                        var productShape = context.ShapeInstancesOf((IfcProduct)item)
+//                            .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+//                            .ToList();
+//                        if (!productShape.Any() && item is IfcFeatureElement)
+//                        {
+//                            productShape = context.ShapeInstancesOf((IfcProduct)item)
+//                                .Where(
+//                                    s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+//                                .ToList();
+//                        }
+//
+//                        if (!productShape.Any())
+//                            return null;
+//
+//                        var shapeInstance = productShape.FirstOrDefault();
+//
+//
+//                        WpfMaterial material;
+//                        styles.TryGetValue(shapeInstance.StyleLabel, out material);
+//
+//                        if (material != null)
+//                        {
+//                            string stringMaterial = material.Description;
+//                            string[] materialEntries = stringMaterial.Split(' ');
+//                            double r, g, b, a;
+//
+//                            double.TryParse(materialEntries[1].Substring(2), out r);
+//                            double.TryParse(materialEntries[2].Substring(2), out g);
+//                            double.TryParse(materialEntries[3].Substring(2), out b);
+//                            double.TryParse(materialEntries[4].Substring(2), out a);
+//
+//                            r *= 255;
+//                            g *= 255;
+//                            b *= 255;
+//                            a *= 255;
+//                            fillColor = new SolidColorBrush(Color.FromArgb((byte)r, (byte)g, (byte)b, (byte)a));
+//                            fillColor.Opacity = opacity;
+//                            return new DiffuseMaterial(fillColor);
+//                        }
+//                        else
+//                        {
+//                            fillColor = new SolidColorBrush(Colors.Gray);
+//                            fillColor.Opacity = opacity;
+//                            return new DiffuseMaterial(fillColor);
+//                        }
+//                    }
+//                    catch
+//                    {
+//                        fillColor = new SolidColorBrush(Colors.Gray);
+//                        fillColor.Opacity = opacity;
+//                        return new DiffuseMaterial(fillColor);
+//                    }
+//
+//                    break;
+//
+//            }
+//
+//            fillColor = new SolidColorBrush(Colors.Gray);
+//            fillColor.Opacity = opacity;
+//            return new DiffuseMaterial(fillColor);
+//
+//
+//
+//        }
 
 
         /// <summary>
@@ -480,58 +499,42 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="m"></param>
         /// <param name="item"></param>
         /// <param name="wcsTransform"></param>
-        public void GetGeometryFromXbimModel(MeshGeometry3D m, IPersistIfcEntity item, XbimMatrix3D wcsTransform)
+        public void GetGeometryFromXbimModel(MeshGeometry3D m, IPersistEntity item, XbimMatrix3D wcsTransform)
         {
-            var model = item.ModelOf as XbimModel;
-            if (model == null || !(item is IfcProduct))
-                return;
+            if (item.Model == null || !(item is IIfcProduct)) return;
 
-            switch (model.GeometrySupportLevel)
+            var context = new Xbim3DModelContext(item.Model);
+
+            var productShape = context.ShapeInstancesOf((Xbim.Ifc4.Interfaces.IIfcProduct) item)
+                .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                .ToList();
+            if (!productShape.Any() && item is IIfcFeatureElement)
             {
-                case 2:
-                    var context = new Xbim3DModelContext(model);
-
-                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
-                        .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                        .ToList();
-                    if (!productShape.Any() && item is IfcFeatureElement)
-                    {
-                        productShape = context.ShapeInstancesOf((IfcProduct)item)
-                            .Where(
-                                s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-                            .ToList();
-                    }
-
-
-                    foreach(var shapeInstance in productShape)
-                    { 
-                        IXbimShapeGeometryData shapeGeom = context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
-                        switch ((XbimGeometryType)shapeGeom.Format)
-                        {
-                            case XbimGeometryType.PolyhedronBinary:
-                                m.Read(shapeGeom.ShapeData,
-                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-                                break;
-                            case XbimGeometryType.Polyhedron:
-                                m.Read(((XbimShapeGeometry)shapeGeom).ShapeData,
-                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-                                break;
-                        }
-                    }
-                    break;
-                case 1:
-                    var xm3D = new XbimMeshGeometry3D();
-                    var geomDataSet = model.GetGeometryData(item.EntityLabel, XbimGeometryType.TriangulatedMesh);
-                    foreach (var geomData in geomDataSet)
-                    {
-#pragma warning disable 618
-                        var gd = geomData.TransformBy(wcsTransform);
-#pragma warning restore 618
-                        xm3D.Add(gd);
-                    }
-                    m.Add(xm3D);
-                    break;
+                productShape = context.ShapeInstancesOf((Xbim.Ifc4.Interfaces.IIfcProduct) item)
+                    .Where(
+                        s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                    .ToList();
             }
+
+            if (!productShape.Any())
+                return;
+            foreach (var shapeInstance in productShape)
+            {
+                IXbimShapeGeometryData shapeGeom =
+                    context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
+                switch ((XbimGeometryType)shapeGeom.Format)
+                {
+                    case XbimGeometryType.PolyhedronBinary:
+                        m.Read(shapeGeom.ShapeData,
+                            XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+                        break;
+                    case XbimGeometryType.Polyhedron:
+                        m.Read(((XbimShapeGeometry)shapeGeom).ShapeData,
+                            XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+                        break;
+                }
+            }
+
         }
     }
 }

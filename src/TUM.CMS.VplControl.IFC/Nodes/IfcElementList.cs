@@ -14,15 +14,15 @@ using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 using System.Collections;
+using Xbim.Ifc;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcElementListNode : Node
     {
         private readonly TextBox _textBox;
-        public XbimModel xModel;
+        public IfcStore xModel;
 
         private XbimTreeview treeview;
         // private DynamicProductSelectionControl productSelectionControl;
@@ -81,7 +81,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
                         xModel = DataController.Instance.GetModel(modelid);
-                        List<IfcProduct> elements = xModel.IfcProducts.OfType<IfcProduct>().ToList();
+                        List<IfcProduct> elements = xModel.Instances.OfType<IfcProduct>().ToList();
                         foreach (var element in elements)
                         {
                             if (res.Contains(element.GlobalId))
@@ -112,7 +112,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
                 xModel = DataController.Instance.GetModel(modelid);
-                List<IfcProduct> elements = xModel.IfcProducts.OfType<IfcProduct>().ToList();
+                List<IfcProduct> elements = xModel.Instances.OfType<IfcProduct>().ToList();
                 foreach (var element in elements)
                 {
                     if (res.Contains(element.GlobalId))

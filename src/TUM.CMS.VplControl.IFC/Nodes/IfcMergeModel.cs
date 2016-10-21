@@ -1,20 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
-using Xbim.XbimExtensions;
-using XbimGeometry.Interfaces;
 using System.Collections;
-using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.UtilityResource;
 
 namespace TUM.CMS.VplControl.IFC.Nodes

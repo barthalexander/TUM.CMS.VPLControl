@@ -8,6 +8,7 @@ using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.IO;
 using System.Windows;
 using System.Windows.Controls;
+using Xbim.Ifc;
 
 
 namespace TUM.CMS.VplControl.Energy.Nodes
@@ -21,7 +22,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
         public double l;
         public double Rse;
-        public XbimModel xModel;
+        public IfcStore xModel;
         public List<double> DoorsThermalT;
 
         public EnergyDoors(Core.VplControl hostCanvas) : base(hostCanvas)
@@ -70,11 +71,14 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             ///
             /// ifc door thickness calculation, saved in ifcDoorThickness list, prepare for energy node
             ///
+            
+       
+
             var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
             if (modelid == null)
                 return;
             xModel = DataController.Instance.GetModel(modelid);
-            var ifcDoor = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
+            var ifcDoor = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
             Console.WriteLine("ifcDoor has " + ifcDoor.Count + " elements");
 
             List<double> ifcDoorThickness = new List<double> { };
@@ -83,14 +87,14 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 Console.WriteLine("###" + ifcDoor[i].Tag + "###" + ifcDoor[i].GetType() + "###");
                 try
                 {
-                    var ifcDoorVolume = ifcDoor[i].PropertySets.ToList()[2].HasProperties.ToList()[2];//is it the right property..?-->Yes (Volumen)
+                    var ifcDoorVolume = ifcDoor[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
                     var ifcDoorArea = ifcDoor[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
                     var volume = ifcDoorVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var volumeValue = volume.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                    var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
                     var area = ifcDoorArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var areaValue = area.NominalValue as Xbim.XbimExtensions.SelectTypes.IfcValue;
+                    var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
