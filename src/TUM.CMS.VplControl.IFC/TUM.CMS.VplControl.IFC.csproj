@@ -160,6 +160,7 @@
   <ItemGroup>
     <Compile Include="Nodes\IfcEnergyCalculateVisualizeTT.cs" />
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
+    <Compile Include="Nodes\IfcFilterWithMvd.cs" />
     <Compile Include="Nodes\IfcPartialModel.cs" />
     <Compile Include="Nodes\IfcPropertyFilterNode.cs" />
     <Compile Include="Nodes\IfcFilterNode.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="Nodes\IfcTreeNode.cs" />
     <Compile Include="Nodes\IfcMvdXMLReader.cs" />
     <Compile Include="Nodes\IfcEnergyVisualizeTT.cs" />
+    <Compile Include="Nodes\IfcWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
