@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
+using Xbim.Common.Step21;
 using Xbim.Ifc;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
-using Xbim.XbimExtensions;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -61,15 +53,32 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var fileString = selectedItem.Value.ToString();
 
-            ModelInfo modelInfo = new ModelInfo(fileString);
+            
             xModel = DataController.Instance.GetModel(fileString);
-            List<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement> elements = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement>().ToList();
-            foreach (var element in elements)
+
+            if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc2X3)
             {
-                modelInfo.AddElementIds(element.GlobalId);
+                ModelInfoIFC2x3 modelInfo = new ModelInfoIFC2x3(fileString);
+                List<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement> elements = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcBuildingElement>().ToList();
+                foreach (var element in elements)
+                {
+                    modelInfo.AddElementIds(element.GlobalId);
+                }
+                xModel.Close();
+                OutputPorts[0].Data = modelInfo;
             }
-            xModel.Close();
-            OutputPorts[0].Data = modelInfo;
+            if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc4)
+            {
+                ModelInfoIFC4 modelInfo = new ModelInfoIFC4(fileString);
+                List<Xbim.Ifc4.ProductExtension.IfcBuildingElement> elements = xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcBuildingElement>().ToList();
+                foreach (var element in elements)
+                {
+                    modelInfo.AddElementIds(element.GlobalId);
+                }
+                xModel.Close();
+                OutputPorts[0].Data = modelInfo;
+            }
+
         }
         /// <summary>
         /// Adds all Models which are stored at the DataController to the ComboBox

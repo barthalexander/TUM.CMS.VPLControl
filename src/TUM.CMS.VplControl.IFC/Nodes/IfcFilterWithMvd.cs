@@ -12,15 +12,14 @@ using Xbim.IO;
 using Xbim;
 using TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses;
 using System.Collections;
-using Xbim.Ifc2x3.UtilityResource;
-//using Xbim.Ifc2x3.GeometricConstraintResource;
+ using Xbim.Ifc;
 
 
- namespace TUM.CMS.VplControl.IFC.Nodes
+namespace TUM.CMS.VplControl.IFC.Nodes
  {
     public class IfcFilterWithMvd : Node
     {
-        public XbimModel xModel;
+        public IfcStore xModel;
         public ModelInfo outputInfo;
         public HashSet<String> ChosenEntities;
 
@@ -52,85 +51,173 @@ using Xbim.Ifc2x3.UtilityResource;
             //get xbim-model of the ifc-file from the IfcParseNode
             Console.WriteLine(InputPorts[0].Data.GetType().ToString());
 
-            string modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
-            List<IfcGloballyUniqueId> elementsids = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
-
-            if (modelid == null) return;
-            Console.WriteLine("modelid={0}", modelid);
-
-            xModel = DataController.Instance.GetModel(modelid); 
-           /*                   
-           foreach (IfcGloballyUniqueId uid in elementsids)
+            Type IfcVersionType = InputPorts[0].Data.GetType();
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                Console.WriteLine(uid);
-            }
-            */
-            Console.WriteLine("elementsids.Count()={0}",elementsids.Count());  //-->1076
+                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> elementsids = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                if (modelid == null) return;
+                Console.WriteLine("modelid={0}", modelid);
 
-            var comboBox = ControlElements[2] as ComboBox;
-            if (comboBox != null && comboBox.Items.Count > 0)
+                xModel = DataController.Instance.GetModel(modelid);
+                /*                   
+                foreach (IfcGloballyUniqueId uid in elementsids)
+                 {
+                     Console.WriteLine(uid);
+                 }
+                 */
+                Console.WriteLine("elementsids.Count()={0}", elementsids.Count());  //-->1076
+
+                var comboBox = ControlElements[2] as ComboBox;
+                if (comboBox != null && comboBox.Items.Count > 0)
+                {
+                    comboBox.SelectedItem = -1;
+                    comboBox.Items.Clear();
+                }
+
+
+
+
+                //Console.WriteLine("xModel.IfcSite.Count()={0}", IfcCount);
+                /*
+                foreach (IfcGloballyUniqueId el in elementsids)
+                {
+                    Console.WriteLine(el.ToString());
+                }
+                */
+
+                //outputInfo = new ModelInfo(modelid);
+                //xModel = DataController.Instance.GetModel(modelid);
+
+                Console.WriteLine(" 2 ");
+
+                //get the mvd-file from the IfcMvdXMLReader
+                MvdXMLReader mvd = (MvdXMLReader)InputPorts[1].Data;
+
+                //We find all applicableEntities from all ConceptTemplates and all EntityNames from EntiryRules
+                //The ifc-elements of these entity-types are going to be the output
+                ChosenEntities = new HashSet<String>();
+
+                Dictionary<string, ConceptTemplate> dict = mvd.templates.getConceptTemplates();
+
+                Console.WriteLine("BEGIN");
+                FindEntityNames(dict);
+                Console.WriteLine("END");
+                foreach (string s in ChosenEntities)
+                {
+                    Console.WriteLine(s);     //--> 
+                }
+
+
+                // var ifcwindow = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
+                var ifcLocalPlacement = xModel.Instances.OfType<Xbim.Ifc2x3.GeometricConstraintResource.IfcLocalPlacement>().ToList();
+                var ifcAxis2Placement3D = xModel.Instances.OfType<Xbim.Ifc2x3.GeometryResource.IfcAxis2Placement3D>().ToList();
+                var ifcCartesianPoint = xModel.Instances.OfType<Xbim.Ifc2x3.GeometryResource.IfcCartesianPoint>().ToList();
+                var ifcDirection = xModel.Instances.OfType<Xbim.Ifc2x3.GeometryResource.IfcDirection>().ToList();
+                //there are Not in the IFC file 
+                var ifcRelNests = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcRelNests>().ToList();
+                var ifcFlowDirectionEnum = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgServiceElements.IfcFlowDirectionEnum>().ToList();
+                // IfcDistributionSystemEnum --> NOT FOUND
+
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> IfcLocalPlacementFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> IfcAxis2Placement3DFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> IfcCartesianPointFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> IfcDirectionFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> IfcRelNestsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> IfcFlowDirectionEnumFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+
+                foreach (var item in ifcLocalPlacement)
+                {
+
+                    IfcLocalPlacementFiltered.Add(item.);
+
+                }
+            }
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
-                comboBox.SelectedItem = -1;
-                comboBox.Items.Clear();
+                var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementsids = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
+                if (modelid == null) return;
+                Console.WriteLine("modelid={0}", modelid);
+
+                xModel = DataController.Instance.GetModel(modelid);
+                /*                   
+                foreach (IfcGloballyUniqueId uid in elementsids)
+                 {
+                     Console.WriteLine(uid);
+                 }
+                 */
+                Console.WriteLine("elementsids.Count()={0}", elementsids.Count());  //-->1076
+
+                var comboBox = ControlElements[2] as ComboBox;
+                if (comboBox != null && comboBox.Items.Count > 0)
+                {
+                    comboBox.SelectedItem = -1;
+                    comboBox.Items.Clear();
+                }
+
+
+
+
+                //Console.WriteLine("xModel.IfcSite.Count()={0}", IfcCount);
+                /*
+                foreach (IfcGloballyUniqueId el in elementsids)
+                {
+                    Console.WriteLine(el.ToString());
+                }
+                */
+
+                //outputInfo = new ModelInfo(modelid);
+                //xModel = DataController.Instance.GetModel(modelid);
+
+                Console.WriteLine(" 2 ");
+
+                //get the mvd-file from the IfcMvdXMLReader
+                MvdXMLReader mvd = (MvdXMLReader)InputPorts[1].Data;
+
+                //We find all applicableEntities from all ConceptTemplates and all EntityNames from EntiryRules
+                //The ifc-elements of these entity-types are going to be the output
+                ChosenEntities = new HashSet<String>();
+
+                Dictionary<string, ConceptTemplate> dict = mvd.templates.getConceptTemplates();
+
+                Console.WriteLine("BEGIN");
+                FindEntityNames(dict);
+                Console.WriteLine("END");
+                foreach (string s in ChosenEntities)
+                {
+                    Console.WriteLine(s);     //--> 
+                }
+
+
+                // var ifcwindow = xModel.IfcProducts.OfType<Xbim.Ifc4.SharedBldgElements.IfcWindow>().ToList();
+                var ifcLocalPlacement = xModel.Instances.OfType<Xbim.Ifc4.GeometricConstraintResource.IfcLocalPlacement>().ToList();
+                var ifcAxis2Placement3D = xModel.Instances.OfType<Xbim.Ifc4.GeometryResource.IfcAxis2Placement3D>().ToList();
+                var ifcCartesianPoint = xModel.Instances.OfType<Xbim.Ifc4.GeometryResource.IfcCartesianPoint>().ToList();
+                var ifcDirection = xModel.Instances.OfType<Xbim.Ifc4.GeometryResource.IfcDirection>().ToList();
+                //there are Not in the IFC file 
+                var ifcRelNests = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcRelNests>().ToList();
+                var ifcFlowDirectionEnum = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgServiceElements.IfcFlowDirectionEnum>().ToList();
+                // IfcDistributionSystemEnum --> NOT FOUND
+
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> IfcLocalPlacementFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> IfcAxis2Placement3DFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> IfcCartesianPointFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> IfcDirectionFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> IfcRelNestsFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> IfcFlowDirectionEnumFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+
+                foreach (var item in ifcLocalPlacement)
+                {
+
+                    IfcLocalPlacementFiltered.Add(item.GlobalId);
+
+                }
             }
 
 
 
-
-            //Console.WriteLine("xModel.IfcSite.Count()={0}", IfcCount);
-            /*
-            foreach (IfcGloballyUniqueId el in elementsids)
-            {
-                Console.WriteLine(el.ToString());
-            }
-            */
-
-            //outputInfo = new ModelInfo(modelid);
-            //xModel = DataController.Instance.GetModel(modelid);
-
-            Console.WriteLine(" 2 ");
-
-            //get the mvd-file from the IfcMvdXMLReader
-            MvdXMLReader mvd = (MvdXMLReader)InputPorts[1].Data;
-
-            //We find all applicableEntities from all ConceptTemplates and all EntityNames from EntiryRules
-            //The ifc-elements of these entity-types are going to be the output
-            ChosenEntities = new HashSet<String>();
-
-            Dictionary<string, ConceptTemplate> dict = mvd.templates.getConceptTemplates();
-
-            Console.WriteLine("BEGIN");
-            FindEntityNames(dict);
-            Console.WriteLine("END");
-            foreach (string s in ChosenEntities)
-            {
-                Console.WriteLine(s);     //--> 
-            }
-
-
-            // var ifcwindow = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
-            var ifcLocalPlacement = xModel.IfcProducts.OfType<Xbim.Ifc2x3.GeometricConstraintResource.IfcLocalPlacement>().ToList();
-            var ifcAxis2Placement3D = xModel.IfcProducts.OfType<Xbim.Ifc2x3.GeometryResource.IfcAxis2Placement3D>().ToList();
-            var ifcCartesianPoint = xModel.IfcProducts.OfType<Xbim.Ifc2x3.GeometryResource.IfcCartesianPoint>().ToList();
-            var ifcDirection = xModel.IfcProducts.OfType<Xbim.Ifc2x3.GeometryResource.IfcDirection>().ToList();
-            //there are Not in the IFC file 
-            var ifcRelNests = xModel.IfcProducts.OfType<Xbim.Ifc2x3.Kernel.IfcRelNests>().ToList();
-            var ifcFlowDirectionEnum = xModel.IfcProducts.OfType<Xbim.Ifc2x3.SharedBldgServiceElements.IfcFlowDirectionEnum>().ToList();
-            // IfcDistributionSystemEnum --> NOT FOUND
-
-            List<IfcGloballyUniqueId> IfcLocalPlacementFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> IfcAxis2Placement3DFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> IfcCartesianPointFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> IfcDirectionFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> IfcRelNestsFiltered = new List<IfcGloballyUniqueId> { };
-            List<IfcGloballyUniqueId> IfcFlowDirectionEnumFiltered = new List<IfcGloballyUniqueId> { };
-
-            foreach (var item in ifcLocalPlacement)
-            {
-
-                IfcLocalPlacementFiltered.Add(item.GlobalId);
-                
-            }
+            
 
         }
 

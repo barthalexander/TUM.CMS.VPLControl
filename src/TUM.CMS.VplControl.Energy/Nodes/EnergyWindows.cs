@@ -72,7 +72,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             ///
             /// ifc win thickness calculation, saved in ifcWinThickness list, prepare for energy node
             ///
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
             if (modelid == null)
                 return;
             xModel = DataController.Instance.GetModel(modelid);
@@ -106,12 +106,12 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             }
 
 
-            //ModelInfo outputInfo = new ModelInfo(((ModelInfo)(InputPorts[0].Data)).ModelId);
+            //ModelInfo OutputInfoIfc2x3 = new ModelInfo(((ModelInfo)(InputPorts[0].Data)).ModelId);
             /* foreach (var item in WallsThermalT)
              {
-                 outputInfo.AddElementIds(item);//
+                 OutputInfoIfc2x3.AddElementIds(item);//
              }
-             OutputPorts[0].Data = outputInfo; */
+             OutputPorts[0].Data = OutputInfoIfc2x3; */
             OutputPorts[0].Data = WinsThermalT;
         }
 

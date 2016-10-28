@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Ifc;
@@ -42,9 +43,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
-            var modelid = ((ModelInfo) (InputPorts[0].Data)).ModelId;
-            var elementids = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
-            treeview.Model = DataController.Instance.GetModel(modelid);
+            Type IfcVersionType = InputPorts[0].Data.GetType();
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
+            {
+                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                treeview.Model = DataController.Instance.GetModel(modelid);
+            }
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            {
+                var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+                treeview.Model = DataController.Instance.GetModel(modelid);
+            }
+            
         }
 
         public override Node Clone()

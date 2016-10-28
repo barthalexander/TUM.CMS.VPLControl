@@ -1,10 +1,10 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using System.Collections.Generic;
 using Xbim.Ifc;
 using System.Linq;
-using Xbim.Ifc2x3.Extensions;
 using TUM.CMS.VplControl.IFC.Utilities;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
@@ -17,7 +17,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             : base(hostCanvas)
         {
 
-            AddInputPortToNode("IfcFile", typeof(ModelInfo));
+            AddInputPortToNode("IfcFile", typeof(ModelInfoIFC2x3));
 
 
 
@@ -49,60 +49,123 @@ namespace TUM.CMS.VplControl.IFC.Nodes
        
         public override void Calculate()
         {
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
-            if (modelid == null) return;
-            xModel = DataController.Instance.GetModel(modelid, true);
+            Type t = InputPorts[0].Data.GetType();
+            if (t.Name == "ModelInfoIFC2x3")
+            {
+                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                if (modelid == null) return;
+                xModel = DataController.Instance.GetModel(modelid, true);
 
 
-            var scrollViewer = ControlElements[0] as ScrollViewer;
-            if (scrollViewer == null) return;
-            var textBlock = scrollViewer.Content as TextBlock;
-            if (textBlock == null) return;
-            textBlock.Text = "";
+                var scrollViewer = ControlElements[0] as ScrollViewer;
+                if (scrollViewer == null) return;
+                var textBlock = scrollViewer.Content as TextBlock;
+                if (textBlock == null) return;
+                textBlock.Text = "";
 
-           
 
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcWall> walls = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcWindow> windows = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
-            List<Xbim.Ifc2x3.SharedBldgElements.IfcDoor> doors = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
+
+                List<Xbim.Ifc2x3.SharedBldgElements.IfcWall> walls = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+                List<Xbim.Ifc2x3.SharedBldgElements.IfcWindow> windows = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
+                List<Xbim.Ifc2x3.SharedBldgElements.IfcDoor> doors = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
+
+                List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
+                textBlock.Text += "Walls: \n\n";
+                foreach (var wall in walls)
+                {
+                    textBlock.Text += wall.Name +"\t";
+                    
+
+                    foreach (var relation in wall.Decomposes)
+                    {
+                        textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
+                    }
+                    textBlock.Text += "\n";
+                }
+                textBlock.Text += "\nWindows: \n\n";
+
+                foreach (var window in windows)
+                {
+                    textBlock.Text += window.Name + "\t" + window.Description + "\t";
+
+                    foreach (var relation in window.Decomposes)
+                    {
+                        textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
+                    }
+                    textBlock.Text += "\n";
+                }
+                textBlock.Text += "\nDoors: \n\n";
+
+                foreach (var door in doors)
+                {
+                    textBlock.Text += door.Name + "\t" + door.Material + "\t";
+
+                    foreach (var relation in door.Decomposes)
+                    {
+                        textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
+                    }
+                    textBlock.Text += "\n";
+                }
+                DataController.Instance.CloseModel(xModel);
+            }
+            else if (t.Name == "ModelInfoIFC4")
+            {
+                var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+                if (modelid == null) return;
+                xModel = DataController.Instance.GetModel(modelid, true);
+
+
+                var scrollViewer = ControlElements[0] as ScrollViewer;
+                if (scrollViewer == null) return;
+                var textBlock = scrollViewer.Content as TextBlock;
+                if (textBlock == null) return;
+                textBlock.Text = "";
+
+
+
+                List<Xbim.Ifc4.SharedBldgElements.IfcWall> walls = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWall>().ToList();
+                List<Xbim.Ifc4.SharedBldgElements.IfcWindow> windows = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWindow>().ToList();
+                List<Xbim.Ifc4.SharedBldgElements.IfcDoor> doors = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcDoor>().ToList();
+
+                List<Xbim.Ifc4.ProductExtension.IfcSpace> spaces = xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcSpace>().ToList();
+                textBlock.Text += "Walls: \n\n";
+                foreach (var wall in walls)
+                {
+                    textBlock.Text += wall.Name + "\t";
+
+                    foreach (var relation in wall.Decomposes)
+                    {
+                        textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
+                    }
+                    textBlock.Text += "\n";
+                }
+                textBlock.Text += "\nWindows: \n\n";
+
+                foreach (var window in windows)
+                {
+                    textBlock.Text += window.Name + "\t" + window.Description + "\t";
+
+                    foreach (var relation in window.Decomposes)
+                    {
+                        textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
+                    }
+                    textBlock.Text += "\n";
+                }
+                textBlock.Text += "\nDoors: \n\n";
+
+                foreach (var door in doors)
+                {
+                    textBlock.Text += door.Name + "\t" + door.ObjectType.Value + "\t";
+
+                    foreach (var relation in door.Decomposes)
+                    {
+                        textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
+                    }
+                    textBlock.Text += "\n";
+                }
+                DataController.Instance.CloseModel(xModel);
+            }
             
-            List<Xbim.Ifc2x3.ProductExtension.IfcSpace> spaces = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSpace>().ToList();
-            textBlock.Text += "Walls: \n\n";
-            foreach (var wall in walls)
-            {
-                textBlock.Text += wall.Name + "\t";
-
-                foreach (var relation in wall.Decomposes)
-                {
-                    textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
-                }
-                textBlock.Text += "\n";
-            }
-            textBlock.Text += "\nWindows: \n\n";
-
-            foreach (var window in windows)
-            {
-                textBlock.Text += window.Name + "\t" + window.Description + "\t";
-
-                foreach (var relation in window.Decomposes)
-                {
-                    textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
-                }
-                textBlock.Text += "\n";
-            }
-            textBlock.Text += "\nDoors: \n\n";
-
-            foreach (var door in doors)
-            {
-                textBlock.Text += door.Name + "\t" + door.GetMaterial() + "\t";
-
-                foreach (var relation in door.Decomposes)
-                {
-                    textBlock.Text += string.Format("\tStorey = {0}", relation.RelatingObject.Name) + " \t";
-                }
-                textBlock.Text += "\n";
-            }
-            DataController.Instance.CloseModel(xModel);
         }
 
         public override Node Clone()

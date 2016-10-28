@@ -1,12 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using TUM.CMS.VplControl.Core;
-using Xbim.IO;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
 using TUM.CMS.VplControl.IFC.Utilities;
-using Xbim.Common.Geometry;
 using Xbim.Ifc;
-using Xbim.Ifc2x3.IO;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -45,15 +43,31 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         public override void Calculate()
         {
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            Type IfcVersionTyp = InputPorts[0].Data.GetType();
+            if (IfcVersionTyp.Name == "ModelInfoIFC2x3")
+            {
+                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
 
-            if (modelid == null) return;
+                if (modelid == null) return;
 
-            BackgroundWorker worker = new BackgroundWorker();
+                BackgroundWorker worker = new BackgroundWorker();
 
-            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-            worker.RunWorkerAsync(modelid);
-            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                worker.RunWorkerAsync(modelid);
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+            }
+            if (IfcVersionTyp.Name == "ModelInfoIFC4")
+            {
+                var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+
+                if (modelid == null) return;
+
+                BackgroundWorker worker = new BackgroundWorker();
+
+                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                worker.RunWorkerAsync(modelid);
+                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+            }
 
         }
 
