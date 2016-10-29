@@ -12,6 +12,7 @@ using Xbim.Common;
 using Xbim.Common.Metadata;
 using Xbim.Common.Step21;
 using Xbim.Ifc;
+using Xbim.Presentation;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -135,16 +136,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     var value = prop.PropertyInfo.GetValue(toCopy, null);
                     return value;
                 };
-                using (var geomRead = xModel.GeometryStore.BeginRead())
-                {
-                    var lookup = geomRead.ShapeGeometries;
-                    var styles = geomRead.StyleIds;
-                    var regions = geomRead.ContextRegions.SelectMany(r => r).ToList();
-                    //we need to get all the default styles for various products
-                    var defaultStyles = geomRead.ShapeInstances.Select(i => -(int)i.IfcTypeId).Distinct();
-                    var allStyles = defaultStyles.Concat(styles).ToList();
-                }
 
+                
                 using (var txn = newModel.BeginTransaction())
                 {
                     var copied = new XbimInstanceHandleMap(xModel, newModel);
@@ -152,14 +145,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     {
                         foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
                         {
-                            newModel.InsertCopy(item, copied, propTransform, false, false);
+                            newModel.InsertCopy(item, copied, propTransform, true, true);
                         }
                     }
                     else
                     {
                         foreach (var item in xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
                         {
-                            newModel.InsertCopy(item, copied, propTransform, false, false);
+                            newModel.InsertCopy(item, copied, propTransform, true, true);
                         }
                     }
 

@@ -14,8 +14,12 @@ using Xbim.Presentation;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Windows.Input;
 using System.Windows.Controls;
+using log4net.Util;
 using Xbim.Common;
 using Xbim.Ifc;
+using Xbim.Ifc2x3.Extensions;
+using Xbim.Ifc2x3.MeasureResource;
+using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Esent;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
@@ -72,6 +76,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             _viewPort.Children.Clear();
             _viewPort.Children.Add(new SunLight());
+            _viewPort.ZoomExtentsWhenLoaded = true;
 
             ModelListsIfc2x3 = new List<ModelInfoIFC2x3>();
             ModelListAll2x3 = new List<ModelInfoIFC2x3>();
@@ -282,13 +287,46 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             // Loop through Entities and visualze them in the viewport
             var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
+
             // xModel = (IfcStore) e.Argument;
             foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
             {
+
                 if (res.Contains(item.GlobalId))
                 {
+
+
+                    XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
+
+                    short userDefinedId = 0;
+                    xModel.UserDefinedId = userDefinedId;
+
+
+                    ModelPositions.AddModel(xModel.ReferencingModel);
+
+                    if (xModel.IsFederation)
+                    {
+                        foreach (var refModel in xModel.ReferencedModels)
+                        {
+                            refModel.Model.UserDefinedId = ++userDefinedId;
+                            var v = refModel.Model as IfcStore;
+                            if (v != null)
+                                ModelPositions.AddModel(v.ReferencingModel);
+                        }
+                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                    }
+                    var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+                    
+                    var p = ModelBounds.Centroid();
+                    var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                    var oneMeter = xModel.ModelFactors.OneMetre;
+                    var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
+                    var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
+                    XbimMatrix3D Transform = translation * scaling;
+
                     var m = new MeshGeometry3D();
-                    GetGeometryFromXbimModel_IFC2x3(m, item, XbimMatrix3D.Identity);
+                    GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
+                    
                     var mat = GetStyleFromXbimModel_IFC2x3(item);
                     // var mat = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
 
@@ -300,8 +338,39 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 // Show whole building with opacity 0.03
                 else
                 {
+                    XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
+
+                    short userDefinedId = 0;
+                    xModel.UserDefinedId = userDefinedId;
+
+
+                    ModelPositions.AddModel(xModel.ReferencingModel);
+
+                    if (xModel.IsFederation)
+                    {
+                        foreach (var refModel in xModel.ReferencedModels)
+                        {
+                            refModel.Model.UserDefinedId = ++userDefinedId;
+                            var v = refModel.Model as IfcStore;
+                            if (v != null)
+                                ModelPositions.AddModel(v.ReferencingModel);
+                        }
+                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                    }
+                    var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+
+                    var p = ModelBounds.Centroid();
+                    var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                    var oneMeter = xModel.ModelFactors.OneMetre;
+                    var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
+                    var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
+                    XbimMatrix3D Transform = translation * scaling;
+
+
+
+
                     var m = new MeshGeometry3D();
-                    GetGeometryFromXbimModel_IFC2x3(m, item, XbimMatrix3D.Identity);
+                    GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
                     var mat = GetStyleFromXbimModel_IFC2x3(item, 0.03);
 
                     var mb = new MeshBuilder(false, false);
@@ -321,8 +390,37 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 if (res.Contains(item.GlobalId))
                 {
+                    XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
+
+                    short userDefinedId = 0;
+                    xModel.UserDefinedId = userDefinedId;
+
+
+                    ModelPositions.AddModel(xModel.ReferencingModel);
+
+                    if (xModel.IsFederation)
+                    {
+                        foreach (var refModel in xModel.ReferencedModels)
+                        {
+                            refModel.Model.UserDefinedId = ++userDefinedId;
+                            var v = refModel.Model as IfcStore;
+                            if (v != null)
+                                ModelPositions.AddModel(v.ReferencingModel);
+                        }
+                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                    }
+                    var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+
+                    var p = ModelBounds.Centroid();
+                    var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                    var oneMeter = xModel.ModelFactors.OneMetre;
+                    var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
+                    var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
+                    XbimMatrix3D Transform = translation * scaling;
+
+
                     var m = new MeshGeometry3D();
-                    GetGeometryFromXbimModel_IFC4(m, item, XbimMatrix3D.Identity);
+                    GetGeometryFromXbimModel_IFC4(m, item, Transform);
                     var mat = GetStyleFromXbimModel_IFC4(item);
                     // var mat = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
 
@@ -334,8 +432,35 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 // Show whole building with opacity 0.03
                 else
                 {
+                    XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
+
+                    short userDefinedId = 0;
+                    xModel.UserDefinedId = userDefinedId;
+
+
+                    ModelPositions.AddModel(xModel.ReferencingModel);
+
+                    if (xModel.IsFederation)
+                    {
+                        foreach (var refModel in xModel.ReferencedModels)
+                        {
+                            refModel.Model.UserDefinedId = ++userDefinedId;
+                            var v = refModel.Model as IfcStore;
+                            if (v != null)
+                                ModelPositions.AddModel(v.ReferencingModel);
+                        }
+                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                    }
+                    var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+
+                    var p = ModelBounds.Centroid();
+                    var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                    var oneMeter = xModel.ModelFactors.OneMetre;
+                    var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
+                    var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
+                    XbimMatrix3D Transform = translation * scaling;
                     var m = new MeshGeometry3D();
-                    GetGeometryFromXbimModel_IFC4(m, item, XbimMatrix3D.Identity);
+                    GetGeometryFromXbimModel_IFC4(m, item, Transform);
                     var mat = GetStyleFromXbimModel_IFC4(item, 0.03);
 
                     var mb = new MeshBuilder(false, false);
@@ -348,7 +473,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         }
 
 
-       
+
         public override Node Clone()
         {
             return new IfcParseGeometryNode(HostCanvas)
@@ -416,7 +541,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             
             return true;
         }
-         public bool VisualizeMesh_IFC4(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
+        public bool VisualizeMesh_IFC4(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
         {
             
 
@@ -602,140 +727,30 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <returns></returns>
         public Material GetStyleFromXbimModel_IFC2x3(Xbim.Ifc2x3.Kernel.IfcProduct item, double opacity = 1)
         {
-            var defautMaterial = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
-            Material mat = null;
-            Material material;
-            if (defautMaterial.TryGetValue(item.GetType().Name, out material))
-            {
-                ((System.Windows.Media.Media3D.DiffuseMaterial) material).Brush.Opacity = opacity;
-                mat = material;
-            }
-            else
-            {
-                mat = defautMaterial["IfcProduct"];
-                ((System.Windows.Media.Media3D.DiffuseMaterial)mat).Brush.Opacity = opacity;
-            }
-            return mat;
+            var context = new Xbim3DModelContext(item.Model);
+
+            var productShape = context.ShapeInstancesOf((Xbim.Ifc4.Interfaces.IIfcProduct)item)
+                .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                .ToList();
+
+            var wpfMaterial = GetWpfMaterial(item.Model, productShape[0].StyleLabel);
+
+            ((System.Windows.Media.Media3D.DiffuseMaterial)wpfMaterial).Brush.Opacity = opacity;
+            return wpfMaterial;
         }
         public Material GetStyleFromXbimModel_IFC4(Xbim.Ifc4.Kernel.IfcProduct item, double opacity = 1)
         {
-            var defautMaterial = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
-            Material mat = null;
-            Material material;
-            if (defautMaterial.TryGetValue(item.GetType().Name, out material))
-            {
-                //((System.Windows.Media.Media3D.DiffuseMaterial)material).Brush.Opacity = opacity;
-                mat = material;
-            }
-            else
-            {
-                mat = defautMaterial["IfcProduct"];
-                //((System.Windows.Media.Media3D.DiffuseMaterial)mat).Brush.Opacity = opacity;
+            var context = new Xbim3DModelContext(item.Model);
 
-            }
-            return mat;
+            var productShape = context.ShapeInstancesOf((Xbim.Ifc4.Interfaces.IIfcProduct)item)
+                .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                .ToList();
+
+            var wpfMaterial = GetWpfMaterial(item.Model, productShape[0].StyleLabel);
+
+            ((System.Windows.Media.Media3D.DiffuseMaterial)wpfMaterial).Brush.Opacity = opacity;
+            return wpfMaterial;
         }
-//                public DiffuseMaterial GetStyleFromXbimModel(IPersistEntity item, double opacity = 1)
-//                {
-//                    var model = item.Model as IfcStore;
-//                    if (model == null || !(item is Xbim.Ifc2x3.Kernel.IfcProduct))
-//                        return null;
-//                    SolidColorBrush fillColor = new SolidColorBrush();
-//
-//                    switch (model.GeometrySupportLevel)
-//                    {
-//                        case 2:
-//                            try
-//                            {
-//                                // Style
-//                                Dictionary<int, WpfMaterial> styles = new Dictionary<int, WpfMaterial>();
-//                                Dictionary<int, WpfMeshGeometry3D> meshSets = new Dictionary<int, WpfMeshGeometry3D>();
-//                                Model3DGroup opaques = new Model3DGroup();
-//                                Model3DGroup transparents = new Model3DGroup();
-//                        var styledItemsGroup = model.Instances
-//                                                .OfType<Xbim.Ifc2x3.Interfaces.IIfcStyledItem>()
-//                                                .Where(s => s.Item != null)
-//                                                .GroupBy(s => s.Item.EntityLabel);
-//
-//                        var context = new Xbim3DModelContext(model);
-//                                // foreach (var style in context.SurfaceStyles)
-//                                // {
-//                                //     WpfMaterial wpfMaterial = new WpfMaterial();
-//                                //     wpfMaterial.CreateMaterial(   );
-//                                //     styles.Add(style.DefinedObjectId, wpfMaterial);
-//                                //     WpfMeshGeometry3D mg = new WpfMeshGeometry3D(wpfMaterial, wpfMaterial);
-//                                //     meshSets.Add(style.DefinedObjectId, mg);
-//                                //     if (style.IsTransparent)
-//                                //         transparents.Children.Add(mg);
-//                                //     else
-//                                //         opaques.Children.Add(mg);
-//                                // 
-//                                // }
-//        
-//                                var productShape = context.ShapeInstancesOf((Xbim.Ifc2x3.Kernel.IfcProduct)item)
-//                                    .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-//                                    .ToList();
-//                                if (!productShape.Any() && item is Xbim.Ifc2x3.ProductExtension.IfcFeatureElement)
-//                                {
-//                                    productShape = context.ShapeInstancesOf((Xbim.Ifc2x3.Kernel.IfcProduct)item)
-//                                        .Where(
-//                                            s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-//                                        .ToList();
-//                                }
-//        
-//                                if (!productShape.Any())
-//                                    return null;
-//        
-//                                var shapeInstance = productShape.FirstOrDefault();
-//        
-//        
-//                                WpfMaterial material;
-//                                styles.TryGetValue(shapeInstance.StyleLabel, out material);
-//        
-//                                if (material != null)
-//                                {
-//                                    string stringMaterial = material.Description;
-//                                    string[] materialEntries = stringMaterial.Split(' ');
-//                                    double r, g, b, a;
-//        
-//                                    double.TryParse(materialEntries[1].Substring(2), out r);
-//                                    double.TryParse(materialEntries[2].Substring(2), out g);
-//                                    double.TryParse(materialEntries[3].Substring(2), out b);
-//                                    double.TryParse(materialEntries[4].Substring(2), out a);
-//        
-//                                    r *= 255;
-//                                    g *= 255;
-//                                    b *= 255;
-//                                    a *= 255;
-//                                    fillColor = new SolidColorBrush(Color.FromArgb((byte)r, (byte)g, (byte)b, (byte)a));
-//                                    fillColor.Opacity = opacity;
-//                                    return new DiffuseMaterial(fillColor);
-//                                }
-//                                else
-//                                {
-//                                    fillColor = new SolidColorBrush(Colors.Gray);
-//                                    fillColor.Opacity = opacity;
-//                                    return new DiffuseMaterial(fillColor);
-//                                }
-//                            }
-//                            catch
-//                            {
-//                                fillColor = new SolidColorBrush(Colors.Gray);
-//                                fillColor.Opacity = opacity;
-//                                return new DiffuseMaterial(fillColor);
-//                            }
-//        
-//                            break;
-//        
-//                    }
-//        
-//                    fillColor = new SolidColorBrush(Colors.Gray);
-//                    fillColor.Opacity = opacity;
-//                    return new DiffuseMaterial(fillColor);
-//        
-//        
-//        
-//                }
 
 
         /// <summary>
@@ -819,5 +834,40 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
 
+        private static Material GetWpfMaterial(IModel model, int styleId)
+        {
+            var sStyle = model.Instances[styleId] as Xbim.Ifc4.Interfaces.IIfcSurfaceStyle;
+                            var wpfMaterial = new WpfMaterial();
+
+            if (sStyle != null)
+            {
+                var texture = XbimTexture.Create(sStyle);
+                texture.DefinedObjectId = styleId;
+                wpfMaterial.CreateMaterial(texture);
+
+                return wpfMaterial;
+            }
+            else
+            {
+                var defautMaterial = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
+
+                Material material;
+                if (defautMaterial.TryGetValue(model.GetType().Name, out material))
+                {
+                    //((System.Windows.Media.Media3D.DiffuseMaterial)material).Brush.Opacity = opacity;
+                    return material;
+                }
+                else
+                {
+                    XbimColour color = new XbimColour("red",1,1,1);
+                    wpfMaterial.CreateMaterial(color);
+                    return wpfMaterial;
+                    // return defautMaterial["IfcProduct"];
+                    //((System.Windows.Media.Media3D.DiffuseMaterial)mat).Brush.Opacity = opacity;
+
+                }
+            }
+            
+        }
     }
 }
