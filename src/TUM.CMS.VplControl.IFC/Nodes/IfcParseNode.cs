@@ -4,13 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
-using Xbim.XbimExtensions;
 using System.Linq;
 using System.Windows.Media;
 using TUM.CMS.VplControl.IFC.Utilities;
@@ -18,10 +12,7 @@ using Xbim.Common;
 using Xbim.Common.Metadata;
 using Xbim.Common.Step21;
 using Xbim.Ifc;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.ProductExtension;
-using Xbim.Ifc2x3.SharedBldgElements;
-using Xbim.XbimExtensions.DataProviders;
+using Xbim.Presentation;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -133,23 +124,39 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 copyFile = result + "copy" + number + ".ifc";
             }
 
-            var newModel = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+            
 
             using (xModel = IfcStore.Open(file))
             {
+
+                var newModel = IfcStore.Create(xModel.IfcSchemaVersion, XbimStoreType.InMemoryModel);
+                //var newModel = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
                 PropertyTranformDelegate propTransform = delegate(ExpressMetaProperty prop, object toCopy)
                 {
                     var value = prop.PropertyInfo.GetValue(toCopy, null);
                     return value;
                 };
 
+                
                 using (var txn = newModel.BeginTransaction())
                 {
                     var copied = new XbimInstanceHandleMap(xModel, newModel);
-                    foreach (var item in xModel.Instances.OfType<IfcProduct>())
+                    if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc2X3)
                     {
-                        newModel.InsertCopy(item, copied, propTransform, false, false);
+                        foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
+                        {
+                            newModel.InsertCopy(item, copied, propTransform, true, true);
+                        }
                     }
+                    else
+                    {
+                        foreach (var item in xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
+                        {
+                            newModel.InsertCopy(item, copied, propTransform, true, true);
+                        }
+                    }
+
+                    
                     txn.Commit();
                     newModel.SaveAs(copyFile);
                 }
@@ -163,14 +170,30 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
-            ModelInfo modelInfo = new ModelInfo(copyFile);
             xModel = DataController.Instance.GetModel(copyFile);
-            List<IfcProduct> elements = xModel.Instances.OfType<IfcProduct>().ToList();
-            foreach (var element in elements)
+            if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc2X3)
             {
-                modelInfo.AddElementIds(element.GlobalId);
+                ModelInfoIFC2x3 modelInfo = new ModelInfoIFC2x3(copyFile);
+                List< Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType< Xbim.Ifc2x3.Kernel.IfcProduct> ().ToList();
+                foreach (var element in elements)
+                {
+                    modelInfo.AddElementIds(element.GlobalId);
+                }
+                e.Result = modelInfo;
             }
-            e.Result = modelInfo;
+            else
+            {
+                ModelInfoIFC4 modelInfo = new ModelInfoIFC4(copyFile);
+                List< Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType< Xbim.Ifc4.Kernel.IfcProduct> ().ToList();
+                foreach (var element in elements)
+                {
+                    modelInfo.AddElementIds(element.GlobalId);
+                }
+                e.Result = modelInfo;
+            }
+
+            
+            
 
            
         }

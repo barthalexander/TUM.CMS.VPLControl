@@ -1,25 +1,21 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 using System.Xml;
 using TUM.CMS.VplControl.Core;
 using System.Collections.Generic;
-using Xbim.IO;
-using Xbim.XbimExtensions;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Linq;
-using System.Collections;
-using System.Text.RegularExpressions;
-using System;
 using System.Windows;
-using System.Reflection;
-using Xbim.Ifc2x3.ProductExtension;
-using System.IO;
 using Xbim.Ifc;
+using Xbim.Properties;
+using Version = System.Version;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcPropertyFilterNode : Node
     {
         public IfcStore xModel;
+        private Type IfcVersionType = null;
         
         public IfcPropertyFilterNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
@@ -28,9 +24,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddInputPortToNode("IfcProducts", typeof(object));
 
             AddOutputPortToNode("FilteredProducts", typeof(object));
-
-          
-            
                      
             var labelPropertySet = new Label {Content="Property Set filter:" };
             var labelProperties = new Label { Content = "property filter:" };
@@ -43,7 +36,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var comboBoxProperties = new ComboBox { };
             comboBoxProperties.SelectionChanged += comboBoxProperties_SelectionChanged;
 
-            
 
             var textBox = new TextBox { };
             textBox.TextChanged += textBox_TextChanged;
@@ -65,145 +57,274 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            var textBox = ControlElements[5] as TextBox;
-            if (textBox == null) return;
-            var button = ControlElements[6] as Button;
-            if (button == null) return;            
-            var comboBoxPropertySet = ControlElements[1] as ComboBox;
-            if (comboBoxPropertySet == null) return;
-            var comboBoxProperties = ControlElements[3] as ComboBox;
-            if (comboBoxProperties == null) return;            
-            if (comboBoxProperties.Items.Count == 0) return;
-
-            var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
-            var property = selectedItem.Value as Xbim.Ifc2x3.PropertyResource.IfcProperty;
-            if (property == null) return;
-
-            var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
-                        
-            var selectedItemIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
-            if (selectedItemIds == null) return;
-
-            List<double> propertyValueDoubles = new List<double> { };
-            List<bool> propertyValueBools = new List<bool> { };
-            List<string> propertyValueStrings = new List<string> { };
-
-         
-            for(int i=0;i<selectedItemIds.Count;i++ )
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                var selectedProduct = xModel.Instances.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);                            
-                var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
-                var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
-                string propertyType = oneProperty.GetType().ToString();
-                if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
-                {
-                    var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var propertyValue = property2.NominalValue;
-                    object propertyValueTrue = property2.NominalValue.Value;
-                    string propertyValueType = propertyValue.UnderlyingSystemType.Name;
-                    if (propertyValueType == "Double")
-                    {
-                        double propertyValueDouble = (double)propertyValueTrue;
-                        propertyValueDoubles.Add(propertyValueDouble);
-                    }
-                    if (propertyValueType=="Boolean")
-                    {
-                        bool propertyValueBool = (bool)propertyValueTrue;
-                        propertyValueBools.Add(propertyValueBool);
-                    }
-                    if(propertyValueType == "String")
-                    {
-                        string propertyValueString = (string)propertyValueTrue;
-                        propertyValueStrings.Add(propertyValueString);
-                    }
+                var textBox = ControlElements[5] as TextBox;
+                if (textBox == null) return;
+                var button = ControlElements[6] as Button;
+                if (button == null) return;
+                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                if (comboBoxPropertySet == null) return;
+                var comboBoxProperties = ControlElements[3] as ComboBox;
+                if (comboBoxProperties == null) return;
+                if (comboBoxProperties.Items.Count == 0) return;
 
+                var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
+                var property = selectedItem.Value as Xbim.Ifc2x3.PropertyResource.IfcProperty;
+                if (property == null) return;
+
+                var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
+
+                var selectedItemIds = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                if (selectedItemIds == null) return;
+
+                List<double> propertyValueDoubles = new List<double> { };
+                List<bool> propertyValueBools = new List<bool> { };
+                List<string> propertyValueStrings = new List<string> { };
+
+
+                for (int i = 0; i < selectedItemIds.Count; i++)
+                {
+                    var selectedProduct = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);
+                    var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
+                    var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
+                    string propertyType = oneProperty.GetType().ToString();
+                    if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
+                    {
+                        var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                        var propertyValue = property2.NominalValue;
+                        object propertyValueTrue = property2.NominalValue.Value;
+                        string propertyValueType = propertyValue.UnderlyingSystemType.Name;
+                        if (propertyValueType == "Double")
+                        {
+                            double propertyValueDouble = (double)propertyValueTrue;
+                            propertyValueDoubles.Add(propertyValueDouble);
+                        }
+                        if (propertyValueType == "Boolean")
+                        {
+                            bool propertyValueBool = (bool)propertyValueTrue;
+                            propertyValueBools.Add(propertyValueBool);
+                        }
+                        if (propertyValueType == "String")
+                        {
+                            string propertyValueString = (string)propertyValueTrue;
+                            propertyValueStrings.Add(propertyValueString);
+                        }
+
+                    }
+                    else { return; }
                 }
-                else { return; }
-            }
 
-            
 
-            List<double> propertyValueDoublesSelected = new List<double> { };
-            List<bool> propertyValueBoolsSelected = new List<bool> { };
-            List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDsSelected = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
 
-            string toDetect = textBox.Text;
-            string ss;
-            double s;
-            if (toDetect.Contains("<"))
-            {
-                int j = toDetect.IndexOf("<");
-                ss = toDetect.Substring(j+1, toDetect.Length - 1);
-                s = double.Parse(ss);
-                for(int i = 0; i < propertyValueDoubles.Count; i++)
+                List<double> propertyValueDoublesSelected = new List<double> { };
+                List<bool> propertyValueBoolsSelected = new List<bool> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDsSelected = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+
+                string toDetect = textBox.Text;
+                string ss;
+                double s;
+                if (toDetect.Contains("<"))
                 {
-                    if(propertyValueDoubles[i]<s)
+                    int j = toDetect.IndexOf("<");
+                    ss = toDetect.Substring(j + 1, toDetect.Length - 1);
+                    s = double.Parse(ss);
+                    for (int i = 0; i < propertyValueDoubles.Count; i++)
                     {
-                        propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(selectedItemIds[i]);
-                        
-                    }
-                }
-            }
+                        if (propertyValueDoubles[i] < s)
+                        {
+                            propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
 
-            if (toDetect.Contains(">"))
-            {
-                int j = toDetect.IndexOf(">");
-                ss = toDetect.Substring(j+1, toDetect.Length - 1);
-                s = double.Parse(ss);
-                for (int i = 0; i < propertyValueDoubles.Count; i++)
-                {
-                    if (propertyValueDoubles[i] > s)
-                    {
-                        propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(selectedItemIds[i]);
+                        }
                     }
                 }
-            }
 
-            if (toDetect.Contains("="))
-            {
-                int j = toDetect.IndexOf("=");
-                ss = toDetect.Substring(j+1, toDetect.Length - 1);
-                s = double.Parse(ss);
-                for (int i = 0; i < propertyValueDoubles.Count; i++)
+                if (toDetect.Contains(">"))
                 {
-                    if (propertyValueDoubles[i] == s)
+                    int j = toDetect.IndexOf(">");
+                    ss = toDetect.Substring(j + 1, toDetect.Length - 1);
+                    s = double.Parse(ss);
+                    for (int i = 0; i < propertyValueDoubles.Count; i++)
                     {
-                        propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
-                        searchIDsSelected.Add(selectedItemIds[i]);
+                        if (propertyValueDoubles[i] > s)
+                        {
+                            propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
+                        }
                     }
                 }
-            }
 
-            if(toDetect=="True"||toDetect=="False")
-            {
-                for (int i = 0; i < propertyValueBools.Count; i++)
+                if (toDetect.Contains("="))
                 {
-                    string trueorfalse = propertyValueBools[i].ToString();
-                    if (propertyValueBools[i].ToString ()== toDetect)
+                    int j = toDetect.IndexOf("=");
+                    ss = toDetect.Substring(j + 1, toDetect.Length - 1);
+                    s = double.Parse(ss);
+                    for (int i = 0; i < propertyValueDoubles.Count; i++)
                     {
-                        propertyValueBoolsSelected.Add(propertyValueBools[i]);
-                        searchIDsSelected.Add(selectedItemIds[i]);
+                        if (propertyValueDoubles[i] == s)
+                        {
+                            propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
+                        }
                     }
                 }
+
+                if (toDetect == "True" || toDetect == "False")
+                {
+                    for (int i = 0; i < propertyValueBools.Count; i++)
+                    {
+                        string trueorfalse = propertyValueBools[i].ToString();
+                        if (propertyValueBools[i].ToString() == toDetect)
+                        {
+                            propertyValueBoolsSelected.Add(propertyValueBools[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
+                        }
+                    }
+                }
+
+                ModelInfoIFC2x3 outputInfo = new ModelInfoIFC2x3(((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId);
+                foreach (var item in searchIDsSelected)
+                {
+                    outputInfo.AddElementIds(item);
+                }
+                OutputPorts[0].Data = outputInfo;
             }
-
-            //var outputInfo = (ModelInfo)(InputPorts[0].Data);
-            //outputInfo.ElementIds = searchIDsSelected;
-            //OutputPorts[0].Data = outputInfo;
-
-            ModelInfo outputInfo = new ModelInfo(((ModelInfo)(InputPorts[0].Data)).ModelId);
-            foreach (var item in searchIDsSelected)
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
-                outputInfo.AddElementIds(item);
+                var textBox = ControlElements[5] as TextBox;
+                if (textBox == null) return;
+                var button = ControlElements[6] as Button;
+                if (button == null) return;
+                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                if (comboBoxPropertySet == null) return;
+                var comboBoxProperties = ControlElements[3] as ComboBox;
+                if (comboBoxProperties == null) return;
+                if (comboBoxProperties.Items.Count == 0) return;
+
+                var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
+                var property = selectedItem.Value as Xbim.Ifc4.PropertyResource.IfcProperty;
+                if (property == null) return;
+
+                var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc4.Kernel.IfcPropertySet;
+
+                var selectedItemIds = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
+                if (selectedItemIds == null) return;
+
+                List<double> propertyValueDoubles = new List<double> { };
+                List<bool> propertyValueBools = new List<bool> { };
+                List<string> propertyValueStrings = new List<string> { };
+
+
+                for (int i = 0; i < selectedItemIds.Count; i++)
+                {
+                    var selectedProduct = xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[i]);
+                    var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
+                    var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
+                    string propertyType = oneProperty.GetType().ToString();
+                    if (propertyType == "Xbim.Ifc4.PropertyResource.IfcPropertySingleValue")
+                    {
+                        var property2 = property as Xbim.Ifc4.PropertyResource.IfcPropertySingleValue;
+                        var propertyValue = property2.NominalValue;
+                        object propertyValueTrue = property2.NominalValue.Value;
+                        string propertyValueType = propertyValue.UnderlyingSystemType.Name;
+                        if (propertyValueType == "Double")
+                        {
+                            double propertyValueDouble = (double)propertyValueTrue;
+                            propertyValueDoubles.Add(propertyValueDouble);
+                        }
+                        if (propertyValueType == "Boolean")
+                        {
+                            bool propertyValueBool = (bool)propertyValueTrue;
+                            propertyValueBools.Add(propertyValueBool);
+                        }
+                        if (propertyValueType == "String")
+                        {
+                            string propertyValueString = (string)propertyValueTrue;
+                            propertyValueStrings.Add(propertyValueString);
+                        }
+
+                    }
+                    else { return; }
+                }
+
+
+
+                List<double> propertyValueDoublesSelected = new List<double> { };
+                List<bool> propertyValueBoolsSelected = new List<bool> { };
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> searchIDsSelected = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+
+                string toDetect = textBox.Text;
+                string ss;
+                double s;
+                if (toDetect.Contains("<"))
+                {
+                    int j = toDetect.IndexOf("<");
+                    ss = toDetect.Substring(j + 1, toDetect.Length - 1);
+                    s = double.Parse(ss);
+                    for (int i = 0; i < propertyValueDoubles.Count; i++)
+                    {
+                        if (propertyValueDoubles[i] < s)
+                        {
+                            propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
+
+                        }
+                    }
+                }
+
+                if (toDetect.Contains(">"))
+                {
+                    int j = toDetect.IndexOf(">");
+                    ss = toDetect.Substring(j + 1, toDetect.Length - 1);
+                    s = double.Parse(ss);
+                    for (int i = 0; i < propertyValueDoubles.Count; i++)
+                    {
+                        if (propertyValueDoubles[i] > s)
+                        {
+                            propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
+                        }
+                    }
+                }
+
+                if (toDetect.Contains("="))
+                {
+                    int j = toDetect.IndexOf("=");
+                    ss = toDetect.Substring(j + 1, toDetect.Length - 1);
+                    s = double.Parse(ss);
+                    for (int i = 0; i < propertyValueDoubles.Count; i++)
+                    {
+                        if (propertyValueDoubles[i] == s)
+                        {
+                            propertyValueDoublesSelected.Add(propertyValueDoubles[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
+                        }
+                    }
+                }
+
+                if (toDetect == "True" || toDetect == "False")
+                {
+                    for (int i = 0; i < propertyValueBools.Count; i++)
+                    {
+                        string trueorfalse = propertyValueBools[i].ToString();
+                        if (propertyValueBools[i].ToString() == toDetect)
+                        {
+                            propertyValueBoolsSelected.Add(propertyValueBools[i]);
+                            searchIDsSelected.Add(selectedItemIds[i]);
+                        }
+                    }
+                }
+
+                ModelInfoIFC4 outputInfo = new ModelInfoIFC4(((ModelInfoIFC4)(InputPorts[0].Data)).ModelId);
+                foreach (var item in searchIDsSelected)
+                {
+                    outputInfo.AddElementIds(item);
+                }
+                OutputPorts[0].Data = outputInfo;
             }
-            OutputPorts[0].Data = outputInfo;
-
-
-
-
         }
+        
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -224,42 +345,108 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public override void Calculate()
         {
             OutputPorts[0].Data = null;
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
-
-            if (modelid == null) return;
-            ModelInfo outputInfo = new ModelInfo(modelid);            
-            xModel = DataController.Instance.GetModel(modelid);
-          
-
-            var comboBoxPropertySet = ControlElements[1] as ComboBox;
-            if (comboBoxPropertySet == null) return;
-            comboBoxPropertySet.Items.Clear();
-
-            var selectedItemIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
-            if (selectedItemIds == null) return;
-
-            // MemberInfo info = typeof(Xbim.Ifc2x3.Kernel.IfcProduct).GetMethod("GlobalId");
-            // IfcPersistedEntityAttribute attr = (IfcPersistedEntityAttribute)Attribute.GetCustomAttribute(info, typeof(IfcPersistedEntityAttribute));
-
-           
-           var selectedProduct = xModel.Instances.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
-
-            
-
-            List<Xbim.Ifc2x3.Kernel.IfcPropertySet> PropertySet = new List<Xbim.Ifc2x3.Kernel.IfcPropertySet> { };
-
-            List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
-
-            
-
-            PropertySet = selectedProduct.PropertySets.ToList();
-            for (int i = 0; i < PropertySet.Count(); i++)
+            IfcVersionType = InputPorts[0].Data.GetType();
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                ComboboxItem onePropertySet = new ComboboxItem() { Text = PropertySet[i].Name.ToString(), Value = PropertySet[i] };
-                comboBoxPropertySet.Items.Add(onePropertySet);
-            }
+                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
 
-            comboBoxPropertySet.SelectedIndex = 0;
+                if (modelid == null) return;
+                ModelInfoIFC2x3 outputInfo = new ModelInfoIFC2x3(modelid);
+                xModel = DataController.Instance.GetModel(modelid);
+
+
+                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                if (comboBoxPropertySet == null) return;
+                comboBoxPropertySet.Items.Clear();
+
+                var selectedItemIds = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                if (selectedItemIds == null) return;
+
+                // MemberInfo info = typeof(Xbim.Ifc2x3.Kernel.IfcProduct).GetMethod("GlobalId");
+                // IfcPersistedEntityAttribute attr = (IfcPersistedEntityAttribute)Attribute.GetCustomAttribute(info, typeof(IfcPersistedEntityAttribute));
+                var mgr = new Definitions<PropertySetDef>(Xbim.Properties.Version.IFC2x3);
+                mgr.LoadAllDefault();
+               
+                List<string> ListofAllProducts = new List<string>();
+                foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
+                {
+                    Type t = item.GetType();
+                    var productName = t.Name;
+                    if (!ListofAllProducts.Contains(productName))
+                    {
+                        ListofAllProducts.Add(productName);
+                    }
+                }
+                foreach (var element in ListofAllProducts)
+                {
+                    var result = mgr.DefinitionSets.Where(p => p.ApplicableClasses.Any(c => c.ClassName == element));
+                    foreach (var pSet in result)
+                    {
+                        ComboboxItem onePropertySet = new ComboboxItem() { Text = pSet.Name, Value = pSet };
+                        if (!comboBoxPropertySet.Items.Contains(onePropertySet))
+                        {
+                            comboBoxPropertySet.Items.Add(onePropertySet);
+                        }
+                    }
+                }
+
+
+                //var selectedProduct = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
+                //                List<Xbim.Ifc2x3.Kernel.IfcPropertySet> PropertySet = new List<Xbim.Ifc2x3.Kernel.IfcPropertySet> { };
+                //
+                //                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                //
+                //
+                //
+                //                PropertySet = selectedProduct.PropertySets.ToList();
+                //                for (int i = 0; i < PropertySet.Count(); i++)
+                //                {
+                //                    ComboboxItem onePropertySet = new ComboboxItem() { Text = PropertySet[i].Name.ToString(), Value = PropertySet[i] };
+                //                    comboBoxPropertySet.Items.Add(onePropertySet);
+                //                }
+
+                comboBoxPropertySet.SelectedIndex = 0;
+            }
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            {
+                var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+
+                if (modelid == null) return;
+                ModelInfoIFC4 outputInfo = new ModelInfoIFC4(modelid);
+                xModel = DataController.Instance.GetModel(modelid);
+
+
+                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                if (comboBoxPropertySet == null) return;
+                comboBoxPropertySet.Items.Clear();
+
+                var selectedItemIds = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
+                if (selectedItemIds == null) return;
+
+                // MemberInfo info = typeof(Xbim.Ifc4.Kernel.IfcProduct).GetMethod("GlobalId");
+                // IfcPersistedEntityAttribute attr = (IfcPersistedEntityAttribute)Attribute.GetCustomAttribute(info, typeof(IfcPersistedEntityAttribute));
+
+
+                var selectedProduct = xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
+
+
+
+                List<Xbim.Ifc4.Interfaces.IIfcPropertySet> PropertySet = new List<Xbim.Ifc4.Interfaces.IIfcPropertySet> { };
+
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> searchIDs = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
+
+
+
+                PropertySet = selectedProduct.PropertySets.ToList();
+                for (int i = 0; i < PropertySet.Count(); i++)
+                {
+                    ComboboxItem onePropertySet = new ComboboxItem() { Text = PropertySet[i].Name.ToString(), Value = PropertySet[i] };
+                    comboBoxPropertySet.Items.Add(onePropertySet);
+                }
+
+                comboBoxPropertySet.SelectedIndex = 0;
+            }
+            
 
         }
 
@@ -273,20 +460,39 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             comboBoxProperties.Items.Clear();
 
             if (comboBoxPropertySet.Items.Count == 0) return;
-
-            var selectedItem = (ComboboxItem)(comboBoxPropertySet.SelectedItem);
-            var propertySet = selectedItem.Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
-            if (propertySet == null) return;
-            var hasProperties=propertySet.HasProperties.ToList();
-           
-            
-            for (int i = 0; i < hasProperties.Count; i++)
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };           
-                comboBoxProperties.Items.Add(oneHasProperties);
+                var selectedItem = (ComboboxItem)(comboBoxPropertySet.SelectedItem);
+                var propertySet = selectedItem.Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
+                if (propertySet == null) return;
+                var hasProperties = propertySet.HasProperties.ToList();
+
+
+                for (int i = 0; i < hasProperties.Count; i++)
+                {
+                    ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };
+                    comboBoxProperties.Items.Add(oneHasProperties);
+                }
+
+                comboBoxProperties.SelectedIndex = 0;
+            }
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            {
+                var selectedItem = (ComboboxItem)(comboBoxPropertySet.SelectedItem);
+                var propertySet = selectedItem.Value as Xbim.Ifc4.Kernel.IfcPropertySet;
+                if (propertySet == null) return;
+                var hasProperties = propertySet.HasProperties.ToList();
+
+
+                for (int i = 0; i < hasProperties.Count; i++)
+                {
+                    ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };
+                    comboBoxProperties.Items.Add(oneHasProperties);
+                }
+
+                comboBoxProperties.SelectedIndex = 0;
             }
 
-            comboBoxProperties.SelectedIndex = 0;
 
 
         }
@@ -301,87 +507,186 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (comboBoxProperties == null) return;
             if (comboBoxProperties.Items.Count == 0) return;
 
-            var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
-            var property = selectedItem.Value as Xbim.Ifc2x3.PropertyResource.IfcProperty;
-            if (property == null) return;
-
-            var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
-
-            var selectedItemIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
-            if (selectedItemIds == null) return;
-
-            List<double> propertyValueDoubles = new List<double> { };
-            List<bool> propertyValueBools = new List<bool> { };
-            List<string> propertyValueStrings = new List<string> { };
-
-
-            for (int j = 0; j < selectedItemIds.Count; j++)
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                var selectedProduct = xModel.Instances.OfType<IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[j]);
-                var propertySet = selectedProduct.PropertySets.ToList().Find(x => x.Name == selectedPropertySet.Name);
-                var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
-                string propertyType = oneProperty.GetType().ToString();
-                if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
+                var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
+                var property = selectedItem.Value as Xbim.Ifc2x3.PropertyResource.IfcProperty;
+                if (property == null) return;
+
+                var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
+
+                var selectedItemIds = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                if (selectedItemIds == null) return;
+
+                List<double> propertyValueDoubles = new List<double> { };
+                List<bool> propertyValueBools = new List<bool> { };
+                List<string> propertyValueStrings = new List<string> { };
+
+
+                for (int j = 0; j < selectedItemIds.Count; j++)
                 {
-                    var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
-                    var propertyValue = property2.NominalValue;
-                    object propertyValueTrue = property2.NominalValue.Value;
-                    string propertyValueType = propertyValue.UnderlyingSystemType.Name;
-                    if (propertyValueType == "Double")
+                    var selectedProduct =
+                        xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[j]);
+                    var propertySet = selectedProduct.PropertySets.ToList()
+                        .Find(x => x.Name == selectedPropertySet.Name);
+                    var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
+                    string propertyType = oneProperty.GetType().ToString();
+                    if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
                     {
-                        double propertyValueDouble = (double)propertyValueTrue;
-                        propertyValueDoubles.Add(propertyValueDouble);
-                        textBox.Text = "Double: give range";
-                    }
-                    if (propertyValueType == "Boolean")
-                    {
-                        bool propertyValueBool = (bool)propertyValueTrue;
-                        propertyValueBools.Add(propertyValueBool);
-                        textBox.Text = "Boolean: True or False";
-                    }
-                    if (propertyValueType == "String")
-                    {
-                        string propertyValueString = (string)propertyValueTrue;
-                        propertyValueStrings.Add(propertyValueString);
-
-                        //print only different value of 'string' to the textbox
-                        List<bool> diffString = new List<bool> { };
-
-                        for (int i = 0; i < propertyValueStrings.Count; i++)
+                        var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                        var propertyValue = property2.NominalValue;
+                        object propertyValueTrue = property2.NominalValue.Value;
+                        string propertyValueType = propertyValue.UnderlyingSystemType.Name;
+                        if (propertyValueType == "Double")
                         {
-                            diffString.Add(true);
+                            double propertyValueDouble = (double) propertyValueTrue;
+                            propertyValueDoubles.Add(propertyValueDouble);
+                            textBox.Text = "Double: give range";
                         }
-
-                        for (int i = 0; i < propertyValueStrings.Count; i++)
+                        if (propertyValueType == "Boolean")
                         {
-                            for (int k = i + 1; k < propertyValueStrings.Count; k++)
+                            bool propertyValueBool = (bool) propertyValueTrue;
+                            propertyValueBools.Add(propertyValueBool);
+                            textBox.Text = "Boolean: True or False";
+                        }
+                        if (propertyValueType == "String")
+                        {
+                            string propertyValueString = (string) propertyValueTrue;
+                            propertyValueStrings.Add(propertyValueString);
+
+                            //print only different value of 'string' to the textbox
+                            List<bool> diffString = new List<bool> {};
+
+                            for (int i = 0; i < propertyValueStrings.Count; i++)
+                            {
+                                diffString.Add(true);
+                            }
+
+                            for (int i = 0; i < propertyValueStrings.Count; i++)
+                            {
+                                for (int k = i + 1; k < propertyValueStrings.Count; k++)
+                                {
+                                    if (diffString[i] == true)
+                                    {
+                                        if (propertyValueStrings[i] == propertyValueStrings[k])
+                                        {
+                                            diffString[i] = false;
+                                        }
+
+                                    }
+                                }
+                            }
+
+
+                            textBox.Text = "String: has ";
+                            for (int i = 0; i < diffString.Count; i++)
                             {
                                 if (diffString[i] == true)
                                 {
-                                    if (propertyValueStrings[i] == propertyValueStrings[k]) { diffString[i] = false; }
+                                    textBox.Text += propertyValueStrings[i];
 
                                 }
                             }
-                        }
 
-
-                        textBox.Text = "String: has ";
-                        for (int i = 0; i < diffString.Count; i++)
-                        {
-                            if (diffString[i] == true)
-                            {
-                                textBox.Text += propertyValueStrings[i];
-
-                            }
                         }
 
                     }
-
+                    else
+                    {
+                        return;
+                    }
                 }
-                else { return; }
             }
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            {
+                var selectedItem = (ComboboxItem)(comboBoxProperties.SelectedItem);
+                var property = selectedItem.Value as Xbim.Ifc4.PropertyResource.IfcProperty;
+                if (property == null) return;
+
+                var selectedPropertySet = ((ComboboxItem)(comboBoxPropertySet.SelectedItem)).Value as Xbim.Ifc4.Kernel.IfcPropertySet;
+
+                var selectedItemIds = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
+                if (selectedItemIds == null) return;
+
+                List<double> propertyValueDoubles = new List<double> { };
+                List<bool> propertyValueBools = new List<bool> { };
+                List<string> propertyValueStrings = new List<string> { };
 
 
+                for (int j = 0; j < selectedItemIds.Count; j++)
+                {
+                    var selectedProduct =
+                        xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[j]);
+                    var propertySet = selectedProduct.PropertySets.ToList()
+                        .Find(x => x.Name == selectedPropertySet.Name);
+                    var oneProperty = propertySet.HasProperties.ToList().Find(x => x.Name == property.Name);
+                    string propertyType = oneProperty.GetType().ToString();
+                    if (propertyType == "Xbim.Ifc4.PropertyResource.IfcPropertySingleValue")
+                    {
+                        var property2 = property as Xbim.Ifc4.PropertyResource.IfcPropertySingleValue;
+                        var propertyValue = property2.NominalValue;
+                        object propertyValueTrue = property2.NominalValue.Value;
+                        string propertyValueType = propertyValue.UnderlyingSystemType.Name;
+                        if (propertyValueType == "Double")
+                        {
+                            double propertyValueDouble = (double)propertyValueTrue;
+                            propertyValueDoubles.Add(propertyValueDouble);
+                            textBox.Text = "Double: give range";
+                        }
+                        if (propertyValueType == "Boolean")
+                        {
+                            bool propertyValueBool = (bool)propertyValueTrue;
+                            propertyValueBools.Add(propertyValueBool);
+                            textBox.Text = "Boolean: True or False";
+                        }
+                        if (propertyValueType == "String")
+                        {
+                            string propertyValueString = (string)propertyValueTrue;
+                            propertyValueStrings.Add(propertyValueString);
+
+                            //print only different value of 'string' to the textbox
+                            List<bool> diffString = new List<bool> { };
+
+                            for (int i = 0; i < propertyValueStrings.Count; i++)
+                            {
+                                diffString.Add(true);
+                            }
+
+                            for (int i = 0; i < propertyValueStrings.Count; i++)
+                            {
+                                for (int k = i + 1; k < propertyValueStrings.Count; k++)
+                                {
+                                    if (diffString[i] == true)
+                                    {
+                                        if (propertyValueStrings[i] == propertyValueStrings[k])
+                                        {
+                                            diffString[i] = false;
+                                        }
+
+                                    }
+                                }
+                            }
+
+
+                            textBox.Text = "String: has ";
+                            for (int i = 0; i < diffString.Count; i++)
+                            {
+                                if (diffString[i] == true)
+                                {
+                                    textBox.Text += propertyValueStrings[i];
+
+                                }
+                            }
+
+                        }
+
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
         }
 
 

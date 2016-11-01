@@ -155,7 +155,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             ///
             /// ifc wall thickness calculation, saved in ifcWallThickness list, prepare for energy node
             ///
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
             if (modelid == null) return;
             xModel = DataController.Instance.GetModel(modelid);
             var ifcWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
@@ -212,7 +212,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
         public void Calculate2()
         {
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
             if (modelid == null)
                 return;
             xModel = DataController.Instance.GetModel(modelid);

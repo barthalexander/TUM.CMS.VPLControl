@@ -71,7 +71,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             Console.WriteLine("***This be Calculate() function runnin***");
 
             TTValues = new Hashtable();
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
             if (modelid == null) return;
             xModel = DataController.Instance.GetModel(modelid);
             //the Calculate() function re-loads the input ifc-elements, puts them in the checkBox and also checks whether ThermalTrasmittance(TT) is given or not
@@ -79,7 +79,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var comboBoxElementsSet = ControlElements[2] as ComboBox;
             if (comboBoxElementsSet == null) return;//
             comboBoxElementsSet.Items.Clear();
-            var selectedItemIds = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
+            var selectedItemIds = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
             if (selectedItemIds == null) return;
             TT_available = true;//lets suppose TT is available in every element...If it is not in at least one, then TT_available=false
             Console.WriteLine("***" + selectedItemIds.Count + " ifc-Elements in the input***");

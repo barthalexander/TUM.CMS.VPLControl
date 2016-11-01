@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.UtilityResource;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
-using Xbim.XbimExtensions;
 using System.Collections;
 using Xbim.Ifc;
 
@@ -75,62 +67,132 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     foreach (var model in collection)
                     {
                         textBlock.Text += "Model " + i + "\n\n";
-                        var modelid = ((ModelInfo) (model)).ModelId;
-                        var elementIdsList = ((ModelInfo) (model)).ElementIds;
-                        var res = new HashSet<IfcGloballyUniqueId>(elementIdsList);
-
-
-                        xModel = DataController.Instance.GetModel(modelid);
-                        List<IfcProduct> elements = xModel.Instances.OfType<IfcProduct>().ToList();
-                        foreach (var element in elements)
+                        Type ifcVersion = InputPorts[0].Data.GetType();
+                        if (ifcVersion.Name == "ModelInfoIFC2x3")
                         {
-                            if (res.Contains(element.GlobalId))
-                            {
-                                var text = "";
-                                if (element.Name == "")
-                                {
-                                    text = "n.N" + " (" + element.GlobalId + ")";
-                                }
-                                else
-                                {
-                                    text = element.Name + " (" + element.GlobalId + ")";
-                                }
+                            var modelid = ((ModelInfoIFC2x3)(model)).ModelId;
+                            var elementIdsList = ((ModelInfoIFC2x3)(model)).ElementIds;
+                            var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
 
-                                textBlock.Text += text + "\n";
+
+                            xModel = DataController.Instance.GetModel(modelid);
+                            List<Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>().ToList();
+                            foreach (var element in elements)
+                            {
+                                if (res.Contains(element.GlobalId))
+                                {
+                                    var text = "";
+                                    if (element.Name == "")
+                                    {
+                                        text = "n.N" + " (" + element.GlobalId + ")";
+                                    }
+                                    else
+                                    {
+                                        text = element.Name + " (" + element.GlobalId + ")";
+                                    }
+
+                                    textBlock.Text += text + "\n";
+                                }
                             }
+                            textBlock.Text += "\n\n";
+                            i++;
                         }
-                        textBlock.Text += "\n\n";
-                        i++;
+                        else if (ifcVersion.Name == "ModelInfoIFC4")
+                        {
+                            var modelid = ((ModelInfoIFC4)(model)).ModelId;
+                            var elementIdsList = ((ModelInfoIFC4)(model)).ElementIds;
+                            var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
+
+
+                            xModel = DataController.Instance.GetModel(modelid);
+                            List<Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>().ToList();
+                            foreach (var element in elements)
+                            {
+                                if (res.Contains(element.GlobalId))
+                                {
+                                    var text = "";
+                                    if (element.Name == "")
+                                    {
+                                        text = "n.N" + " (" + element.GlobalId + ")";
+                                    }
+                                    else
+                                    {
+                                        text = element.Name + " (" + element.GlobalId + ")";
+                                    }
+
+                                    textBlock.Text += text + "\n";
+                                }
+                            }
+                            textBlock.Text += "\n\n";
+                            i++;
+                        }
+
                     }
             }
             else
             {
                 textBlock.Text += "Model 1 \n\n";
-                var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
-                var elementIdsList = ((ModelInfo)(InputPorts[0].Data)).ElementIds;
-                var res = new HashSet<IfcGloballyUniqueId>(elementIdsList);
 
-
-                xModel = DataController.Instance.GetModel(modelid);
-                List<IfcProduct> elements = xModel.Instances.OfType<IfcProduct>().ToList();
-                foreach (var element in elements)
+                Type ifcVersion = InputPorts[0].Data.GetType();
+                if (ifcVersion.Name == "ModelInfoIFC2x3")
                 {
-                    if (res.Contains(element.GlobalId))
-                    {
-                        var text = "";
-                        if (element.Name == "")
-                        {
-                            text = "n.N" + " (" + element.GlobalId + ")";
-                        }
-                        else
-                        {
-                            text = element.Name +" ("+ element.GlobalId + ")";
-                        }
+                    var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                    var elementIdsList = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                    var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
 
-                        textBlock.Text += text + "\n";
+
+                    xModel = DataController.Instance.GetModel(modelid);
+                    List<Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>().ToList();
+                    foreach (var element in elements)
+                    {
+                        if (res.Contains(element.GlobalId))
+                        {
+                            var text = "";
+                            if (element.Name == "")
+                            {
+                                text = "n.N" + " (" + element.GlobalId + ")";
+                            }
+                            else
+                            {
+                                text = element.Name + " (" + element.GlobalId + ")";
+                            }
+
+                            textBlock.Text += text + "\n";
+                        }
                     }
+                    textBlock.Text += "\n\n";
                 }
-                textBlock.Text += "\n\n";
+                else if(ifcVersion.Name == "ModelInfoIFC4")
+                {
+                    var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+                    var elementIdsList = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
+                    var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
+
+
+                    xModel = DataController.Instance.GetModel(modelid);
+                    List<Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>().ToList();
+                    foreach (var element in elements)
+                    {
+                        if (res.Contains(element.GlobalId))
+                        {
+                            var text = "";
+                            if (element.Name == "")
+                            {
+                                text = "n.N" + " (" + element.GlobalId + ")";
+                            }
+                            else
+                            {
+                                text = element.Name + " (" + element.GlobalId + ")";
+                            }
+
+                            textBlock.Text += text + "\n";
+                        }
+                    }
+                    textBlock.Text += "\n\n";
+
+                }
+
+                
             }
             
         }

@@ -3,13 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
-using Xbim.XbimExtensions;
 using System.Linq;
 using System.Diagnostics;
 using TUM.CMS.VplControl.IFC.Utilities;
@@ -57,43 +52,89 @@ namespace TUM.CMS.VplControl.IFC.Nodes
        
         public override void Calculate()
         {
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
-
-            if (modelid != null && File.Exists(modelid))
+            Type IfcVersionType = InputPorts[0].Data.GetType();
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                xModel = DataController.Instance.GetModel(modelid);
-               
-                try
+                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+
+                if (modelid != null && File.Exists(modelid))
                 {
-                    var ifcsite = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSite>().ToList();
+                    xModel = DataController.Instance.GetModel(modelid);
 
-                    List<long> ifcRefLong = new List<long>();
-                    List<long> ifcRefLat = new List<long>();
-
-                    ifcRefLong = ifcsite[0].RefLongitude;
-                    ifcRefLat = ifcsite[0].RefLatitude;
-
-                   
-                    if (ifcRefLong != null && ifcRefLat != null)
+                    try
                     {
-                        maps.Source = null;
-                        maps.Source = new Uri("https://www.google.de/maps/@" + ifcRefLat[0] + "." + ifcRefLat[1] + ifcRefLat[2] + ifcRefLat[3] + "," + ifcRefLong[0] + "." + ifcRefLong[1] + ifcRefLong[2] + ifcRefLong[3] + ",15z");
-                        var textBlock = ControlElements[1] as TextBlock;
-                        textBlock.Text = "Geo Coordinates: " + ifcsite[0].RefLatitude.Value.AsDouble + "," + ifcsite[0].RefLongitude.Value.AsDouble;
+                        var ifcsite = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSite>().ToList();
+
+                        List<long> ifcRefLong = new List<long>();
+                        List<long> ifcRefLat = new List<long>();
+
+                        ifcRefLong = ifcsite[0].RefLongitude;
+                        ifcRefLat = ifcsite[0].RefLatitude;
+
+
+                        if (ifcRefLong != null && ifcRefLat != null)
+                        {
+                            maps.Source = null;
+                            maps.Source = new Uri("https://www.google.de/maps/@" + ifcRefLat[0] + "." + ifcRefLat[1] + ifcRefLat[2] + ifcRefLat[3] + "," + ifcRefLong[0] + "." + ifcRefLong[1] + ifcRefLong[2] + ifcRefLong[3] + ",15z");
+                            var textBlock = ControlElements[1] as TextBlock;
+                            textBlock.Text = "Geo Coordinates: " + ifcsite[0].RefLatitude.Value.AsDouble + "," + ifcsite[0].RefLongitude.Value.AsDouble;
+                        }
+                        else
+                        {
+                            var textBlock = ControlElements[1] as TextBlock;
+                            textBlock.Text = "No Geo Coordinates were found on the IFC File";
+                        }
+
+
                     }
-                    else
+                    catch (Exception e)
                     {
-                        var textBlock = ControlElements[1] as TextBlock;
-                        textBlock.Text = "No Geo Coordinates were found on the IFC File";
+                        MessageBox.Show(e.Message);
                     }
-
-
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
                 }
             }
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            {
+                var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+
+                if (modelid != null && File.Exists(modelid))
+                {
+                    xModel = DataController.Instance.GetModel(modelid);
+
+                    try
+                    {
+                        var ifcsite = xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcSite>().ToList();
+
+                        List<long> ifcRefLong = new List<long>();
+                        List<long> ifcRefLat = new List<long>();
+
+                        ifcRefLong = ifcsite[0].RefLongitude;
+                        ifcRefLat = ifcsite[0].RefLatitude;
+
+
+                        if (ifcRefLong != null && ifcRefLat != null)
+                        {
+                            maps.Source = null;
+                            maps.Source = new Uri("https://www.google.de/maps/@" + ifcRefLat[0] + "." + ifcRefLat[1] + ifcRefLat[2] + ifcRefLat[3] + "," + ifcRefLong[0] + "." + ifcRefLong[1] + ifcRefLong[2] + ifcRefLong[3] + ",15z");
+                            var textBlock = ControlElements[1] as TextBlock;
+                            textBlock.Text = "Geo Coordinates: " + ifcsite[0].RefLatitude.Value.AsDouble + "," + ifcsite[0].RefLongitude.Value.AsDouble;
+                        }
+                        else
+                        {
+                            var textBlock = ControlElements[1] as TextBlock;
+                            textBlock.Text = "No Geo Coordinates were found on the IFC File";
+                        }
+
+
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
+                }
+
+            }
+            
 
             
 

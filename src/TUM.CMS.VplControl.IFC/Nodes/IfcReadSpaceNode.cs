@@ -4,22 +4,9 @@ using System.Windows.Controls;
 using System.Xml;
 using TUM.CMS.VplControl.Core;
 using System.Collections.Generic;
-using System.IO;
-using System.Windows.Input;
-using Microsoft.Win32;
-using Xbim.IO;
-using Xbim.ModelGeometry.Scene;
-using Xbim.Presentation;
-using Xbim.XbimExtensions;
 using Xbim.Ifc;
-
-using System.ComponentModel;
 using System.Linq;
 using TUM.CMS.VplControl.IFC.Utilities;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.ProductExtension;
-using Xbim.Ifc2x3.Extensions;
-using Xbim.Ifc2x3.Interfaces;
 using IIfcPhysicalSimpleQuantity = Xbim.Ifc4.Interfaces.IIfcPhysicalSimpleQuantity;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
@@ -69,7 +56,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public override void Calculate()
         {
 
-            var modelid = ((ModelInfo)(InputPorts[0].Data)).ModelId;
+            var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
             
             xModel = DataController.Instance.GetModel(modelid);
 
