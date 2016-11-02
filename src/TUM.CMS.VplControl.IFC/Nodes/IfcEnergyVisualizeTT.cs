@@ -13,12 +13,19 @@ using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.UtilityResource;
 using Xbim.ModelGeometry.Scene;
 using Xbim.Presentation;
+using TUM.CMS.VplControl.IFC.Utilities;
 using System.Reflection;
 using System.Collections;
+using System.Windows.Input;
 using Xbim.Common.Enumerations;
 using Xbim.Ifc;
+using System.Windows.Controls;
 using Xbim.Ifc2x3.IO;
 using Xbim.IO.Esent;
+
+using System.Collections;
+using System.Drawing;
+using Xbim.Common;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -26,6 +33,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         private readonly HelixViewport3D _viewPort;
         public IfcStore XModel;
+
+        public List<ModelInfoIFC2x3> ModelListIFC2x3;
+        public List<ModelInfoIFC2x3> ModelListAll2x3;
+
+        private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
+        
+
+        private Hashtable TTValueColor;
+        private readonly Color NoTTColor = Colors.Red;
+        private List<KeyValuePair<String, object>> _Colors;
 
         public IfcEnergyVisualizeTT(Core.VplControl hostCanvas) : base(hostCanvas)
         {
@@ -35,83 +52,233 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddInputPortToNode("Model", typeof(string));
             AddOutputPortToNode("SelectedEntities", typeof(List<IfcGloballyUniqueId>));
 
-            _viewPort = new HelixViewport3D/*();*/
+            _viewPort = new HelixViewport3D
             {
                 MinWidth = 520,
                 MinHeight = 520
             };
+            RadioButton radioButton_1 = new RadioButton { Content = "pass all" };
+            RadioButton radioButton_2 = new RadioButton { Content = "pass selected", IsChecked = true };
+            //create a bar
+            ProgressBar ColorBar = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
+
+            ColorBar.Height = 20;//defines the height
+            ColorBar.Width = 400;//defines the width
+            //ColorBar.Background=new Color(Color)
+            ColorBar.Value = 0;//just keeps he progress bar empty
+            _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
 
             AddControlToNode(_viewPort);
+            AddControlToNode(radioButton_1);
+            AddControlToNode(radioButton_2);
+            AddControlToNode(ColorBar);
         }
 
         public override void Calculate()
         {
+            //in TTValueColor hashTable we will have <TT,Material(Color)> key-value pairs
+            TTValueColor = new Hashtable();
+            //get all colors available in a list
+            Console.WriteLine("Total of " + _Colors.Count + " Colors available!!");
+            //NoTTMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red));//when TT is not available we use Red
+            OutputPorts[0].Data = null;
+            var button_1 = ControlElements[1] as RadioButton;
+            if (button_1 == null) return;
+            var button_2 = ControlElements[2] as RadioButton;
+            if (button_2 == null) return;
             // Init the viewport
+
             _viewPort.Children.Clear();
             _viewPort.Children.Add(new SunLight());
-
-            var file = InputPorts[0].Data.ToString();
-
-            if (file == null || !File.Exists(file)) return;
-
-            var zufall = new Random();
-            var number = zufall.Next(1, 1000);
-
-            var path = Path.GetTempPath();
-            XModel = IfcStore.Open(file);
-
-            XModel.Close();//?
-
-
-            var context = new Xbim3DModelContext(XModel);
-            //upgrade to new geometry representation, use the default 3D model
-            context.CreateContext();
-
-         
-
-            //in TTValueColor hashTable we will have <TT,Material(Color)> key-value pairs
-            Hashtable TTValueColor = new Hashtable();
-            //get all colors available in a list
-            var _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
-            Console.WriteLine("Total of " + _Colors.Count + " Colors available!!");
-            //Console.WriteLine("The one we use in case of TT not being available is "+ _Colors[_Colors.Count- 1].ToString());
-            //DiffuseMaterial NoTTMaterial = new DiffuseMaterial(new SolidColorBrush((Color)_Colors[_Colors.Count-1].Value));//in case of no TT being available the Color used will be the last one in the list
-            DiffuseMaterial NoTTMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
-            // Loop through Entities and visualize them in the viewport
-            int count = 0;
-            Console.WriteLine("The elements r in total " + XModel.Instances.OfType<IfcProduct>().Count() + ".");
-            foreach (var item in XModel.Instances.OfType<IfcProduct>())
+            ModelListIFC2x3 = new List<ModelInfoIFC2x3>();
+            ModelListAll2x3 = new List<ModelInfoIFC2x3>();
+            Type t = InputPorts[0].Data.GetType();
+            if (t.IsGenericType)
             {
-                // Console.WriteLine(count++);
+                var collection = InputPorts[0].Data as ICollection;
+                if (collection != null)
+                    foreach (var model in collection)
+                    {
+                        var modelId = ((ModelInfo)(model)).ModelId;
+                        var elementIdsList = ((ModelInfo)(model)).ElementIds;
+                        XModel = DataController.Instance.GetModel(modelId, true);
 
-//                var m = new MeshGeometry3D();
-//                GetGeometryFromXbimModel(m, item, XbimMatrix3D.Identity);
-//                // string itemtype = item.GetType().ToString();//...
-//
-//                double TT = GetTTifExists(item);//it TT-property does not exist, it returns -1
-//                                                // Console.WriteLine("TT = "+TT);
-//                DiffuseMaterial Material = null;
-//                if (TTValueColor.ContainsKey(TT))
-//                    Material = TTValueColor[TT] as DiffuseMaterial;
-//                else  //new TT - Material(Color) pair
-//                {
-//                    if (TT == -1)//the TT-Material pair when TT is not available...
-//                    {
-//                        Material = NoTTMaterial;
-//                    }
-//                    else
-//                    {
-//                        Material = new DiffuseMaterial(new SolidColorBrush((Color)_Colors[TTValueColor.Count].Value));
-//                    }
-//                    TTValueColor.Add(TT, Material);
-//                }
-//
-//                var mb = new MeshBuilder(false, false);
-//                VisualizeMesh(mb, m, Material);
+                        ModelListIFC2x3.Add(new ModelInfoIFC2x3(modelId));
+                        ModelListAll2x3.Add(new ModelInfoIFC2x3(modelId));
+                        int indexOfModel = 0;
+                        foreach (var item in ModelListIFC2x3)
+                        {
+                            if (item.ModelId == modelId)
+                            {
+                                indexOfModel = ModelListIFC2x3.IndexOf(item);
+                                break;
+                            }
+                        }
+                        foreach (var item in ModelListAll2x3)
+                        {
+                            if (item.ModelId == modelId)
+                            {
+                                indexOfModel = ModelListAll2x3.IndexOf(item);
+                                break;
+                            }
+                        }
+
+                        var context = new Xbim3DModelContext(XModel);
+                        //upgrade to new geometry represenation, uses the default 3D model
+                        context.CreateContext();
+                        worker_DoWork(XModel, indexOfModel, elementIdsList);
+                        button_1.Checked += (sender, e) => button_1_Checked(sender, e, elementIdsList, indexOfModel);
+                        
+                    }
+            }
+            else
+            {
+                var file = InputPorts[0].Data.ToString();
+
+                var modelId = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                var elementIdsList = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                if (modelId == null) return;
+                int indexOfModel = 0;
+                foreach (var item in ModelListIFC2x3)
+                {
+                    if (item.ModelId == modelId)
+                    {
+                        indexOfModel = ModelListIFC2x3.IndexOf(item);
+                        break;
+                    }
+                }
+                foreach (var item in ModelListAll2x3)
+                {
+                    if (item.ModelId == modelId)
+                    {
+                        indexOfModel = ModelListAll2x3.IndexOf(item);
+                        break;
+                    }
+                }
+                XModel = DataController.Instance.GetModel(modelId, true);
+
+                ModelListIFC2x3.Add(new ModelInfoIFC2x3(modelId));
+                ModelListAll2x3.Add(new ModelInfoIFC2x3(modelId));
+                var context = new Xbim3DModelContext(XModel);
+                //upgrade to new geometry represenation, uses the default 3D model
+                context.CreateContext();
+
+
+                worker_DoWork(XModel, indexOfModel, elementIdsList);
+                button_1.Checked += (sender, e) => button_1_Checked(sender, e, elementIdsList, indexOfModel);
 
             }
-            Console.WriteLine("The colors that have actually been used r " + TTValueColor.Keys.Count + " (distinct TT-Values).");
         }
+
+
+
+        private void button_1_Checked(object sender, RoutedEventArgs e, List<IfcGloballyUniqueId> elementIdsList, int indexOfModel)
+        {
+
+            if (ModelListAll2x3.Count == 1)
+            {
+                ModelListAll2x3[0].ElementIds = elementIdsList;
+                OutputPorts[0].Data = ModelListAll2x3[0];
+            }
+
+            if (ModelListAll2x3.Count > 1)
+            {
+                ModelListAll2x3[indexOfModel].ElementIds = elementIdsList;
+                OutputPorts[0].Data = ModelListAll2x3;
+
+            }
+        }
+
+        private void worker_DoWork(IfcStore xModel, int indexOfModel, List<IfcGloballyUniqueId> elementIdsList)
+        {
+            // Loop through Entities and visualize them in the viewport
+            var res = new HashSet<IfcGloballyUniqueId>(elementIdsList);
+            // xModel = (XbimModel) e.Argument;
+            foreach (var item in xModel.Instances.OfType<IfcProduct>())
+            {
+                if (res.Contains(item.GlobalId))
+                {
+                    var m = new MeshGeometry3D();
+                    GetGeometryFromXbimModel_IFC4(m, item, XbimMatrix3D.Identity);
+                    double TT = GetTTifExists(item);//it TT-property does not exist, it returns -1
+             
+                    DiffuseMaterial Material = null;
+                    Color thisColor;
+                    if (TTValueColor.ContainsKey(TT))
+                        thisColor = (Color)TTValueColor[TT];
+                    else  //new TT - Material(Color) pair
+                    {
+                        if (TT == -1)//the TT-Material pair when TT is not available...
+                        {
+                            thisColor = NoTTColor;
+                        }
+                        else
+                        {
+                            thisColor = (Color)_Colors[TTValueColor.Count].Value;
+
+                        }
+                        TTValueColor.Add(TT, thisColor);
+                    }
+                    var mb = new MeshBuilder(false, false);
+                    VisualizeMesh(mb, m, Material);
+                    //VisualizeMesh(mb, m, mat, item, indexOfModel);
+                }
+
+                // Show whole building with opacity 0.03
+                else
+                {
+                    var m = new MeshGeometry3D();
+                    GetGeometryFromXbimModel_IFC4(m, item, XbimMatrix3D.Identity);
+                    double TT = GetTTifExists(item);//it TT-property does not exist, it returns -1
+
+                    //var mat = GetStyleFromXbimModel(item, 0.03);
+                    DiffuseMaterial Material = null;
+                    Color thisColor;
+                    if (TTValueColor.ContainsKey(TT))
+                        thisColor = (Color)TTValueColor[TT];
+                    else  //new TT - Material(Color) pair
+                    {
+                        if (TT == -1)//the TT-Material pair when TT is not available...
+                        {
+                            thisColor = NoTTColor;
+                        }
+                        else
+                        {
+                            thisColor = (Color)_Colors[TTValueColor.Count].Value;
+                        }
+                        TTValueColor.Add(TT, thisColor);
+                    }
+                    Material = new DiffuseMaterial(new SolidColorBrush(thisColor));
+                    var mb = new MeshBuilder(false, false);
+                    VisualizeMesh(mb, m, Material);
+                    //VisualizeMesh(mb, m, mat, item, indexOfModel);
+                }
+
+                Console.WriteLine("The colors that are actually being used are " + TTValueColor.Keys.Count + " (distinct TT-Values).");
+                List<double> SortedTTs = TTValueColor.Keys.OfType<double>().ToList();
+                SortedTTs.Sort();
+                SortedTTs.RemoveAt(0);//remove the NoTTColor (Red)
+
+                GradientStopCollection colorsCollection = new GradientStopCollection();
+
+                double i = 0;
+                double inc = 1.0 / SortedTTs.Count;
+                foreach (double c in SortedTTs)
+                {
+                    Color col = (Color)TTValueColor[c];
+                    colorsCollection.Add(new GradientStop(col, i));
+                    i += inc;
+                    Console.WriteLine("**** TT of " + c + " is in " + col + "****");
+                }
+
+                LinearGradientBrush colors = new LinearGradientBrush(colorsCollection, 0);
+
+                ProgressBar ColorBar = ControlElements[4] as ProgressBar;
+                ColorBar.Background = colors;
+
+            }
+        }
+
 
         public /*static*/ Dictionary<string, object> GetStaticPropertyBag(Type t)
         {
@@ -147,6 +314,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             return -1;//TT property was not found in this element...
         }
 
+
         public override Node Clone()
         {
             return new IfcParseGeometryNode(HostCanvas)
@@ -156,11 +324,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
 
-        /// <summary>
-        ///     VisualizeMesh in the Viewport
-        /// </summary>
-        /// <param name="meshBuilder"></param>
-        /// <param name="mesh"></param>
+     
         public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat)
         {
             // Output on console
@@ -177,9 +341,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     points[mesh.TriangleIndices[i + 2]]);
             }
 
-            // TODO: Color has to be read! 
 
-            // Create the Geometry
             var myGeometryModel = new GeometryModel3D
             {
                 //Material = new DiffuseMaterial(new SolidColorBrush(Colors.Aqua)),
@@ -197,67 +359,104 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             return true;
         }
+      
+        protected void OnElementMouseDown(object sender, MouseButtonEventArgs e, IfcEnergyVisualizeTT ifcParseGeometryNode, IfcProduct itemModel, int indexOfModel)
+        {
+            // Check null expression
+            // if (e == null) throw new ArgumentNullException(nameof(e));
+            // 1-CLick event
+            if (e.LeftButton != MouseButtonState.Pressed)
+                return;
 
-        /// <summary>
-        ///     Create MeshGeometry3D
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="item"></param>
-        /// <param name="wcsTransform"></param>
-//        public void GetGeometryFromXbimModel(MeshGeometry3D m, IPersistIfcEntity item, XbimMatrix3D wcsTransform)
-//        {
-//            var model = item.ModelOf as XbimModel;
-//            if (model == null || !(item is IfcProduct))
-//                return;
-//
-//            switch (model.GeometrySupportLevel)
-//            {
-//                case 2:
-//                    var context = new Xbim3DModelContext(model);
-//
-//                    var productShape = context.ShapeInstancesOf((IfcProduct)item)
-//                        .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-//                        .ToList();
-//                    if (!productShape.Any() && item is IfcFeatureElement)
-//                    {
-//                        productShape = context.ShapeInstancesOf((IfcProduct)item)
-//                            .Where(
-//                                s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
-//                            .ToList();
-//                    }
-//
-//                    if (!productShape.Any())
-//                        return;
-//                    foreach (var shapeInstance in productShape)
-//                    {
-//                        IXbimShapeGeometryData shapeGeom =
-//                            context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
-//                        switch ((XbimGeometryType)shapeGeom.Format)
-//                        {
-//                            case XbimGeometryType.PolyhedronBinary:
-//                                m.Read(shapeGeom.ShapeData,
-//                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-//                                break;
-//                            case XbimGeometryType.Polyhedron:
-//                                m.Read(((XbimShapeGeometry)shapeGeom).ShapeData,
-//                                    XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
-//                                break;
-//                        }
-//                    }
-//                    break;
-//                case 1:
-//                    var xm3D = new XbimMeshGeometry3D();
-//                    var geomDataSet = model.GetGeometryData(item.EntityLabel, XbimGeometryType.TriangulatedMesh);
-//                    foreach (var geomData in geomDataSet)
-//                    {
-//#pragma warning disable 618
-//                        var gd = geomData.TransformBy(wcsTransform);
-//#pragma warning restore 618
-//                        xm3D.Add(gd);
-//                    }
-//                    m.Add(xm3D);
-//                    break;
-//            }
-//        }
+            // Get sender
+            var element = sender as ModelUIElement3D;
+
+            // Check Type
+            if (element != null)
+            {
+                var geometryModel3D = element.Model as GeometryModel3D;
+                if (geometryModel3D == null)
+                    return;
+
+                // If it is already selected ... Deselect
+                if (ModelListIFC2x3[indexOfModel].ElementIds.Contains(itemModel.GlobalId))
+                {
+                    geometryModel3D.Material = geometryModel3D.BackMaterial;
+                    ModelListIFC2x3[indexOfModel].ElementIds.Remove(itemModel.GlobalId);
+                }
+                // If not ... Select!
+                else
+                {
+                    ModelListIFC2x3[indexOfModel].AddElementIds(itemModel.GlobalId);
+                    geometryModel3D.Material = _selectionMaterial;
+                }
+            }
+
+            var button_2 = ControlElements[2] as RadioButton;
+            if (button_2 == null) return;
+            if ((bool)button_2.IsChecked)
+            {
+                if (ModelListIFC2x3.Count == 1)
+                {
+                    OutputPorts[0].Data = ModelListIFC2x3[0];
+
+                }
+                // Set selected models to Output ...  
+                if (ModelListIFC2x3.Count > 1)
+                {
+                    OutputPorts[0].Data = ModelListIFC2x3;
+
+                }
+
+            }
+
+            // button_2.Checked += (sender2,e2)=>button_2_Checked(sender2,e2,indexOfModel);
+
+            e.Handled = true;
+        }
+        private void button_2_Checked(object sender2, RoutedEventArgs e2, int indexOfModel)
+        {
+
+        }
+
+        //check here
+        public void GetGeometryFromXbimModel_IFC4(MeshGeometry3D m, IPersistEntity item, XbimMatrix3D wcsTransform)
+        {
+            if (item.Model == null || !(item is Xbim.Ifc4.Kernel.IfcProduct)) return;
+
+            var context = new Xbim3DModelContext(item.Model);
+
+            var productShape = context.ShapeInstancesOf((Xbim.Ifc4.Interfaces.IIfcProduct)item)
+                .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                .ToList();
+            if (!productShape.Any() && item is Xbim.Ifc4.Interfaces.IIfcFeatureElement)
+            {
+                productShape = context.ShapeInstancesOf((Xbim.Ifc4.Interfaces.IIfcProduct)item)
+                    .Where(
+                        s => s.RepresentationType == XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
+                    .ToList();
+            }
+
+            if (!productShape.Any())
+                return;
+            foreach (var shapeInstance in productShape)
+            {
+                IXbimShapeGeometryData shapeGeom =
+                    context.ShapeGeometry(shapeInstance.ShapeGeometryLabel);
+                switch ((XbimGeometryType)shapeGeom.Format)
+                {
+                    case XbimGeometryType.PolyhedronBinary:
+                        m.Read(shapeGeom.ShapeData,
+                            XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+                        break;
+                    case XbimGeometryType.Polyhedron:
+                        m.Read(((XbimShapeGeometry)shapeGeom).ShapeData,
+                            XbimMatrix3D.Multiply(shapeInstance.Transformation, wcsTransform));
+                        break;
+                }
+            }
+
+        }
     }
-}
+        }
+    
