@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,24 @@ using Xbim.IO;
 using Xbim;
 using TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses;
 using System.Collections;
+<<<<<<< HEAD
+using Xbim.Ifc2x3.UtilityResource;
+using Xbim.Common;
+using Xbim.Common.Metadata;
+using Xbim.Common.Step21;
+using Xbim.Ifc;
+using Xbim.Ifc2x3.Kernel;
+using Xbim.Ifc2x3.ProductExtension;
+using Xbim.Presentation;
+
+
+
+namespace TUM.CMS.VplControl.IFC.Nodes
+{
+    public class IfcFilterWithMvd : Node
+    {
+        public IfcStore  xModel;
+=======
  using Xbim.Ifc;
 
 
@@ -20,6 +38,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     public class IfcFilterWithMvd : Node
     {
         public IfcStore xModel;
+>>>>>>> 07126a31ffd1783d5cccc62e5e40e23cef93a096
         public ModelInfo outputInfo;
         public HashSet<String> ChosenEntities;
 
@@ -44,6 +63,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            
+            //Find all ConceptRoots (example Slabs) in Model View
+
+            //Filter IFC for ConceptRoots
+
+            //Find all Concept in Model View and their referencing ConceptTemplate in Templates
+
+            //save the TemplateRule(in Rules<Concept<Model View) information for further use
+
+            //filter IFC for TemplateRule value
+
+
             Console.WriteLine(" 1 BEGIN");
 
             //get xbim-model of the ifc-file from the IfcParseNode
@@ -74,6 +105,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
 
 
+<<<<<<< HEAD
+            xModel = DataController.Instance.GetModel(modelid);
+            /*                   
+            foreach (IfcGloballyUniqueId uid in elementsids)
+             {
+                 Console.WriteLine(uid);
+             }
+             */
+            Console.WriteLine("elementsids.Count()={0}", elementsids.Count());  //-->1076
+=======
+>>>>>>> 07126a31ffd1783d5cccc62e5e40e23cef93a096
 
 
                 //Console.WriteLine("xModel.IfcSite.Count()={0}", IfcCount);
@@ -156,6 +198,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
+<<<<<<< HEAD
+                IfcLocalPlacementFiltered.Add(item.GlobalId);
+
+=======
 
                 //Console.WriteLine("xModel.IfcSite.Count()={0}", IfcCount);
                 /*
@@ -211,6 +257,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     //IfcLocalPlacementFiltered.Add(item.GlobalId);
 
                 }
+>>>>>>> 07126a31ffd1783d5cccc62e5e40e23cef93a096
             }
 
         }
@@ -313,4 +360,4 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
     }
- }
+}
