@@ -143,20 +143,27 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     var copied = new XbimInstanceHandleMap(xModel, newModel);
                     if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc2X3)
                     {
+                        ModelInfoIFC2x3 modelInfo = new ModelInfoIFC2x3(copyFile);
                         foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
                         {
                             newModel.InsertCopy(item, copied, propTransform, true, true);
+                            modelInfo.AddElementIds(item.GlobalId);
                         }
+                        e.Result = modelInfo;
                     }
                     else
                     {
+                        ModelInfoIFC4 modelInfo = new ModelInfoIFC4(copyFile);
                         foreach (var item in xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
                         {
                             newModel.InsertCopy(item, copied, propTransform, true, true);
+                            modelInfo.AddElementIds(item.GlobalId);
+
                         }
+                        e.Result = modelInfo;
                     }
 
-                    
+
                     txn.Commit();
                     newModel.SaveAs(copyFile);
                 }
@@ -167,33 +174,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             xModel.Close();
 
             DataController.Instance.AddModel(copyFile, xModel);
-
-
-
-            xModel = DataController.Instance.GetModel(copyFile);
-            if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc2X3)
-            {
-                ModelInfoIFC2x3 modelInfo = new ModelInfoIFC2x3(copyFile);
-                List< Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType< Xbim.Ifc2x3.Kernel.IfcProduct> ().ToList();
-                foreach (var element in elements)
-                {
-                    modelInfo.AddElementIds(element.GlobalId);
-                }
-                e.Result = modelInfo;
-            }
-            else
-            {
-                ModelInfoIFC4 modelInfo = new ModelInfoIFC4(copyFile);
-                List< Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType< Xbim.Ifc4.Kernel.IfcProduct> ().ToList();
-                foreach (var element in elements)
-                {
-                    modelInfo.AddElementIds(element.GlobalId);
-                }
-                e.Result = modelInfo;
-            }
-
-            
-            
 
            
         }

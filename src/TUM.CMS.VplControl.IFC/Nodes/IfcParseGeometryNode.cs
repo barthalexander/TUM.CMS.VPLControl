@@ -135,7 +135,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             context.CreateContext();
                             worker_DoWork_IFC2x3(_xModel, indexOfModel, elementIdsList);
                             button_1.Checked += (sender, e) => button_1_Checked_IFC2x3(sender, e, elementIdsList, indexOfModel);
-                            worker = new BackgroundWorker();
                         }
                         else if (IfcVersionType.Name == "ModelInfoIFC4")
                         {
@@ -168,7 +167,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             context.CreateContext();
                             worker_DoWork_IFC4(_xModel, indexOfModel, elementIdsList);
                             button_1.Checked += (sender, e) => button_1_Checked_IFC4(sender, e, elementIdsList, indexOfModel);
-                            worker = new BackgroundWorker();
                         }
                     }
                 }
@@ -328,7 +326,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
                     
                     var mat = GetStyleFromXbimModel_IFC2x3(item);
-                    // var mat = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
 
                     var mb = new MeshBuilder(false, false);
 
@@ -732,8 +729,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var productShape = context.ShapeInstancesOf((Xbim.Ifc4.Interfaces.IIfcProduct)item)
                 .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
                 .ToList();
-
-            var wpfMaterial = GetWpfMaterial(item.Model, productShape[0].StyleLabel);
+            Material wpfMaterial = null;
+            if (productShape.Count > 0)
+            {
+                wpfMaterial = GetWpfMaterial(item.Model, productShape[0].StyleLabel);
+            }
+            else
+            {
+                wpfMaterial = GetWpfMaterial(item.Model, 0);
+            }
 
             ((System.Windows.Media.Media3D.DiffuseMaterial)wpfMaterial).Brush.Opacity = opacity;
             return wpfMaterial;
@@ -746,7 +750,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 .Where(s => s.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded)
                 .ToList();
 
-            var wpfMaterial = GetWpfMaterial(item.Model, productShape[0].StyleLabel);
+            Material wpfMaterial = null;
+            if (productShape.Count > 0)
+            {
+                wpfMaterial = GetWpfMaterial(item.Model, productShape[0].StyleLabel);
+            }
+            else
+            {
+                wpfMaterial = GetWpfMaterial(item.Model, 0);
+            }
 
             ((System.Windows.Media.Media3D.DiffuseMaterial)wpfMaterial).Brush.Opacity = opacity;
             return wpfMaterial;

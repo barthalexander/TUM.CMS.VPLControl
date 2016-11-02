@@ -12,24 +12,6 @@ using Xbim.IO;
 using Xbim;
 using TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses;
 using System.Collections;
-<<<<<<< HEAD
-using Xbim.Ifc2x3.UtilityResource;
-using Xbim.Common;
-using Xbim.Common.Metadata;
-using Xbim.Common.Step21;
-using Xbim.Ifc;
-using Xbim.Ifc2x3.Kernel;
-using Xbim.Ifc2x3.ProductExtension;
-using Xbim.Presentation;
-
-
-
-namespace TUM.CMS.VplControl.IFC.Nodes
-{
-    public class IfcFilterWithMvd : Node
-    {
-        public IfcStore  xModel;
-=======
  using Xbim.Ifc;
 
 
@@ -38,7 +20,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     public class IfcFilterWithMvd : Node
     {
         public IfcStore xModel;
->>>>>>> 07126a31ffd1783d5cccc62e5e40e23cef93a096
         public ModelInfo outputInfo;
         public HashSet<String> ChosenEntities;
 
@@ -104,18 +85,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     comboBox.Items.Clear();
                 }
 
-
-<<<<<<< HEAD
-            xModel = DataController.Instance.GetModel(modelid);
-            /*                   
-            foreach (IfcGloballyUniqueId uid in elementsids)
-             {
-                 Console.WriteLine(uid);
-             }
-             */
-            Console.WriteLine("elementsids.Count()={0}", elementsids.Count());  //-->1076
-=======
->>>>>>> 07126a31ffd1783d5cccc62e5e40e23cef93a096
 
 
                 //Console.WriteLine("xModel.IfcSite.Count()={0}", IfcCount);
@@ -197,12 +166,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
 
 
-
-<<<<<<< HEAD
-                IfcLocalPlacementFiltered.Add(item.GlobalId);
-
-=======
-
                 //Console.WriteLine("xModel.IfcSite.Count()={0}", IfcCount);
                 /*
                 foreach (IfcGloballyUniqueId el in elementsids)
@@ -257,7 +220,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     //IfcLocalPlacementFiltered.Add(item.GlobalId);
 
                 }
->>>>>>> 07126a31ffd1783d5cccc62e5e40e23cef93a096
             }
 
         }
