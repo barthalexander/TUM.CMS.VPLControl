@@ -11,7 +11,7 @@ namespace TUM.CMS.VplControl.IFC.Utilities
     public class MvdXMLReader
     {
         public string filepath { get; set; }
-        private Templates templates { get; set; }
+        public Templates templates { get; set; }
         private ModelView modelView;
         public MvdXMLReader(string filepath)
         {

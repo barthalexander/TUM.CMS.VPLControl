@@ -42,8 +42,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddControlToNode(label);
         }
 
-
-
         public override void Calculate()
         {
             Console.WriteLine(" 1 BEGIN");
@@ -116,7 +114,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var ifcDirection = xModel.Instances.OfType<Xbim.Ifc2x3.GeometryResource.IfcDirection>().ToList();
                 //there are Not in the IFC file 
                 var ifcRelNests = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcRelNests>().ToList();
-                var ifcFlowDirectionEnum = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgServiceElements.IfcFlowDirectionEnum>().ToList();
+                //var ifcFlowDirectionEnum = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgServiceElements.IfcFlowDirectionEnum>().ToList();
                 // IfcDistributionSystemEnum --> NOT FOUND
 
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> IfcLocalPlacementFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
@@ -129,7 +127,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 foreach (var item in ifcLocalPlacement)
                 {
 
-                    IfcLocalPlacementFiltered.Add(item.);
+                    //IfcLocalPlacementFiltered.Add(item.GlobalId);
 
                 }
             }
@@ -197,7 +195,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var ifcDirection = xModel.Instances.OfType<Xbim.Ifc4.GeometryResource.IfcDirection>().ToList();
                 //there are Not in the IFC file 
                 var ifcRelNests = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcRelNests>().ToList();
-                var ifcFlowDirectionEnum = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgServiceElements.IfcFlowDirectionEnum>().ToList();
+                //var ifcFlowDirectionEnum = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgServiceElements.IfcFlowDirectionEnum>().ToList();
                 // IfcDistributionSystemEnum --> NOT FOUND
 
                 List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> IfcLocalPlacementFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
@@ -210,19 +208,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 foreach (var item in ifcLocalPlacement)
                 {
 
-                    IfcLocalPlacementFiltered.Add(item.GlobalId);
+                    //IfcLocalPlacementFiltered.Add(item.GlobalId);
 
                 }
             }
 
-
-
-            
-
         }
-
-
-
 
         //Every template has one CONCEPTTEMPLATE
         //dict : current ConceptTemplate
