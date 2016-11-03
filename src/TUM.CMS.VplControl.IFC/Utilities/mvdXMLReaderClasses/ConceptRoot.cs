@@ -23,5 +23,10 @@ namespace TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses
             concepts.Add(uuid, concept);
         }
 
+        public Dictionary<string, Concept> GetAllConcepts()
+        {
+            return concepts;
+        }
+
     }
 }

@@ -26,10 +26,20 @@ namespace TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses
         {
             return exchangeRequirements[uuid];
         }
+        public Dictionary<string, ExchangeRequirement> GetAllExchangeRequirements()
+        {
+            return exchangeRequirements;
+        }
+
 
         public void addRoots(string uuid, ConceptRoot conceptRoot)
         {
             roots.Add(uuid, conceptRoot);
+        }
+
+        public Dictionary<string, ConceptRoot> GetAllConceptRoots()
+        {
+            return roots;
         }
 
         public void addDefinition(Definition definition)

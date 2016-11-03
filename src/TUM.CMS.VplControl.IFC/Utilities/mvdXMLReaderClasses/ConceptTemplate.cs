@@ -32,6 +32,11 @@ namespace TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses
         {
             subTemplates.Add(template);
         }
+
+        public List<Templates> getAllSubTemplates()
+        {
+            return subTemplates;
+        }
         public void setUUID(string uuid)
         {
             this.uuid = uuid;

@@ -80,6 +80,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null)
+                return;
+
             var file = InputPorts[0].Data.ToString();
             if (file != "" && File.Exists(file))
             {
@@ -125,49 +128,28 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
 
             
-
+            File.Copy(file, copyFile);
             using (xModel = IfcStore.Open(file))
             {
-
-                var newModel = IfcStore.Create(xModel.IfcSchemaVersion, XbimStoreType.InMemoryModel);
-                //var newModel = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
-                PropertyTranformDelegate propTransform = delegate(ExpressMetaProperty prop, object toCopy)
+                if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc2X3)
                 {
-                    var value = prop.PropertyInfo.GetValue(toCopy, null);
-                    return value;
-                };
-
-                
-                using (var txn = newModel.BeginTransaction())
-                {
-                    var copied = new XbimInstanceHandleMap(xModel, newModel);
-                    if (xModel.IfcSchemaVersion == IfcSchemaVersion.Ifc2X3)
+                    ModelInfoIFC2x3 modelInfo = new ModelInfoIFC2x3(copyFile);
+                    foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
                     {
-                        ModelInfoIFC2x3 modelInfo = new ModelInfoIFC2x3(copyFile);
-                        foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
-                        {
-                            newModel.InsertCopy(item, copied, propTransform, true, true);
-                            modelInfo.AddElementIds(item.GlobalId);
-                        }
-                        e.Result = modelInfo;
+                        modelInfo.AddElementIds(item.GlobalId);
                     }
-                    else
-                    {
-                        ModelInfoIFC4 modelInfo = new ModelInfoIFC4(copyFile);
-                        foreach (var item in xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
-                        {
-                            newModel.InsertCopy(item, copied, propTransform, true, true);
-                            modelInfo.AddElementIds(item.GlobalId);
-
-                        }
-                        e.Result = modelInfo;
-                    }
-
-
-                    txn.Commit();
-                    newModel.SaveAs(copyFile);
+                    e.Result = modelInfo;
                 }
-                newModel.Close();
+                else
+                {
+                    ModelInfoIFC4 modelInfo = new ModelInfoIFC4(copyFile);
+                    foreach (var item in xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
+                    {
+                        modelInfo.AddElementIds(item.GlobalId);
+
+                    }
+                    e.Result = modelInfo;
+                }
             }
 
 

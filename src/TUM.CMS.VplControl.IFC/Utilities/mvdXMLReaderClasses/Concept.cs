@@ -31,6 +31,16 @@ namespace TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses
             subConcepts.Add(uuid, concept);
         }
 
+        public Dictionary<string, Concept> GetAllSubConcepts()
+        {
+            return subConcepts;
+        }
+
+        public Dictionary<string, Requirement> GetAllRequirements()
+        {
+            return requirements;
+        }
+
         public void setConceptTemplate(ConceptTemplate conceptTemplate)
         {
             this.conceptTemplate = conceptTemplate;

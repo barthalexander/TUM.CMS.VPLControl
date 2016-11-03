@@ -67,6 +67,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null)
+                return;
+
             OutputPorts[0].Data = null;
             var button_1 = ControlElements[1] as RadioButton;
             if (button_1 == null) return;
