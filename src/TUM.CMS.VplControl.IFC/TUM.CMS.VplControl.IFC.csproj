@@ -164,7 +164,7 @@
   <ItemGroup>
     <Compile Include="Nodes\IfcEnergyCalculateVisualizeTT.cs" />
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
-    <Compile Include="Nodes\IfcMvdFilter_Another_Version.cs" />
+    <Compile Include="Nodes\IfcMvdChecker_Another_Version.cs" />
     <Compile Include="Nodes\IfcPartialModel.cs" />
     <Compile Include="Nodes\IfcPropertyFilterNode.cs" />
     <Compile Include="Nodes\IfcFilterNode.cs" />

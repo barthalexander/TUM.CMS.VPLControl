@@ -22,6 +22,9 @@ using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Presentation;
 using System.Reflection;
 
+
+
+
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcMvdChecker_Another_Version : Node
@@ -31,16 +34,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public ModelInfoIFC4 OutputInfoIfc4;
         public Type IfcVersionType = null;
         public bool match;
+        public List<IfcProduct> elements = new List<IfcProduct> { };
 
         public HashSet<String> ChosenEntities;
-
+        public object transporting;
 
         public IfcMvdChecker_Another_Version(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
             AddInputPortToNode("IfcFile", typeof(object));
             AddInputPortToNode("MvdFile", typeof(object));
-           
+
 
             AddOutputPortToNode("FilteredIfc", typeof(object));
 
@@ -87,6 +91,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 case "Slab":
                     if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList() == null) { conceptRootMatch = false; Console.WriteLine("missing concept root Slab"); return conceptRootMatch; }
+                    else { elements.AddRange(xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList()); }
                     break;
                 case "Wall":
                     if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList() == null) { conceptRootMatch = false; Console.WriteLine("missing concept root Wall"); return conceptRootMatch; }
@@ -123,36 +128,106 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     break;
             }
 
-            Dictionary<string, Concept> allConcepts = conceptRoot.GetAllConcepts();            
+            Dictionary<string, Concept> allConcepts = conceptRoot.GetAllConcepts();
 
             if (allConcepts.Count > 0)
             {
                 foreach (var item in allConcepts)
                 {
                     conceptRootMatch = CheckConcept(item.Value);
-                    if (conceptRootMatch == false) { return conceptRootMatch;}
+                    if (conceptRootMatch == false) { return conceptRootMatch; }
                 }
             }
 
+
+
             return true;
-            
+
         }
 
+        public static Type[] getTypeByName(string className)
+        {
+            List<Type> returnVal = new List<Type>();
+            
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Type[] assemblyTypes = a.GetTypes();
+                for (int j = 0; j < assemblyTypes.Length; j++)
+                {
+                    if (assemblyTypes[j].Name == className)
+                    {
+                        returnVal.Add(assemblyTypes[j]);
+                        if(returnVal.Count==2) return returnVal.ToArray();
+                    }
+                }
+            }
 
+            return returnVal.ToArray();
+        }
 
+        public T Cast<T>(object input)
+        {
+            return (T)input;
+        }
         public bool CheckConcept(Concept concept)
         {
+            //Get ConceptTemplate Name from MVD
+            string conceptName = concept.name;
+            conceptName = string.Join("", conceptName.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
+            conceptName = "Ifc" + conceptName;
+
+            //convert ConceptTemplate MVD into corresponding Types in IfcModel
+            Type[] TypesOfConceptInMvd= getTypeByName(conceptName);
+            //Xbim.Ifc2x3.MaterialResource.IfcMaterialLayerSetUsage
+            
+            foreach (Type TypeOfConceptInMvd in TypesOfConceptInMvd)
+            {
+                var IfcProperties = elements[0].GetType().GetProperties();
+
+                Type[] interfaces=TypeOfConceptInMvd.GetInterfaces();
+                                        
+
+                foreach (Type item in interfaces)
+                {
+                    
+                    if(IfcProperties.FirstOrDefault(a => a.PropertyType == item)!=null)
+                    {
+                        PropertyInfo propertyneeded = IfcProperties.FirstOrDefault(a => a.PropertyType == item);
+                        //var obj = Activator.CreateInstance(types[1]);
+                        var obj=propertyneeded.GetValue(elements[0]);
+                        
+
+                        PropertyInfo propertyagain=obj.GetType().GetRuntimeProperties().FirstOrDefault(a=>a.Name=="DirectionSense");
+                        var obj2 = propertyagain.GetValue(obj);
+                        
+                        //if(obj2==POSITIVE)
+                    }
+                    
+                }
+
+
+
+                
+
+                //Xbim.Ifc4.Interfaces.IIfcMaterialSelect
+                  //  IfcObjectDefinition.
+               // PropertyInfo propertyneeded= properties.FirstOrDefault(a => a.PropertyType==types[0]);
+
+            }
+
+            //Assembly resultAssembly = assemblies.FirstOrDefault(a => a.GetType("IfcMaterialLayerSetUsage", false) != null);
+
             bool conceptMatch = true;
             ConceptTemplate conceptTemplate = concept.getConceptTemplate();
-            conceptMatch=CheckConceptTemplate(conceptTemplate);
-            if(conceptMatch==false) { return conceptMatch; }
+            conceptMatch = CheckConceptTemplate(conceptTemplate);
+            if (conceptMatch == false) { return conceptMatch; }
 
             Dictionary<string, Concept> allSubConcepts = concept.GetAllSubConcepts();
             if (allSubConcepts.Count > 0)
             {
                 foreach (var item in allSubConcepts)
                 {
-                    conceptMatch=CheckConcept(item.Value);
+                    conceptMatch = CheckConcept(item.Value);
 
                 }
             }
@@ -161,6 +236,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public bool CheckConceptTemplate(ConceptTemplate conceptTemplate)
         {
+            bool conceptTemplateMatch = true;
+
+
             Dictionary<string, ConceptTemplate> subConceptTemplates = conceptTemplate.getConceptTemplateses();
             if (subConceptTemplates.Count > 0)
             {
@@ -189,7 +267,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 foreach (var item in attributeRules)
                 {
-                    CheckAttributeRule(item);
+
+                    conceptTemplateMatch = CheckAttributeRuleBegin(item);
+                    if (conceptTemplateMatch == false) { return conceptTemplateMatch; }
                 }
             }
             return true;
@@ -211,27 +291,228 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             return true;
         }
 
-        public bool CheckAttributeRule(AttributeRule attributeRule)
+        public bool CheckAttributeRuleBegin(AttributeRule attributeRule)
         {
-            List<EntityRule> allEntityRules = attributeRule.getEntityRules();
-            if (allEntityRules.Any())
+            bool attributeRuleMatch = true;
+            string attributeRuleName = attributeRule.attributeName;
+            foreach (IfcProduct element in elements)
             {
-                foreach (var item in allEntityRules)
+                if (element.GetType().GetProperty(attributeRuleName).GetValue(element) == null)
                 {
-                    CheckEntityRule(item);
+                    attributeRuleMatch = false;
+                    Console.WriteLine("missing Attribute " + attributeRuleName);
+                    return attributeRuleMatch;
                 }
             }
+
+            List<EntityRule> allEntityRules = attributeRule.getEntityRules();
+
+            foreach (EntityRule entityRule in allEntityRules)
+            {
+               // attributeRuleMatch = CheckEntityRule(entityRule);
+               // if (attributeRuleMatch == false) { return attributeRuleMatch; }
+
+                string entityName = entityRule.entityName;
+                Type[] TypesOfEntityRuleInMvd = getTypeByName("IfcRelAssociatesMaterial");
+
+                foreach (IfcProduct element in elements)
+                {
+                    //get all properties in this IfcProduct
+                    var IfcProperties = element.GetType().GetProperties();
+
+                    //loop over attribute rule types
+                    foreach (Type TypeOfEntityRuleInMvd in TypesOfEntityRuleInMvd)
+                    {
+
+                        Type baseType = TypeOfEntityRuleInMvd.BaseType;
+
+                        foreach (PropertyInfo property in IfcProperties)
+                        {
+                            if (property.PropertyType.IsGenericType)
+                            {
+                                if (property.PropertyType.GetGenericArguments()[0] == baseType)
+                                {
+                                    PropertyInfo IfcPropertyNeeded = property;
+                                    var obj = IfcPropertyNeeded.GetValue(element) as IEnumerable;
+                                    if (obj != null)
+                                    {
+                                        foreach (var item in obj)
+                                        {
+                                            transporting = item;//IfcRelAssociatesMaterial
+                                            if (item.GetType() == TypeOfEntityRuleInMvd)
+                                            {                                             
+                                                attributeRuleMatch = CheckEntityRule(entityRule); //IfcRelAssociatesMaterial
+                                                if (attributeRuleMatch == false) { return attributeRuleMatch; }
+                                            }
+                                        }
+
+                                    }
+
+
+
+                                }
+                            }
+                            else
+                            {
+                                if (property.PropertyType == baseType)
+                                {
+                                    PropertyInfo IfcPropertyNeeded = property;
+                                    var obj = IfcPropertyNeeded.GetValue(element);
+
+                                }
+                            }
+
+                        }
+
+                        Type[] interfaces = TypeOfEntityRuleInMvd.GetInterfaces();
+
+                        foreach (Type item in interfaces)
+                        {
+                            if (IfcProperties.FirstOrDefault(a => a.PropertyType == item) != null)
+                            {
+                                PropertyInfo IfcPropertyNeeded = IfcProperties.FirstOrDefault(a => a.PropertyType == item);
+                                var obj = IfcPropertyNeeded.GetValue(element);
+                            }
+                        }
+
+
+                    }
+                }
+
+            }
+
+    
+                          
+                   
+            
+            
+            return true;
+        }
+
+        public bool CheckAttributeRule(AttributeRule attributeRule)
+        {
+            bool attributeRuleMatch = true;
+            string attributeRuleName = attributeRule.attributeName;//RelatingMaterial
+
+            if (transporting.GetType().GetProperty(attributeRuleName).GetValue(transporting) == null)
+            {
+                attributeRuleMatch = false;
+                Console.WriteLine("missing Attribute " + attributeRuleName);
+                return attributeRuleMatch;
+            }
+
+            List<EntityRule> allEntityRules = attributeRule.getEntityRules();
+
+            if (allEntityRules.Any())
+            {
+                foreach (EntityRule entityRule in allEntityRules)
+                {                   
+                    string entityName = entityRule.entityName;//IfcMaterialLayerSetUsage
+                    Type[] TypesOfEntityRuleInMvd = getTypeByName(entityName);//IfcMaterialLayerSetUsage
+
+
+                    //get all properties in this IfcProduct
+                    var IfcProperties = transporting.GetType().GetProperties();
+
+                    //loop over attribute rule types
+                    foreach (Type TypeOfEntityRuleInMvd in TypesOfEntityRuleInMvd)
+                    {
+
+                        Type baseType = TypeOfEntityRuleInMvd.BaseType;
+
+                        foreach (PropertyInfo property in IfcProperties)
+                        {
+                            if (property.PropertyType.IsGenericType)
+                            {
+                                if (property.PropertyType.GetGenericArguments()[0] == baseType)
+                                {
+                                    PropertyInfo IfcPropertyNeeded = property;
+                                    var obj = IfcPropertyNeeded.GetValue(transporting) as IEnumerable;
+                                    if (obj != null)
+                                    {
+                                        foreach (var item in obj)
+                                        {
+                                            transporting = item;
+                                            if (item.GetType() == TypeOfEntityRuleInMvd)
+                                            {
+                                                CheckEntityRule(entityRule);
+                                            }
+                                        }
+
+                                    }
+
+
+
+                                }
+                            }
+                            else
+                            {
+                                if (property.PropertyType == baseType)
+                                {
+                                    PropertyInfo IfcPropertyNeeded = property;
+                                    var obj = IfcPropertyNeeded.GetValue(transporting);
+
+                                }
+                            }
+
+                        }
+
+                        Type[] interfaces = TypeOfEntityRuleInMvd.GetInterfaces();
+
+                        if (interfaces != null)
+                        {
+                            foreach (Type item in interfaces)
+                            {
+                                if (IfcProperties.FirstOrDefault(a => a.PropertyType == item) != null)
+                                {
+                                    PropertyInfo IfcPropertyNeeded = IfcProperties.FirstOrDefault(a => a.PropertyType == item);
+                                    var obj = IfcPropertyNeeded.GetValue(transporting);
+                                    transporting = obj;
+                                    if (obj.GetType() == TypeOfEntityRuleInMvd)
+                                    {
+                                        attributeRuleMatch = CheckEntityRule(entityRule);
+                                        if (attributeRuleMatch == false) { return attributeRuleMatch; }
+
+                                    }
+                                }
+                            }
+                        }
+ 
+                        
+                            PropertyInfo IfcPropertyNeeded2 = transporting.GetType().GetRuntimeProperties().FirstOrDefault(a => a.Name == attributeRuleName);
+                            var obj2 = IfcPropertyNeeded2.GetValue(transporting);
+                        transporting = obj2;
+
+                        if (obj2.GetType() == TypeOfEntityRuleInMvd)
+                        {
+                            attributeRuleMatch = CheckEntityRule(entityRule);
+                            if (attributeRuleMatch == false) { return attributeRuleMatch; }
+                        }
+
+
+
+
+                    }
+
+
+                }
+            }
+
             return true;
         }
 
         public bool CheckEntityRule(EntityRule entityRule)
         {
+            bool entityRuleMatch = true;
+            string entityName = entityRule.entityName;
+
             List<AttributeRule> allAttributeRules = entityRule.getAttributeRules();
             if (allAttributeRules.Any())
             {
                 foreach (var item in allAttributeRules)
                 {
-                    CheckAttributeRule(item);
+                    entityRuleMatch=CheckAttributeRule(item);
+                    if (entityRuleMatch == false) return entityRuleMatch;
                 }
             }
             return true;
