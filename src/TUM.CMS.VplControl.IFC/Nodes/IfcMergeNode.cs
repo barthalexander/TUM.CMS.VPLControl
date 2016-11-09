@@ -8,12 +8,12 @@ using System.Windows;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcMergeModel : Node
+    public class IfcMergeNode : Node
     {
         public ModelInfoIFC2x3 OutputIfc2x3;
         public ModelInfoIFC4 OutputIfc4;
         public Type IfcVersionType = null;
-        public IfcMergeModel(Core.VplControl hostCanvas) : base(hostCanvas)
+        public IfcMergeNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
 
             var labelModels = new Label { Content = "Merge Models" };

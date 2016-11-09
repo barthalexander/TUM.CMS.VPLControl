@@ -16,10 +16,10 @@ using Xbim.Presentation;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcParseNode : Node
+    public class IfcParserNode : Node
     {
         public IfcStore xModel;
-        public IfcParseNode(Core.VplControl hostCanvas) : base(hostCanvas)
+        public IfcParserNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             AddInputPortToNode("Test", typeof(string));
 
@@ -190,7 +190,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override Node Clone()
         {
-            return new IfcParseNode(HostCanvas)
+            return new IfcParserNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left

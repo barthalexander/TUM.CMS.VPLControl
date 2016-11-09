@@ -19,14 +19,14 @@ using Xbim.Ifc2x3.UtilityResource;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcEnergyCalculateVisualizeTT : Node
+    public class EnergyVisualisationNode : Node
     {
         public const double Rsi = 0.13;
         public const double Rse_1 = 0.04;
         public const double Rse_2 = 0.08;
         public const double Rse_3 = 0.00;
 
-        //CHOSEN VALUES 
+        //CHOSEN VALUES
         public const double l = 1;
         public const double Rse = Rse_1;
 
@@ -39,10 +39,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         private Hashtable TTValueColorCalculated;
         private List<KeyValuePair<String, object>> _Colors;
         private Color TTCannotBeCalculated = Colors.Black;//when TT is not available NOR can be calculated we use Black
-                                                          /*  private Color TTSmaller = Colors.Green;
-                                                              private Color TTBigger = Colors.Red;
+                                                          /*   private Color TTSmaller = Colors.Green;
+                                                               private Color TTBigger = Colors.Red;
                                                           */
-        public IfcEnergyCalculateVisualizeTT(Core.VplControl hostCanvas) : base(hostCanvas)
+        public EnergyVisualisationNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             // Init UI
             IsResizeable = true;
@@ -63,32 +63,33 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             //ColorBar.Background=new Color(Color)
             ColorBarAll.Value = 0;//just keeps he progress bar empty
             _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
+            /*
+                 ProgressBar ColorBarAvailable = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
 
-            ProgressBar ColorBarAvailable = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
+                 ColorBarAvailable.Height = 20;//defines the height
+                 ColorBarAvailable.Width = 400;//defines the width
+                 //ColorBar.Background=new Color(Color)
+                 ColorBarAvailable.Value = 0;//just keeps he progress bar empty
+                 _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
 
-            ColorBarAvailable.Height = 20;//defines the height
-            ColorBarAvailable.Width = 400;//defines the width
-            //ColorBar.Background=new Color(Color)
-            ColorBarAvailable.Value = 0;//just keeps he progress bar empty
-            _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
+                 ProgressBar ColorBarCalculated = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
 
-            ProgressBar ColorBarCalculated = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
-
-            ColorBarCalculated.Height = 20;//defines the height
-            ColorBarCalculated.Width = 400;//defines the width
-            //ColorBar.Background=new Color(Color)
-            ColorBarCalculated.Value = 0;//just keeps he progress bar empty
-            _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
-
+                 ColorBarCalculated.Height = 20;//defines the height
+                 ColorBarCalculated.Width = 400;//defines the width
+                 //ColorBar.Background=new Color(Color)
+                 ColorBarCalculated.Value = 0;//just keeps he progress bar empty
+                 _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
+            */
             AddControlToNode(_viewPort);//#0
             AddControlToNode(ColorBarAll);//#1
 
-            Label TTAvailable = new Label { Content = "Colors for available TTs" };
-            AddControlToNode(TTAvailable);//#2
-            AddControlToNode(ColorBarAvailable);//#3
-            Label TTCalculated = new Label { Content = "Colors for calculated TTs" };
-            AddControlToNode(TTCalculated);//#4
-            AddControlToNode(ColorBarCalculated);//#5
+            /*     Label TTAvailable = new Label { Content = "Colors for available TTs" };
+                 AddControlToNode(TTAvailable);//#2
+                 AddControlToNode(ColorBarAvailable);//#3
+                 Label TTCalculated = new Label { Content = "Colors for calculated TTs" };
+                 AddControlToNode(TTCalculated);//#4
+                 AddControlToNode(ColorBarCalculated);//#5
+           */
         }
 
         public override void Calculate()
@@ -152,30 +153,28 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // Loop through Entities and visualize them in the viewport
             Console.WriteLine("The elements r in total " + _xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>().Count() + ".");
 
-            TTValueColorAll.Add(-1, new TTColorAvailable(-1, TTCannotBeCalculated, false));//black for the problematic ones
+            TTValueColorAll.Add(-1, new TTColorAvailable2(-1, -1, TTCannotBeCalculated, false));//black for the problematic ones
             foreach (var item in _xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
             {
 
                 var m = new MeshGeometry3D();
                 GetGeometryFromXbimModel_IFC2x3(m, item, XbimMatrix3D.Identity);
-                TTColorAvailable ttColorAv = GetTTifExistsCalculateifNot_IFC2x3(item);//it TT-property does not exist, it calculates it
+                TTColorAvailable2 ttColorAv = GetTTifExistsCalculateifNot_IFC2x3(item);//it TT-property does not exist, it calculates it
                 // Console.WriteLine("TT = "+TT);
+                ttColorAv.divedTT = Math.Truncate(ttColorAv.TT);
 
                 DiffuseMaterial Material;
                 Color thisColor;
-                if (TTValueColorAll.ContainsKey(ttColorAv.TT))
-
-                    thisColor = ((TTColorAvailable)TTValueColorAll[ttColorAv.TT]).col;
-
+                if (TTValueColorAll.ContainsKey(ttColorAv.divedTT))
+                    thisColor = ((TTColorAvailable2)TTValueColorAll[ttColorAv.divedTT]).col;
                 else  //new TT - Material(Color) pair
                 {
                     thisColor = (Color)_Colors[TTValueColorAll.Count].Value;
                     int thisC = TTValueColorAll.Count;
-                    /*      while (thisColor.Equals(Colors.Black) || thisColor.Equals(Colors.Green) || thisColor.Equals(Colors.Red))
-                              thisColor = (Color)_Colors[++thisC].Value;//black, green n red r reserved, get the next one, sorry
-                    */
+                    while (thisColor.Equals(Colors.Black))// || thisColor.Equals(Colors.Green) || thisColor.Equals(Colors.Red))
+                        thisColor = (Color)_Colors[++thisC].Value;//black, green n red r reserved, get the next one, sorry
                     ttColorAv.col = thisColor;
-                    TTValueColorAll.Add(ttColorAv.TT, ttColorAv);
+                    TTValueColorAll.Add(ttColorAv.divedTT, ttColorAv);
                 }
                 Material = new DiffuseMaterial(new SolidColorBrush(thisColor));
 
@@ -186,6 +185,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             List<double> SortedTTs = TTValueColorAll.Keys.OfType<double>().ToList();
             SortedTTs.Sort();
             SortedTTs.RemoveAt(0);//remove the NoTTColor (Black)
+                                  //Create a new SortedTT-List with values' ranges of TT. Going +1 at each group
 
 
             GradientStopCollection colorsCollection = new GradientStopCollection();
@@ -196,37 +196,37 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             double inc = 1.0 / SortedTTs.Count;
             for (int k = 0; k < SortedTTs.Count; k++)
             {
-                Color col = ((TTColorAvailable)TTValueColorAll[SortedTTs[k]]).col;
+                // Color col = ((TTColorAvailable2)TTValueColorAll[TTRanges[k]]).col;
+                Color col = (Color)_Colors[k].Value;
                 if (SortedTTs[k].Equals(-1))
                     col = TTCannotBeCalculated;
-                /*    if (k == 0)
-                        col = TTSmaller;
-                    if (k == (SortedTTs.Count - 1))
-                        col = TTBigger;
-                */
+                /*  if (k == 0)
+                      col = TTSmaller;
+                  if (k == (SortedTTs.Count - 1))
+                      col = TTBigger;  */
                 colorsCollection.Add(new GradientStop(col, i));
 
-                if (((TTColorAvailable)TTValueColorAll[SortedTTs[k]]).available)
-                    colorsCollectionAvailable.Add(new GradientStop(col, i));
-                else
-                    colorsCollectionCalculated.Add(new GradientStop(col, i));
-
+                /*  if (((TTColorAvailable)TTValueColorAll[TTRanges[k]]).available)
+                      colorsCollectionAvailable.Add(new GradientStop(col, i));
+                  else
+                      colorsCollectionCalculated.Add(new GradientStop(col, i));
+                  */
                 i += inc;
-                Console.WriteLine("**** TT of " + SortedTTs[k] + " is in " + col + "****");
+                Console.WriteLine("**** TT of " + SortedTTs[k] + " is now in " + col + " ****");
             }
 
             LinearGradientBrush colors = new LinearGradientBrush(colorsCollection, 0);
             ProgressBar ColorBarAll = ControlElements[1] as ProgressBar;
             ColorBarAll.Background = colors;
 
-            LinearGradientBrush colorsAvailable = new LinearGradientBrush(colorsCollectionAvailable, 0);
-            ProgressBar ColorBarAvailable = ControlElements[3] as ProgressBar;
-            ColorBarAvailable.Background = colorsAvailable;
+            /*          LinearGradientBrush colorsAvailable = new LinearGradientBrush(colorsCollectionAvailable, 0);
+                      ProgressBar ColorBarAvailable = ControlElements[3] as ProgressBar;
+                      ColorBarAvailable.Background = colorsAvailable;
 
-            LinearGradientBrush colorsCalculated = new LinearGradientBrush(colorsCollectionCalculated, 0);
-            ProgressBar ColorBarCalculated = ControlElements[5] as ProgressBar;
-            ColorBarCalculated.Background = colorsCalculated;
-
+                      LinearGradientBrush colorsCalculated = new LinearGradientBrush(colorsCollectionCalculated, 0);
+                      ProgressBar ColorBarCalculated = ControlElements[5] as ProgressBar;
+                      ColorBarCalculated.Background = colorsCalculated;
+          */
         }
 
         private void worker_DoWork_IFC4(IfcStore xModel)
@@ -241,28 +241,28 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             // Loop through Entities and visualize them in the viewport
             Console.WriteLine("The elements r in total " + _xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>().Count() + ".");
-            TTValueColorAll.Add(-1, new TTColorAvailable(-1, TTCannotBeCalculated, false));//black for the problematic ones
-            foreach (var item in _xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
+            TTValueColorAll.Add(-1, new TTColorAvailable2(-1, -1, TTCannotBeCalculated, false));//black for the problematic ones
+            foreach (var item in _xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
             {
 
                 var m = new MeshGeometry3D();
-                GetGeometryFromXbimModel_IFC4(m, item, XbimMatrix3D.Identity);
-                TTColorAvailable ttColorAv = GetTTifExistsCalculateifNot_IFC4(item);//it TT-property does not exist, it calculates it
+                GetGeometryFromXbimModel_IFC2x3(m, item, XbimMatrix3D.Identity);
+                TTColorAvailable2 ttColorAv = GetTTifExistsCalculateifNot_IFC2x3(item);//it TT-property does not exist, it calculates it
                 // Console.WriteLine("TT = "+TT);
+                ttColorAv.divedTT = Math.Truncate(ttColorAv.TT);
 
                 DiffuseMaterial Material;
                 Color thisColor;
-                if (TTValueColorAll.ContainsKey(ttColorAv.TT))
-                    thisColor = ((TTColorAvailable)TTValueColorAll[ttColorAv.TT]).col;
+                if (TTValueColorAll.ContainsKey(ttColorAv.divedTT))
+                    thisColor = ((TTColorAvailable2)TTValueColorAll[ttColorAv.divedTT]).col;
                 else  //new TT - Material(Color) pair
                 {
                     thisColor = (Color)_Colors[TTValueColorAll.Count].Value;
                     int thisC = TTValueColorAll.Count;
-                    /*      while (thisColor.Equals(Colors.Black) || thisColor.Equals(Colors.Green) || thisColor.Equals(Colors.Red))
-                              thisColor = (Color)_Colors[++thisC].Value;//black, green n red r reserved, get the next one, sorry
-                    */
+                    while (thisColor.Equals(Colors.Black))// || thisColor.Equals(Colors.Green) || thisColor.Equals(Colors.Red))
+                        thisColor = (Color)_Colors[++thisC].Value;//black, green n red r reserved, get the next one, sorry
                     ttColorAv.col = thisColor;
-                    TTValueColorAll.Add(ttColorAv.TT, ttColorAv);
+                    TTValueColorAll.Add(ttColorAv.divedTT, ttColorAv);
                 }
                 Material = new DiffuseMaterial(new SolidColorBrush(thisColor));
 
@@ -273,6 +273,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             List<double> SortedTTs = TTValueColorAll.Keys.OfType<double>().ToList();
             SortedTTs.Sort();
             SortedTTs.RemoveAt(0);//remove the NoTTColor (Black)
+                                  //Create a new SortedTT-List with values' ranges of TT. Going +1 at each group
+
 
             GradientStopCollection colorsCollection = new GradientStopCollection();
             GradientStopCollection colorsCollectionAvailable = new GradientStopCollection();
@@ -282,37 +284,37 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             double inc = 1.0 / SortedTTs.Count;
             for (int k = 0; k < SortedTTs.Count; k++)
             {
-                Color col = ((TTColorAvailable)TTValueColorAll[SortedTTs[k]]).col;
+                // Color col = ((TTColorAvailable2)TTValueColorAll[TTRanges[k]]).col;
+                Color col = (Color)_Colors[k].Value;
                 if (SortedTTs[k].Equals(-1))
                     col = TTCannotBeCalculated;
-                /*      if (k == 0)
-                          col = TTSmaller;
-                      if (k == (SortedTTs.Count - 1))
-                          col = TTBigger;
-                */
+                /*  if (k == 0)
+                      col = TTSmaller;
+                  if (k == (SortedTTs.Count - 1))
+                      col = TTBigger;  */
                 colorsCollection.Add(new GradientStop(col, i));
 
-                if (((TTColorAvailable)TTValueColorAll[SortedTTs[k]]).available)
-                    colorsCollectionAvailable.Add(new GradientStop(col, i));
-                else
-                    colorsCollectionCalculated.Add(new GradientStop(col, i));
-
+                /*  if (((TTColorAvailable)TTValueColorAll[TTRanges[k]]).available)
+                      colorsCollectionAvailable.Add(new GradientStop(col, i));
+                  else
+                      colorsCollectionCalculated.Add(new GradientStop(col, i));
+                  */
                 i += inc;
-                Console.WriteLine("**** TT of " + SortedTTs[k] + " is in " + col + "****");
+                Console.WriteLine("**** TT of " + SortedTTs[k] + " is now in " + col + " ****");
             }
 
             LinearGradientBrush colors = new LinearGradientBrush(colorsCollection, 0);
             ProgressBar ColorBarAll = ControlElements[1] as ProgressBar;
             ColorBarAll.Background = colors;
 
-            LinearGradientBrush colorsAvailable = new LinearGradientBrush(colorsCollectionAvailable, 0);
-            ProgressBar ColorBarAvailable = ControlElements[3] as ProgressBar;
-            ColorBarAvailable.Background = colorsAvailable;
+            /*   LinearGradientBrush colorsAvailable = new LinearGradientBrush(colorsCollectionAvailable, 0);
+               ProgressBar ColorBarAvailable = ControlElements[3] as ProgressBar;
+               ColorBarAvailable.Background = colorsAvailable;
 
-            LinearGradientBrush colorsCalculated = new LinearGradientBrush(colorsCollectionCalculated, 0);
-            ProgressBar ColorBarCalculated = ControlElements[5] as ProgressBar;
-            ColorBarCalculated.Background = colorsCalculated;
-
+               LinearGradientBrush colorsCalculated = new LinearGradientBrush(colorsCollectionCalculated, 0);
+               ProgressBar ColorBarCalculated = ControlElements[5] as ProgressBar;
+               ColorBarCalculated.Background = colorsCalculated;
+           */
         }
 
         public /*static*/ Dictionary<string, object> GetStaticPropertyBag(Type t)
@@ -327,7 +329,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             return map;
         }
 
-        public TTColorAvailable GetTTifExistsCalculateifNot_IFC2x3(Xbim.Ifc2x3.Kernel.IfcProduct ifcProduct)
+        public TTColorAvailable2 GetTTifExistsCalculateifNot_IFC2x3(Xbim.Ifc2x3.Kernel.IfcProduct ifcProduct)
         {
             //bool found = false;
             var propertySets = ifcProduct.PropertySets.ToList() as List<Xbim.Ifc2x3.Kernel.IfcPropertySet>;
@@ -342,7 +344,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     {
                         double thisTT = (double)((Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue)onepropertySet[jj]).NominalValue.Value;
 
-                        return new TTColorAvailable(thisTT, true);
+                        return new TTColorAvailable2(thisTT, true);
                     }
                     jj++;
                 }
@@ -352,22 +354,22 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (ifcProduct.GetType() == typeof(Xbim.Ifc2x3.SharedBldgElements.IfcColumn))
             {
                 double thisTT = CalculateTT_IFC2x3((Xbim.Ifc2x3.SharedBldgElements.IfcColumn)ifcProduct);
-                return new TTColorAvailable(thisTT, false);
+                return new TTColorAvailable2(thisTT, false);
             }
             else if (ifcProduct.GetType() == typeof(Xbim.Ifc2x3.SharedBldgElements.IfcDoor))
             {
                 double thisTT = CalculateTT_IFC2x3((Xbim.Ifc2x3.SharedBldgElements.IfcDoor)ifcProduct);
-                return new TTColorAvailable(thisTT, false);
+                return new TTColorAvailable2(thisTT, false);
             }
             else if (ifcProduct.GetType() == typeof(Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall))
             {
                 double thisTT = CalculateTT_IFC2x3((Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall)ifcProduct);
-                return new TTColorAvailable(thisTT, false);
+                return new TTColorAvailable2(thisTT, false);
             }
 
-            return new TTColorAvailable(-1, true);//smth may be wrong...
+            return new TTColorAvailable2(-1, true);//smth may be wrong...
         }
-        public TTColorAvailable GetTTifExistsCalculateifNot_IFC4(Xbim.Ifc4.Kernel.IfcProduct ifcProduct)
+        public TTColorAvailable2 GetTTifExistsCalculateifNot_IFC4(Xbim.Ifc4.Kernel.IfcProduct ifcProduct)
         {
             //bool found = false;
             var propertySets = ifcProduct.PropertySets.ToList();
@@ -383,7 +385,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         double thisTT = (double)((Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue)onepropertySet[jj]).NominalValue.Value;
 
 
-                        return new TTColorAvailable(thisTT, true);
+                        return new TTColorAvailable2(thisTT, true);
                     }
                     jj++;
                 }
@@ -393,20 +395,20 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (ifcProduct.GetType() == typeof(Xbim.Ifc4.SharedBldgElements.IfcColumn))
             {
                 double thisTT = CalculateTT_IFC4((Xbim.Ifc4.SharedBldgElements.IfcColumn)ifcProduct);
-                return new TTColorAvailable(thisTT, false);
+                return new TTColorAvailable2(thisTT, false);
             }
             else if (ifcProduct.GetType() == typeof(Xbim.Ifc4.SharedBldgElements.IfcDoor))
             {
                 double thisTT = CalculateTT_IFC4((Xbim.Ifc4.SharedBldgElements.IfcDoor)ifcProduct);
-                return new TTColorAvailable(thisTT, false);
+                return new TTColorAvailable2(thisTT, false);
             }
             else if (ifcProduct.GetType() == typeof(Xbim.Ifc4.SharedBldgElements.IfcCurtainWall))
             {
                 double thisTT = CalculateTT_IFC4((Xbim.Ifc4.SharedBldgElements.IfcCurtainWall)ifcProduct);
-                return new TTColorAvailable(thisTT, false);
+                return new TTColorAvailable2(thisTT, false);
             }
 
-            return new TTColorAvailable(-1, true);//smth may be wrong...
+            return new TTColorAvailable2(-1, true);//smth may be wrong...
         }
 
 
@@ -632,6 +634,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
 
+
         public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat)
         {
 
@@ -668,7 +671,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             return true;
         }
 
-        
         public void GetGeometryFromXbimModel_IFC2x3(MeshGeometry3D m, IPersistEntity item, XbimMatrix3D wcsTransform)
         {
             if (item.Model == null || !(item is Xbim.Ifc2x3.Interfaces.IIfcProduct)) return;
@@ -746,23 +748,25 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     }
 
 
-    public class TTColorAvailable
+    public class TTColorAvailable2
     {
         public double TT { get; set; }
         public Color col { get; set; }
         public bool available { get; set; }//true if TT is available, false if it got 2 be calculated
+        public double divedTT { get; set; }
 
-        public TTColorAvailable(double tt, bool av)
+        public TTColorAvailable2(double tt, bool av)
         {
             this.TT = tt;
             this.available = av;
         }
 
-        public TTColorAvailable(double tt, Color c, bool av)
+        public TTColorAvailable2(double tt, double ttt, Color c, bool av)
         {
             this.TT = tt;
             this.col = c;
             this.available = av;
+            this.divedTT = ttt;
         }
     }
 }

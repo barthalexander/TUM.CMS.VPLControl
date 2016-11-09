@@ -10,9 +10,9 @@ using TUM.CMS.VplControl.IFC.Utilities;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class mvdXMLReaderNode : Node
+    public class MvdParserNode : Node
     {
-        public mvdXMLReaderNode(Core.VplControl hostCanvas)
+        public MvdParserNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
             AddInputPortToNode("file", typeof (string));
@@ -57,7 +57,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override Node Clone()
         {
-            return new mvdXMLReaderNode(HostCanvas)
+            return new MvdParserNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left

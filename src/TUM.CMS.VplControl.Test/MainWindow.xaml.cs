@@ -35,7 +35,7 @@ namespace TUM.CMS.VplControl.Test
                      .ToList());
 
             VplControl.ExternalNodeTypes.AddRange(
-                ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(EnergyNode)), "TUM.CMS.VplControl.Energy.Nodes")
+                ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(EnergyCalculatorNode)), "TUM.CMS.VplControl.Energy.Nodes")
                        .ToList());
             VplControl.ExternalNodeTypes.AddRange(
                 ClassUtility.GetTypesInNamespace(Assembly.GetAssembly(typeof(IfcMapsNode)), "TUM.CMS.VplControl.IFC.Nodes")

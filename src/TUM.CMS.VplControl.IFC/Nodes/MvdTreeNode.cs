@@ -10,10 +10,10 @@ using Xbim.Presentation;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcMVDTreeNode : Node
+    public class MvdTreeNode : Node
     {
 
-        public IfcMVDTreeNode(Core.VplControl hostCanvas) : base(hostCanvas)
+        public MvdTreeNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             IsResizeable = true;
 

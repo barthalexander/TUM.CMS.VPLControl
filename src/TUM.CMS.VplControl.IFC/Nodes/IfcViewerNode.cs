@@ -24,7 +24,7 @@ using Xbim.IO.Esent;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcParseGeometryNode : Node
+    public class IfcViewerNode : Node
     {
         private readonly HelixViewport3D _viewPort;
         //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
@@ -38,7 +38,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
         private BackgroundWorker worker;
         private Type IfcVersionType = null;
-        public IfcParseGeometryNode(Core.VplControl hostCanvas) : base(hostCanvas)
+        public IfcViewerNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             // Init UI
             IsResizeable = true;
@@ -476,7 +476,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override Node Clone()
         {
-            return new IfcParseGeometryNode(HostCanvas)
+            return new IfcViewerNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left
@@ -604,7 +604,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="ifcParseGeometryNode"></param>
         /// <param name="itemModel"></param>
         /// <param name="indexOfModel"></param>
-        protected void OnElementMouseDown_IFC2x3(object sender, MouseButtonEventArgs e, IfcParseGeometryNode ifcParseGeometryNode, Xbim.Ifc2x3.Kernel.IfcProduct itemModel, int indexOfModel)
+        protected void OnElementMouseDown_IFC2x3(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc2x3.Kernel.IfcProduct itemModel, int indexOfModel)
         {
             // Check null expression
             // if (e == null) throw new ArgumentNullException(nameof(e));
@@ -658,7 +658,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             
             e.Handled = true;
         }
-        protected void OnElementMouseDown_IFC4(object sender, MouseButtonEventArgs e, IfcParseGeometryNode ifcParseGeometryNode, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
+        protected void OnElementMouseDown_IFC4(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
         {
             // Check null expression
             // if (e == null) throw new ArgumentNullException(nameof(e));

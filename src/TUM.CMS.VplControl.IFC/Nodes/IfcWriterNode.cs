@@ -15,7 +15,7 @@ using Xbim.Ifc;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcWriter : Node
+    public class IfcWriterNode : Node
     {
         private readonly TextBox _textBox;
         public IfcStore xModel;
@@ -24,7 +24,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
         // private DynamicProductSelectionControl productSelectionControl;
-        public IfcWriter(Core.VplControl hostCanvas) : base(hostCanvas)
+        public IfcWriterNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             AddInputPortToNode("Object", typeof(object), true);
 

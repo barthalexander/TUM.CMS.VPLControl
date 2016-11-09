@@ -9,13 +9,13 @@ using Xbim.Ifc;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
-    public class IfcFilterNode : Node
+    public class IfcTypeFilterNode : Node
     {
         public IfcStore xModel;
         public ModelInfoIFC2x3 OutputInfoIfc2x3; 
         public ModelInfoIFC4 OutputInfoIfc4;
         public Type IfcVersionType = null;
-        public IfcFilterNode(Core.VplControl hostCanvas)
+        public IfcTypeFilterNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
 
@@ -500,7 +500,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override Node Clone()
         {
-            return new IfcFilterNode(HostCanvas)
+            return new IfcTypeFilterNode(HostCanvas)
             {
                 Top = Top,
                 Left = Left
