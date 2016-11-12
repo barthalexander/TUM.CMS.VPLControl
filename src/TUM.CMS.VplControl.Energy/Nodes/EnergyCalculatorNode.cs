@@ -65,9 +65,9 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             comboBox_Rse.SelectionChanged += selection_changed2;//load doors' properties n calculate thermal transmittances whenever this checkbox's selection is changed...
             AddControlToNode(comboBox_Rse);  //#2
             //label for Uj total thermal transm for all the doors elements
-            //var label_Uj = new Label { Content = "Uj = " };
-            //AddControlToNode(label_Uj);     //#3
-            var button_Uj = new Button { Content = "Sum all TTs. Uj" };
+            var label_Uj = new Label { Content = "Uj = " };
+            AddControlToNode(label_Uj);     //#3
+            var button_Uj = new Button { Content = "Sum all TTs" };
             button_Uj.Click += button_Click1;//sum up all elements' TT n show it
             AddControlToNode(button_Uj);    //#4
             Console.WriteLine("--2--");
