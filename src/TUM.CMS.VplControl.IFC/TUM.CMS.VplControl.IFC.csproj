@@ -166,6 +166,7 @@
     <Compile Include="Nodes\IfcEnergyCalculateVisualizeTT.cs" />
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
     <Compile Include="Nodes\IfcMvdChecker_Another_Version.cs" />
+    <Compile Include="Nodes\IfcElementProperty.cs" />
     <Compile Include="Nodes\IfcPartialModel.cs" />
     <Compile Include="Nodes\IfcPropertyFilterNode.cs" />
     <Compile Include="Nodes\IfcTypeFilterNode.cs" />
@@ -182,6 +183,14 @@
     <Compile Include="Nodes\IfcTreeNode.cs" />
     <Compile Include="Nodes\MvdParserNode.cs" />
     <Compile Include="Nodes\IfcWriterNode.cs" />
+
+    <Compile Include="Controls\IfcElementPropertyControl.xaml.cs">
+      <DependentUpon>IfcElementPropertyControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IFCViewerControl.xaml.cs">
+      <DependentUpon>IFCViewerControl.xaml</DependentUpon>
+    </Compile>
+    
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -233,6 +242,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="XbimUpdate\Xbim.PropertySets.4.ReadmeForUpdate.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Controls\IfcElementPropertyControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\IFCViewerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Xbim.Geometry.4.0.8\build\Xbim.Geometry.targets" Condition="Exists('..\packages\Xbim.Geometry.4.0.8\build\Xbim.Geometry.targets')" />

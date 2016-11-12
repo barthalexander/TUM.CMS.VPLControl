@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -14,19 +15,15 @@ using Xbim.Presentation;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Windows.Input;
 using System.Windows.Controls;
-using log4net.Util;
 using Xbim.Common;
 using Xbim.Ifc;
-using Xbim.Ifc2x3.Extensions;
-using Xbim.Ifc2x3.MeasureResource;
-using Xbim.Ifc4.Interfaces;
-using Xbim.IO.Esent;
+using TUM.CMS.VplControl.IFC.Controls;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcViewerNode : Node
     {
-        private readonly HelixViewport3D _viewPort;
+        private HelixViewport3D _viewPort;
         //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
         private IfcStore _xModel;
         public List<ModelInfoIFC2x3> ModelListsIfc2x3;
@@ -46,22 +43,23 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddInputPortToNode("Model", typeof(object), true);
             AddOutputPortToNode("FilteredElements", typeof(object));
 
-            _viewPort = new HelixViewport3D
-            {
-                MinWidth = 520,
-                MinHeight = 520
-            };
 
-            RadioButton radioButton_1 = new RadioButton { Content = "pass all" };
-            RadioButton radioButton_2 = new RadioButton { Content = "pass selected", IsChecked = true };
             
-            
+            UserControl usercontrol = new UserControl();
+            Grid grid = new Grid();
+            usercontrol.Content = grid;
+
 
             //_viewPort.MouseDoubleClick += _viewPort_mouseclick;
 
-            AddControlToNode(_viewPort);
-            AddControlToNode(radioButton_1);
-            AddControlToNode(radioButton_2);
+            IFCViewerControl ifcViewerControl = new IFCViewerControl();
+
+
+
+//            AddControlToNode(_viewPort);
+//            AddControlToNode(radioButton_1);
+//            AddControlToNode(radioButton_2);
+            AddControlToNode(ifcViewerControl);
         }
 
 
@@ -70,13 +68,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (InputPorts[0].Data == null)
                 return;
 
+
+            var ifcViewerControl = ControlElements[0] as IFCViewerControl;
             OutputPorts[0].Data = null;
-            var button_1 = ControlElements[1] as RadioButton;
+            var button_1 = ifcViewerControl.RadioButton_1;
             if (button_1 == null) return;
-            var button_2 = ControlElements[2] as RadioButton;
+            var button_2 = ifcViewerControl.RadioButton_2;
             if (button_2 == null) return;
             // Init the viewport
 
+            _viewPort = ifcViewerControl.Viewport3D;
+            _viewPort.MinWidth = 300;
+            _viewPort.MinHeight = 300;
             _viewPort.Children.Clear();
             _viewPort.Children.Add(new SunLight());
             _viewPort.ZoomExtentsWhenLoaded = true;
@@ -290,96 +293,196 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
 
             // xModel = (IfcStore) e.Argument;
-            foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
+            // parallel.foreach
+            var parallel = false;
+            List<ModelUIElement3D> elementList = new List<ModelUIElement3D>();
+            switch (parallel)
             {
-
-                if (res.Contains(item.GlobalId))
-                {
-
-
-                    XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
-
-                    short userDefinedId = 0;
-                    xModel.UserDefinedId = userDefinedId;
-
-
-                    ModelPositions.AddModel(xModel.ReferencingModel);
-
-                    if (xModel.IsFederation)
+                case true:
+                    Parallel.ForEach(xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>(), item =>
                     {
-                        foreach (var refModel in xModel.ReferencedModels)
+                        if (res.Contains(item.GlobalId))
                         {
-                            refModel.Model.UserDefinedId = ++userDefinedId;
-                            var v = refModel.Model as IfcStore;
-                            if (v != null)
-                                ModelPositions.AddModel(v.ReferencingModel);
+                            XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
+
+                            short userDefinedId = 0;
+                            xModel.UserDefinedId = userDefinedId;
+
+
+                            ModelPositions.AddModel(xModel.ReferencingModel);
+
+                            if (xModel.IsFederation)
+                            {
+                                foreach (var refModel in xModel.ReferencedModels)
+                                {
+                                    refModel.Model.UserDefinedId = ++userDefinedId;
+                                    var v = refModel.Model as IfcStore;
+                                    if (v != null)
+                                        ModelPositions.AddModel(v.ReferencingModel);
+                                }
+                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                            }
+                            var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+
+                            var p = ModelBounds.Centroid();
+                            var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                            var oneMeter = xModel.ModelFactors.OneMetre;
+                            var translation = XbimMatrix3D.CreateTranslation(_modelTranslation*oneMeter);
+                            var scaling = XbimMatrix3D.CreateScale(1/oneMeter);
+                            XbimMatrix3D Transform = translation*scaling;
+
+                            var m = new MeshGeometry3D();
+                            GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
+
+                            var mat = GetStyleFromXbimModel_IFC2x3(item);
+
+                            var mb = new MeshBuilder(false, false);
+
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            elementList.Add(element);
                         }
-                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
-                    }
-                    var ModelBounds = ModelPositions.GetEnvelopeInMeters();
-                    
-                    var p = ModelBounds.Centroid();
-                    var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
-                    var oneMeter = xModel.ModelFactors.OneMetre;
-                    var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
-                    var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
-                    XbimMatrix3D Transform = translation * scaling;
 
-                    var m = new MeshGeometry3D();
-                    GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
-                    
-                    var mat = GetStyleFromXbimModel_IFC2x3(item);
+                        // Show whole building with opacity 0.03
+                        else
+                        {
+                            XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
 
-                    var mb = new MeshBuilder(false, false);
-
-                    VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
-                }
-
-                // Show whole building with opacity 0.03
-                else
-                {
-                    XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
-
-                    short userDefinedId = 0;
-                    xModel.UserDefinedId = userDefinedId;
+                            short userDefinedId = 0;
+                            xModel.UserDefinedId = userDefinedId;
 
 
-                    ModelPositions.AddModel(xModel.ReferencingModel);
+                            ModelPositions.AddModel(xModel.ReferencingModel);
 
-                    if (xModel.IsFederation)
+                            if (xModel.IsFederation)
+                            {
+                                foreach (var refModel in xModel.ReferencedModels)
+                                {
+                                    refModel.Model.UserDefinedId = ++userDefinedId;
+                                    var v = refModel.Model as IfcStore;
+                                    if (v != null)
+                                        ModelPositions.AddModel(v.ReferencingModel);
+                                }
+                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                            }
+                            var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+
+                            var p = ModelBounds.Centroid();
+                            var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                            var oneMeter = xModel.ModelFactors.OneMetre;
+                            var translation = XbimMatrix3D.CreateTranslation(_modelTranslation*oneMeter);
+                            var scaling = XbimMatrix3D.CreateScale(1/oneMeter);
+                            XbimMatrix3D Transform = translation*scaling;
+
+                            var m = new MeshGeometry3D();
+                            GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
+                            var mat = GetStyleFromXbimModel_IFC2x3(item, 0.03);
+
+                            var mb = new MeshBuilder(false, false);
+
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            elementList.Add(element);
+                        }
+
+                    });
+                    foreach (var element in elementList)
                     {
-                        foreach (var refModel in xModel.ReferencedModels)
-                        {
-                            refModel.Model.UserDefinedId = ++userDefinedId;
-                            var v = refModel.Model as IfcStore;
-                            if (v != null)
-                                ModelPositions.AddModel(v.ReferencingModel);
-                        }
-                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                        if (element != null)
+                            _viewPort.Children.Add(element);
                     }
-                    var ModelBounds = ModelPositions.GetEnvelopeInMeters();
 
-                    var p = ModelBounds.Centroid();
-                    var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
-                    var oneMeter = xModel.ModelFactors.OneMetre;
-                    var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
-                    var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
-                    XbimMatrix3D Transform = translation * scaling;
+                    break;
+                case false:
+                    foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
+                    {
+
+                        if (res.Contains(item.GlobalId))
+                        {
+                            XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
+
+                            short userDefinedId = 0;
+                            xModel.UserDefinedId = userDefinedId;
+
+
+                            ModelPositions.AddModel(xModel.ReferencingModel);
+
+                            if (xModel.IsFederation)
+                            {
+                                foreach (var refModel in xModel.ReferencedModels)
+                                {
+                                    refModel.Model.UserDefinedId = ++userDefinedId;
+                                    var v = refModel.Model as IfcStore;
+                                    if (v != null)
+                                        ModelPositions.AddModel(v.ReferencingModel);
+                                }
+                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                            }
+                            var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+
+                            var p = ModelBounds.Centroid();
+                            var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                            var oneMeter = xModel.ModelFactors.OneMetre;
+                            var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
+                            var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
+                            XbimMatrix3D Transform = translation * scaling;
+
+                            var m = new MeshGeometry3D();
+                            GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
+
+                            var mat = GetStyleFromXbimModel_IFC2x3(item);
+
+                            var mb = new MeshBuilder(false, false);
+
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            _viewPort.Children.Add(element);
+                        }
+
+                        // Show whole building with opacity 0.03
+                        else
+                        {
+                            XbimModelPositioningCollection ModelPositions = new XbimModelPositioningCollection();
+
+                            short userDefinedId = 0;
+                            xModel.UserDefinedId = userDefinedId;
+
+
+                            ModelPositions.AddModel(xModel.ReferencingModel);
+
+                            if (xModel.IsFederation)
+                            {
+                                foreach (var refModel in xModel.ReferencedModels)
+                                {
+                                    refModel.Model.UserDefinedId = ++userDefinedId;
+                                    var v = refModel.Model as IfcStore;
+                                    if (v != null)
+                                        ModelPositions.AddModel(v.ReferencingModel);
+                                }
+                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
+                            }
+                            var ModelBounds = ModelPositions.GetEnvelopeInMeters();
+
+                            var p = ModelBounds.Centroid();
+                            var _modelTranslation = new XbimVector3D(-p.X, -p.Y, -p.Z);
+                            var oneMeter = xModel.ModelFactors.OneMetre;
+                            var translation = XbimMatrix3D.CreateTranslation(_modelTranslation * oneMeter);
+                            var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
+                            XbimMatrix3D Transform = translation * scaling;
 
 
 
 
-                    var m = new MeshGeometry3D();
-                    GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
-                    var mat = GetStyleFromXbimModel_IFC2x3(item, 0.03);
+                            var m = new MeshGeometry3D();
+                            GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
+                            var mat = GetStyleFromXbimModel_IFC2x3(item, 0.03);
 
-                    var mb = new MeshBuilder(false, false);
+                            var mb = new MeshBuilder(false, false);
 
-                    VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
-                }
-                
-             }
-
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            _viewPort.Children.Add(element);
+                        }
+                    }
+                    break;
+            }
+            
         }
         private void worker_DoWork_IFC4(IfcStore xModel, int indexOfModel, List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementIdsList)
         {
@@ -491,7 +594,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="mat"></param>
         /// <param name="itemModel"></param>
         /// <param name="indexOfModel"></param>
-        public bool VisualizeMesh_IFC2x3(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc2x3.Kernel.IfcProduct itemModel, int indexOfModel)
+        public ModelUIElement3D VisualizeMesh_IFC2x3(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc2x3.Kernel.IfcProduct itemModel, int indexOfModel)
         {
             
 
@@ -528,9 +631,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC2x3(sender1, e1, this, itemModel, indexOfModel);
 
 
-                // Add the Mesh to the ViewPort
+            // Add the Mesh to the ViewPort
+            
 
-                _viewPort.Children.Add(element);
+
+           // _viewPort.Children.Add(element);
 
                 // Do all UI related work here... }
             
@@ -539,9 +644,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             
            
             
-            return true;
+            return element;
         }
-        public bool VisualizeMesh_IFC4(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
+        public ModelUIElement3D VisualizeMesh_IFC4(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
         {
             
 
@@ -580,7 +685,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 // Add the Mesh to the ViewPort
 
-                _viewPort.Children.Add(element);
+                //_viewPort.Children.Add(element);
 
                 // Do all UI related work here... }
             
@@ -589,7 +694,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             
            
             
-            return true;
+            return element;
         }
         
         
@@ -634,9 +739,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     ModelListsIfc2x3[indexOfModel].AddElementIds(itemModel.GlobalId);
                     geometryModel3D.Material = _selectionMaterial;
                 }
-            }           
-
-            var button_2 = ControlElements[2] as RadioButton;
+            }
+            var ifcViewerControl = ControlElements[0] as IFCViewerControl;
+            var button_2 = ifcViewerControl.RadioButton_2;
             if (button_2 == null) return;
             if((bool)button_2.IsChecked)
             {
@@ -688,9 +793,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     ModelListsIfc4[indexOfModel].AddElementIds(itemModel.GlobalId);
                     geometryModel3D.Material = _selectionMaterial;
                 }
-            }           
-
-            var button_2 = ControlElements[2] as RadioButton;
+            }
+            var ifcViewerControl = ControlElements[0] as IFCViewerControl;
+            var button_2 = ifcViewerControl.RadioButton_2;
             if (button_2 == null) return;
             if((bool)button_2.IsChecked)
             {
