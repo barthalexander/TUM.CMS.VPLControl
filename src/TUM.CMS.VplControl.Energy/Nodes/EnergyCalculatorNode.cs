@@ -11,9 +11,12 @@ namespace TUM.CMS.VplControl.Energy.Nodes
     public class EnergyCalculatorNode : Node
     {
         public const double Rsi = 0.13;
+        public ComboboxItemLocal Rse_0 = new ComboboxItemLocal() { Text = "Select Rse" };
         public ComboboxItemLocal Rse_1 = new ComboboxItemLocal() { Text = "In direct transition wall outside air", Value = 0.04 };
         public ComboboxItemLocal Rse_2 = new ComboboxItemLocal() { Text = "A rear-ventilated façade", Value = 0.08 };
         public ComboboxItemLocal Rse_3 = new ComboboxItemLocal() { Text = "In the transition to ground", Value = 0.00 };
+
+        public ComboboxItemFilter ifcLabel = new ComboboxItemFilter() { Text = "Select type of ifcElements" };
 
         public double l;
         public double Rse;
@@ -29,39 +32,51 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         {
             Console.WriteLine("--1--");
             AddInputPortToNode("text", typeof(string));//the ifc parsed file
-            //AddOutputPortToNode("text", typeof(List<double>));//List with doors thermal transmittance
+                                                       //AddOutputPortToNode("text", typeof(List<double>));//List with doors thermal transmittance
 
-            var labelTypeOfProducts = new Label { Content = "select type of ifcElements" };
-            AddControlToNode(labelTypeOfProducts);//#0
+            // var labelTypeOfProducts = new Label { Content = "select type of ifcElements" };
+            // AddControlToNode(labelTypeOfProducts);//
             var comboBoxFilter = new ComboBox
             {
                 //this comboBox is like the one from IfcFilterNode
             };
+            comboBoxFilter.Items.Add(ifcLabel);
+            comboBoxFilter.SelectedIndex = 0;
             comboBoxFilter.SelectionChanged += selection_changed1;//ifcElement selection changed & check whether TT is available or not... act accordingly
-            AddControlToNode(comboBoxFilter);//#1
+            AddControlToNode(comboBoxFilter);//#0
 
-            var label_l = new Label { Content = "Τhermal conductivity λ" };
-            AddControlToNode(label_l);  //#2
+            //var label_l = new Label { Content = "Τhermal conductivity λ" };
+            //AddControlToNode(label_l);  //
             // var textBox_l = new TextBox { MinWidth = 300, MaxWidth = 500, IsHitTestVisible = false };
             var textBox_l = new TextBox { };
+            textBox_l.Text = "Τhermal conductivity λ";
+            textBox_l.MouseDoubleClick += TextBox_l_MouseDoubleClick;
+
             textBox_l.TextChanged += textBox_TextChanged;//when textBox is changed nothing will happen...
-            AddControlToNode(textBox_l);//#3
-            var label_Rse = new Label { Content = "Rse" };
-            AddControlToNode(label_Rse); //#4
+            AddControlToNode(textBox_l);//#1
+                                        //  var label_Rse = new Label { Content = "Rse" };
+                                        //  AddControlToNode(label_Rse); //
             var comboBox_Rse = new ComboBox { };
+            comboBox_Rse.Items.Add(Rse_0);//this Rse_0 is only the label
             comboBox_Rse.Items.Add(Rse_1);
             comboBox_Rse.Items.Add(Rse_2);
             comboBox_Rse.Items.Add(Rse_3);//Ra comboBox has these 3 items
             comboBox_Rse.SelectedIndex = 0;
             comboBox_Rse.SelectionChanged += selection_changed2;//load doors' properties n calculate thermal transmittances whenever this checkbox's selection is changed...
-            AddControlToNode(comboBox_Rse);  //#5
+            AddControlToNode(comboBox_Rse);  //#2
             //label for Uj total thermal transm for all the doors elements
-            var label_Uj = new Label { Content = "Uj = " };
-            AddControlToNode(label_Uj);     //#6
-            var button_Uj = new Button { Content = "Sum all TTs" };
+            //var label_Uj = new Label { Content = "Uj = " };
+            //AddControlToNode(label_Uj);     //#3
+            var button_Uj = new Button { Content = "Sum all TTs. Uj" };
             button_Uj.Click += button_Click1;//sum up all elements' TT n show it
-            AddControlToNode(button_Uj);    //#7
+            AddControlToNode(button_Uj);    //#4
             Console.WriteLine("--2--");
+        }
+
+        private void TextBox_l_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var textBox_l = ControlElements[1] as TextBox;
+            textBox_l.Clear();
         }
 
         public override void Calculate()
@@ -76,13 +91,14 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 if (modelid == null) return;
                 InfoIfc2x3 = (ModelInfoIFC2x3)(InputPorts[0].Data);
                 xModel = DataController.Instance.GetModel(modelid);
-
-                var comboBox = ControlElements[1] as ComboBox;
+                Console.WriteLine("--4.a.i--");
+                var comboBox = ControlElements[0] as ComboBox;
                 if (comboBox != null && comboBox.Items.Count > 0)
                 {
-                    comboBox.SelectedItem = -1;
-                    comboBox.Items.Clear();
+                    // comboBox.SelectedItem = -1;
+                    //  comboBox.Items.Clear();
                 }
+                Console.WriteLine("--4.a.ii--");
                 var ifcwall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
                 var ifcbeam = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
                 var ifccolumn = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList();
@@ -94,7 +110,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 var ifcplate = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcPlate>().ToList();
                 var ifcdoor = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
                 var ifccurtainwall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall>().ToList();
-
+                Console.WriteLine("--5a--");
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcFilteredIds = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
 
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcWallsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
@@ -199,7 +215,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                         curtainwallTT = false;
                 }
 
-
+                Console.WriteLine("--6a--");
                 ComboboxItemFilter ifcwalls = new ComboboxItemFilter() { Text = "ifcwall", ValueIfcGloballyUniqueIds2x3 = ifcWallsFiltered, TTAvailable = wallTT };
                 ComboboxItemFilter ifcbeams = new ComboboxItemFilter() { Text = "ifcbeam", ValueIfcGloballyUniqueIds2x3 = ifcBeamsFiltered, TTAvailable = beamTT };
                 ComboboxItemFilter ifccolumns = new ComboboxItemFilter() { Text = "ifccolumn", ValueIfcGloballyUniqueIds2x3 = ifcColumnsFiltered, TTAvailable = columnTT };
@@ -258,8 +274,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 }
 
 
-                comboBox.SelectedItem = null;
-                Console.WriteLine("--5a--");
+                Console.WriteLine("--7a--");
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
@@ -269,11 +284,11 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 InfoIfc4 = (ModelInfoIFC4)(InputPorts[0].Data);
                 xModel = DataController.Instance.GetModel(modelid);
 
-                var comboBox = ControlElements[1] as ComboBox;
+                var comboBox = ControlElements[0] as ComboBox;
                 if (comboBox != null && comboBox.Items.Count > 0)
                 {
-                    comboBox.SelectedItem = -1;
-                    comboBox.Items.Clear();
+                    // comboBox.SelectedItem = -1;
+                    // comboBox.Items.Clear();
                 }
                 var ifcwall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWall>().ToList();
                 var ifcbeam = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcBeam>().ToList();
@@ -286,7 +301,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 var ifcplate = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcPlate>().ToList();
                 var ifcdoor = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcDoor>().ToList();
                 var ifccurtainwall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcCurtainWall>().ToList();
-
+                Console.WriteLine("--5b--");
                 List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> ifcFilteredIds = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
 
                 List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> ifcWallsFiltered = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> { };
@@ -390,7 +405,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                         curtainwallTT = false;
                 }
 
-
+                Console.WriteLine("--6b--");
                 ComboboxItemFilter ifcwalls = new ComboboxItemFilter() { Text = "ifcwall", ValueIfcGloballyUniqueIds4 = ifcWallsFiltered, TTAvailable = wallTT };
                 ComboboxItemFilter ifcbeams = new ComboboxItemFilter() { Text = "ifcbeam", ValueIfcGloballyUniqueIds4 = ifcBeamsFiltered, TTAvailable = beamTT };
                 ComboboxItemFilter ifccolumns = new ComboboxItemFilter() { Text = "ifccolumn", ValueIfcGloballyUniqueIds4 = ifcColumnsFiltered, TTAvailable = columnTT };
@@ -449,23 +464,39 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 }
 
 
-                comboBox.SelectedItem = null;
-                Console.WriteLine("--5b--");
+
+                Console.WriteLine("--7b--");
             }
         }
 
         public void Calculate1()
         {//gets λ n Rse
-            var textBox_l_in = ControlElements[3] as TextBox;
-            var comboBox_in = ControlElements[5] as ComboBox;
+            var textBox_l_in = ControlElements[1] as TextBox;
+            var comboBox_in = ControlElements[2] as ComboBox;
+
             if (textBox_l_in == null || comboBox_in == null)
                 return;     //if λ or Rse do not have values yet, we cannot do the calculation...
             if (textBox_l_in.Text == "")
                 return;
-
-            l = Double.Parse(textBox_l_in.Text.Replace(",", "."));
-            Console.WriteLine("l = " + l);
+            if (textBox_l_in.Text == "Τhermal conductivity λ")
+                return;
+            /*  if ((comboBox_in.Items[0] != null) && ((ComboboxItemLocal)comboBox_in.Items[0]).Text.Equals("Select Rse"))
+              {
+                  comboBox_in.Items[0] = null;
+              }
+          */
             ComboboxItemLocal Selection = (ComboboxItemLocal)(comboBox_in.SelectedItem);
+            if (Selection.Text == "Select Rse")
+                return;
+
+            try
+            {
+                l = Double.Parse(textBox_l_in.Text.Replace(",", "."));
+            }
+            catch (FormatException fe)
+            { return; }
+            Console.WriteLine("l = " + l);
+
             Console.WriteLine("Combobox's selection is " + Selection.Text + " that is " + Selection.Value);
             Rse = (Double)Selection.Value;
         }
@@ -1425,9 +1456,9 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         {
             //select Type of ifcElements
             //load their IfcGloballyUniqueIds in InfoIfc2x3 or InfoIfc4
-            var comboBox = ControlElements[1] as ComboBox;
+            var comboBox = ControlElements[0] as ComboBox;
             if (comboBox == null) return;
-
+            if (comboBox.SelectedIndex == 0) return;//Rse_0 is only the label we already said
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = ((ComboboxItemFilter)(comboBox.SelectedItem)).ValueIfcGloballyUniqueIds2x3;
@@ -1453,13 +1484,13 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             Label label_TT_exists;
             try
             {
-                label_TT_exists = ControlElements[8] as Label;
+                label_TT_exists = ControlElements[5] as Label;
             }
             catch (ArgumentOutOfRangeException outtt)
             {
                 label_TT_exists = new Label();
-                AddControlToNode(label_TT_exists);
-            }//#8
+                AddControlToNode(label_TT_exists);//#5
+            }//#5
 
             //ElementsThermalT = new List<double>();
 
@@ -1470,7 +1501,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
                 sumExistinTTs((ComboboxItemFilter)comboBox.SelectedItem);
                 Console.WriteLine("Total Thermo is " + sumTT);
-                var label_Uj_in = ControlElements[6] as Label;
+                var label_Uj_in = ControlElements[3] as Label;
                 label_Uj_in.Content = "Uj = " + sumTT;
             }
             else
@@ -1478,7 +1509,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 label_TT_exists.Content = "TT NOT available";
                 //we wont calculate here the sum of TTs cause we are not sure if the right values for λ, R have yet been selected
                 //the calculation will take place when the button is pressed
-                var label_Uj_in = ControlElements[6] as Label;
+                var label_Uj_in = ControlElements[3] as Label;
                 label_Uj_in.Content = "Uj = ";
             }
 
@@ -1486,26 +1517,47 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
 
         public void selection_changed2(object sender, SelectionChangedEventArgs e)
-        {
+        {   /*
+            var comboBox_Rse = ControlElements[2] as ComboBox;
+            comboBox_Rse.Items.Clear();
+            comboBox_Rse.Items.Add(Rse_1);
+            comboBox_Rse.Items.Add(Rse_2);
+            comboBox_Rse.Items.Add(Rse_3);*/
             Calculate1();
         }
 
         public void button_Click1(object sender, RoutedEventArgs e)
         {
-            Calculate1();
-
-            var comboBox = ControlElements[1] as ComboBox;
-            if (comboBox == null) return;
             if (TTExists)
             {
                 Console.WriteLine("No need 2 press the Calculate button since the sum is calculated by itself !!");
                 return;
             }
-            if (comboBox.SelectedIndex.Equals(-1))
+
+            var label_Uj_in = ControlElements[3] as Label;
+
+            var comboBox = ControlElements[0] as ComboBox;
+            if (comboBox == null) return;
+
+            if (((ComboboxItemFilter)comboBox.SelectedItem).Text == "Select type of ifcElements")
             {
-                Console.WriteLine("No type of ifc-elements has been selected...");
+                Console.WriteLine("Select type of ifcElements first..!!");
                 return;
             }
+            var comboBox_Rse = ControlElements[2] as ComboBox;
+            if (((ComboboxItemLocal)comboBox_Rse.SelectedItem).Text == "Select Rse")
+            {
+                Console.WriteLine("Select Rse value first..!!");
+                return;
+            }
+
+            Calculate1();
+
+            /*  if (comboBox.SelectedIndex.Equals(-1))
+              {
+                  Console.WriteLine("No type of ifc-elements has been selected...");
+                  return;
+              }*/
             //since we got up 2 here, TT wont be available...
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
@@ -1565,7 +1617,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 sumTT += thermo;
             }
             Console.WriteLine("Total Thermo is calculated in " + sumTT);
-            var label_Uj_in = ControlElements[6] as Label;
+
             label_Uj_in.Content = "Uj = " + sumTT;
         }
 
