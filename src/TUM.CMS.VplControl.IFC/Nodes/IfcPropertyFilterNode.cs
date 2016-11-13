@@ -9,6 +9,7 @@ using System.Windows;
 using Xbim.Ifc;
 using Xbim.Properties;
 using Version = System.Version;
+using TUM.CMS.VplControl.IFC.Controls;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -16,7 +17,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         public IfcStore xModel;
         private Type IfcVersionType = null;
-        
+
         public IfcPropertyFilterNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
@@ -24,34 +25,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddInputPortToNode("IfcProducts", typeof(object));
 
             AddOutputPortToNode("FilteredProducts", typeof(object));
-                     
-            var labelPropertySet = new Label {Content="Property Set filter:" };
-            var labelProperties = new Label { Content = "property filter:" };
-            var labelPropertyValue = new Label { Content = "Property Value" };
 
+            UserControl usercontrol = new UserControl();
+            Grid grid = new Grid();
+            usercontrol.Content = grid;
 
-            var comboBoxPropertySet = new ComboBox { };
-            comboBoxPropertySet.SelectionChanged += comboBoxPropertySet_SelectionChanged;
+            IfcPropertyFilterControl ifcPropertyFilterControl = new IfcPropertyFilterControl();
+            ifcPropertyFilterControl.comboBoxPropertySet.SelectionChanged += comboBoxPropertySet_SelectionChanged;
+            ifcPropertyFilterControl.comboBoxProperties.SelectionChanged += comboBoxProperties_SelectionChanged;
+            ifcPropertyFilterControl.textBox.TextChanged += textBox_TextChanged;
+            ifcPropertyFilterControl.button.Click += button_Click;
 
-            var comboBoxProperties = new ComboBox { };
-            comboBoxProperties.SelectionChanged += comboBoxProperties_SelectionChanged;
+            AddControlToNode(ifcPropertyFilterControl);
 
-
-            var textBox = new TextBox { };
-            textBox.TextChanged += textBox_TextChanged;
-
-            var button = new Button { Content ="filter according to textBox"};
-            button.Click += button_Click;
-            
-
-            AddControlToNode(labelPropertySet);
-            AddControlToNode(comboBoxPropertySet);
-            AddControlToNode(labelProperties);
-            AddControlToNode(comboBoxProperties);
-            AddControlToNode(labelPropertyValue);            
-            AddControlToNode(textBox);
-            AddControlToNode(button);
-    
 
         }
 
@@ -59,13 +45,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                var textBox = ControlElements[5] as TextBox;
+                var ifcPropertyFilterControl = ControlElements[0] as IfcPropertyFilterControl;
+                if (ifcPropertyFilterControl == null) return;
+
+                var textBox = ifcPropertyFilterControl.textBox as TextBox;
                 if (textBox == null) return;
-                var button = ControlElements[6] as Button;
+                var button = ifcPropertyFilterControl.button as Button;
                 if (button == null) return;
-                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
                 if (comboBoxPropertySet == null) return;
-                var comboBoxProperties = ControlElements[3] as ComboBox;
+                var comboBoxProperties = ifcPropertyFilterControl.comboBoxProperties as ComboBox;
                 if (comboBoxProperties == null) return;
                 if (comboBoxProperties.Items.Count == 0) return;
 
@@ -192,13 +181,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
-                var textBox = ControlElements[5] as TextBox;
+                var ifcPropertyFilterControl = ControlElements[0] as IfcPropertyFilterControl;
+                if (ifcPropertyFilterControl == null) return;
+
+                var textBox = ifcPropertyFilterControl.textBox as TextBox;
                 if (textBox == null) return;
-                var button = ControlElements[6] as Button;
+                var button = ifcPropertyFilterControl.button as Button;
                 if (button == null) return;
-                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
                 if (comboBoxPropertySet == null) return;
-                var comboBoxProperties = ControlElements[3] as ComboBox;
+                var comboBoxProperties = ifcPropertyFilterControl.comboBoxProperties as ComboBox;
                 if (comboBoxProperties == null) return;
                 if (comboBoxProperties.Items.Count == 0) return;
 
@@ -324,11 +316,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 OutputPorts[0].Data = outputInfo;
             }
         }
-        
+
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            
+
         }
 
         public class ComboboxItem
@@ -339,7 +331,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             public override string ToString()
             { return Text; }
 
-           
+
         }
 
         public override void Calculate()
@@ -354,8 +346,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 ModelInfoIFC2x3 outputInfo = new ModelInfoIFC2x3(modelid);
                 xModel = DataController.Instance.GetModel(modelid);
 
-
-                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                var ifcPropertyFilterControl = ControlElements[0] as IfcPropertyFilterControl;
+                if (ifcPropertyFilterControl == null) return;
+                var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
                 if (comboBoxPropertySet == null) return;
                 comboBoxPropertySet.Items.Clear();
 
@@ -364,7 +357,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 // MemberInfo info = typeof(Xbim.Ifc2x3.Kernel.IfcProduct).GetMethod("GlobalId");
                 // IfcPersistedEntityAttribute attr = (IfcPersistedEntityAttribute)Attribute.GetCustomAttribute(info, typeof(IfcPersistedEntityAttribute));
-                var mgr = new Definitions<PropertySetDef>(Xbim.Properties.Version.IFC2x3);
+                /* var mgr = new Definitions<PropertySetDef>(Xbim.Properties.Version.IFC2x3);
                 mgr.LoadAllDefault();
                
                 List<string> ListofAllProducts = new List<string>();
@@ -388,22 +381,22 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             comboBoxPropertySet.Items.Add(onePropertySet);
                         }
                     }
+                }*/
+
+
+                var selectedProduct = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
+                List<Xbim.Ifc2x3.Kernel.IfcPropertySet> PropertySet = new List<Xbim.Ifc2x3.Kernel.IfcPropertySet> { };
+
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+
+
+
+                PropertySet = selectedProduct.PropertySets.ToList();
+                for (int i = 0; i < PropertySet.Count(); i++)
+                {
+                    ComboboxItem onePropertySet = new ComboboxItem() { Text = PropertySet[i].Name.ToString(), Value = PropertySet[i] };
+                    comboBoxPropertySet.Items.Add(onePropertySet);
                 }
-
-
-                //var selectedProduct = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
-                //                List<Xbim.Ifc2x3.Kernel.IfcPropertySet> PropertySet = new List<Xbim.Ifc2x3.Kernel.IfcPropertySet> { };
-                //
-                //                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
-                //
-                //
-                //
-                //                PropertySet = selectedProduct.PropertySets.ToList();
-                //                for (int i = 0; i < PropertySet.Count(); i++)
-                //                {
-                //                    ComboboxItem onePropertySet = new ComboboxItem() { Text = PropertySet[i].Name.ToString(), Value = PropertySet[i] };
-                //                    comboBoxPropertySet.Items.Add(onePropertySet);
-                //                }
 
                 comboBoxPropertySet.SelectedIndex = 0;
             }
@@ -416,7 +409,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 xModel = DataController.Instance.GetModel(modelid);
 
 
-                var comboBoxPropertySet = ControlElements[1] as ComboBox;
+                var ifcPropertyFilterControl = ControlElements[0] as IfcPropertyFilterControl;
+                if (ifcPropertyFilterControl == null) return;
+                var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
                 if (comboBoxPropertySet == null) return;
                 comboBoxPropertySet.Items.Clear();
 
@@ -446,20 +441,21 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 comboBoxPropertySet.SelectedIndex = 0;
             }
-            
+
 
         }
 
         private void comboBoxPropertySet_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var comboBoxPropertySet = ControlElements[1] as ComboBox;
+            var ifcPropertyFilterControl = ControlElements[0] as IfcPropertyFilterControl;
+            if (ifcPropertyFilterControl == null) return;
+            var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
             if (comboBoxPropertySet == null) return;
-            var comboBoxProperties = ControlElements[3] as ComboBox;
+            var comboBoxProperties = ifcPropertyFilterControl.comboBoxProperties as ComboBox;
             if (comboBoxProperties == null) return;
-
             comboBoxProperties.Items.Clear();
-
             if (comboBoxPropertySet.Items.Count == 0) return;
+
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
                 var selectedItem = (ComboboxItem)(comboBoxPropertySet.SelectedItem);
@@ -499,13 +495,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         private void comboBoxProperties_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var textBox = ControlElements[5] as TextBox;
+            var ifcPropertyFilterControl = ControlElements[0] as IfcPropertyFilterControl;
+            if (ifcPropertyFilterControl == null) return;
+
+            var textBox = ifcPropertyFilterControl.textBox as TextBox;
             if (textBox == null) return;
-            var comboBoxPropertySet = ControlElements[1] as ComboBox;
+            var button = ifcPropertyFilterControl.button as Button;
+            if (button == null) return;
+            var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
             if (comboBoxPropertySet == null) return;
-            var comboBoxProperties = ControlElements[3] as ComboBox;
+            var comboBoxProperties = ifcPropertyFilterControl.comboBoxProperties as ComboBox;
             if (comboBoxProperties == null) return;
             if (comboBoxProperties.Items.Count == 0) return;
+
 
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
@@ -539,23 +541,23 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         string propertyValueType = propertyValue.UnderlyingSystemType.Name;
                         if (propertyValueType == "Double")
                         {
-                            double propertyValueDouble = (double) propertyValueTrue;
+                            double propertyValueDouble = (double)propertyValueTrue;
                             propertyValueDoubles.Add(propertyValueDouble);
                             textBox.Text = "Double: give range";
                         }
                         if (propertyValueType == "Boolean")
                         {
-                            bool propertyValueBool = (bool) propertyValueTrue;
+                            bool propertyValueBool = (bool)propertyValueTrue;
                             propertyValueBools.Add(propertyValueBool);
                             textBox.Text = "Boolean: True or False";
                         }
                         if (propertyValueType == "String")
                         {
-                            string propertyValueString = (string) propertyValueTrue;
+                            string propertyValueString = (string)propertyValueTrue;
                             propertyValueStrings.Add(propertyValueString);
 
                             //print only different value of 'string' to the textbox
-                            List<bool> diffString = new List<bool> {};
+                            List<bool> diffString = new List<bool> { };
 
                             for (int i = 0; i < propertyValueStrings.Count; i++)
                             {

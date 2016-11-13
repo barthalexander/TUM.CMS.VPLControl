@@ -165,6 +165,12 @@
     <Compile Include="Controls\IfcMapsControl.xaml.cs">
       <DependentUpon>IfcMapsControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\IfcPropertyFilterControl.xaml.cs">
+      <DependentUpon>IfcPropertyFilterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IfcTypeFilterControl.xaml.cs">
+      <DependentUpon>IfcTypeFilterControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\IfcWriterControl.xaml.cs">
       <DependentUpon>IfcWriterControl.xaml</DependentUpon>
     </Compile>
@@ -259,6 +265,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\IfcMapsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\IfcPropertyFilterControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\IfcTypeFilterControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

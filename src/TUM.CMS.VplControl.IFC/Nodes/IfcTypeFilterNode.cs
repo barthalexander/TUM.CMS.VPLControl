@@ -6,15 +6,17 @@ using System.Collections.Generic;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Linq;
 using Xbim.Ifc;
+using TUM.CMS.VplControl.IFC.Controls;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcTypeFilterNode : Node
     {
         public IfcStore xModel;
-        public ModelInfoIFC2x3 OutputInfoIfc2x3; 
+        public ModelInfoIFC2x3 OutputInfoIfc2x3;
         public ModelInfoIFC4 OutputInfoIfc4;
         public Type IfcVersionType = null;
+
         public IfcTypeFilterNode(Core.VplControl hostCanvas)
             : base(hostCanvas)
         {
@@ -23,31 +25,20 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             AddOutputPortToNode("FilteredProducts", typeof(object));
 
-          
-            var label = new Label { Content ="filtered products"};
-            var labelProducts = new Label { Content = "product filter:"};           
-   
-            var comboBox = new ComboBox
-            {
-                
-            };
-            comboBox.SelectionChanged += comboBox_SelectionChanged;
+            UserControl usercontrol = new UserControl();
+            Grid grid = new Grid();
+            usercontrol.Content = grid;
 
-            
+            IfcTypeFilterControl ifcTypeFilterControl = new IfcTypeFilterControl();
+            ifcTypeFilterControl.comboBox.SelectionChanged += comboBox_SelectionChanged;
 
-            AddControlToNode(label);
-            AddControlToNode(labelProducts);
-            AddControlToNode(comboBox);
 
-    
+            AddControlToNode(ifcTypeFilterControl);
+
+
 
         }
 
-
-        private void textBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            
-        }
 
         public class ComboboxItem
         {
@@ -58,7 +49,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             public override string ToString()
             { return Text; }
 
-           
+
         }
 
         public override void Calculate()
@@ -68,13 +59,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                var modelid = ((ModelInfoIFC2x3) (InputPorts[0].Data)).ModelId;
+                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
 
                 if (modelid == null) return;
-                OutputInfoIfc2x3 = (ModelInfoIFC2x3) (InputPorts[0].Data);
+                OutputInfoIfc2x3 = (ModelInfoIFC2x3)(InputPorts[0].Data);
                 xModel = DataController.Instance.GetModel(modelid);
 
-                var comboBox = ControlElements[2] as ComboBox;
+                var ifcTypeFilterControl = ControlElements[0] as IfcTypeFilterControl;
+                var comboBox = ifcTypeFilterControl.comboBox;
                 if (comboBox != null && comboBox.Items.Count > 0)
                 {
                     comboBox.SelectedItem = -1;
@@ -92,19 +84,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var ifcdoor = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList();
                 var ifccurtainwall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall>().ToList();
 
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcFilteredIds = ((ModelInfoIFC2x3) (InputPorts[0].Data)).ElementIds;
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcFilteredIds = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
 
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcWallsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcBeamsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcColumnsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcSlabsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcWindowsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcStairsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcRoofsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcRampsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcPlatesFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcDoorsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
-                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcCurtainwallsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> {};
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcWallsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcBeamsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcColumnsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcSlabsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcWindowsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcStairsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcRoofsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcRampsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcPlatesFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcDoorsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> ifcCurtainwallsFiltered = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> { };
 
 
                 foreach (var item in ifcwall)
@@ -194,22 +186,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
-                ComboboxItem ifcwalls = new ComboboxItem() {Text = "ifcwall", ValueIfcGloballyUniqueIds2x3 = ifcWallsFiltered};
-                ComboboxItem ifcbeams = new ComboboxItem() {Text = "ifcbeam", ValueIfcGloballyUniqueIds2x3 = ifcBeamsFiltered};
-                ComboboxItem ifccolumns = new ComboboxItem() {Text = "ifccolumn", ValueIfcGloballyUniqueIds2x3 = ifcColumnsFiltered};
-                ComboboxItem ifcslabs = new ComboboxItem() {Text = "ifcslab", ValueIfcGloballyUniqueIds2x3 = ifcSlabsFiltered};
-                ComboboxItem ifcwindows = new ComboboxItem() {Text = "ifcwindow", ValueIfcGloballyUniqueIds2x3 = ifcWindowsFiltered};
-                ComboboxItem ifcstairs = new ComboboxItem() {Text = "ifcstair", ValueIfcGloballyUniqueIds2x3 = ifcStairsFiltered};
-                ComboboxItem ifcroofs = new ComboboxItem() {Text = "ifcroof", ValueIfcGloballyUniqueIds2x3 = ifcRoofsFiltered};
-                ComboboxItem ifcramps = new ComboboxItem() {Text = "ifcramp", ValueIfcGloballyUniqueIds2x3 = ifcRampsFiltered};
-                ComboboxItem ifcplates = new ComboboxItem() {Text = "ifcplate", ValueIfcGloballyUniqueIds2x3 = ifcPlatesFiltered};
-                ComboboxItem ifcdoors = new ComboboxItem() {Text = "ifcdoor", ValueIfcGloballyUniqueIds2x3 = ifcDoorsFiltered};
-                ComboboxItem ifccurtainwalls = new ComboboxItem()
-                {
-                    Text = "ifccurtainwall",
-                    ValueIfcGloballyUniqueIds2x3 = ifcCurtainwallsFiltered
-                };
-
+                ComboboxItem ifcwalls = new ComboboxItem() { Text = "ifcwall", ValueIfcGloballyUniqueIds2x3 = ifcWallsFiltered };
+                ComboboxItem ifcbeams = new ComboboxItem() { Text = "ifcbeam", ValueIfcGloballyUniqueIds2x3 = ifcBeamsFiltered };
+                ComboboxItem ifccolumns = new ComboboxItem() { Text = "ifccolumn", ValueIfcGloballyUniqueIds2x3 = ifcColumnsFiltered };
+                ComboboxItem ifcslabs = new ComboboxItem() { Text = "ifcslab", ValueIfcGloballyUniqueIds2x3 = ifcSlabsFiltered };
+                ComboboxItem ifcwindows = new ComboboxItem() { Text = "ifcwindow", ValueIfcGloballyUniqueIds2x3 = ifcWindowsFiltered };
+                ComboboxItem ifcstairs = new ComboboxItem() { Text = "ifcstair", ValueIfcGloballyUniqueIds2x3 = ifcStairsFiltered };
+                ComboboxItem ifcroofs = new ComboboxItem() { Text = "ifcroof", ValueIfcGloballyUniqueIds2x3 = ifcRoofsFiltered };
+                ComboboxItem ifcramps = new ComboboxItem() { Text = "ifcramp", ValueIfcGloballyUniqueIds2x3 = ifcRampsFiltered };
+                ComboboxItem ifcplates = new ComboboxItem() { Text = "ifcplate", ValueIfcGloballyUniqueIds2x3 = ifcPlatesFiltered };
+                ComboboxItem ifcdoors = new ComboboxItem() { Text = "ifcdoor", ValueIfcGloballyUniqueIds2x3 = ifcDoorsFiltered };
+                ComboboxItem ifccurtainwalls = new ComboboxItem() { Text = "ifccurtainwall", ValueIfcGloballyUniqueIds2x3 = ifcCurtainwallsFiltered };
+                ComboboxItem defaultItem = new ComboboxItem() { Text = "-Ifc Type-", ValueIfcGloballyUniqueIds2x3 = null };
                 if (ifcWallsFiltered.Count != 0)
                 {
                     comboBox.Items.Add(ifcwalls);
@@ -256,7 +244,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
 
 
-                comboBox.SelectedItem = null;
+                comboBox.SelectedItem = defaultItem;
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
@@ -396,11 +384,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 ComboboxItem ifcramps = new ComboboxItem() { Text = "ifcramp", ValueIfcGloballyUniqueIds4 = ifcRampsFiltered };
                 ComboboxItem ifcplates = new ComboboxItem() { Text = "ifcplate", ValueIfcGloballyUniqueIds4 = ifcPlatesFiltered };
                 ComboboxItem ifcdoors = new ComboboxItem() { Text = "ifcdoor", ValueIfcGloballyUniqueIds4 = ifcDoorsFiltered };
-                ComboboxItem ifccurtainwalls = new ComboboxItem()
-                {
-                    Text = "ifccurtainwall",
-                    ValueIfcGloballyUniqueIds4 = ifcCurtainwallsFiltered
-                };
+                ComboboxItem ifccurtainwalls = new ComboboxItem() { Text = "ifccurtainwall", ValueIfcGloballyUniqueIds4 = ifcCurtainwallsFiltered };
+                ComboboxItem defaultItem = new ComboboxItem() { Text = "-Ifc Type-", ValueIfcGloballyUniqueIds4 = null };
 
                 if (ifcWallsFiltered.Count != 0)
                 {
@@ -448,14 +433,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
 
 
-                comboBox.SelectedItem = null;
+                comboBox.SelectedItem = defaultItem;
             }
         }
 
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
-            var comboBox = ControlElements[2] as ComboBox;
+            var ifcTypeFilterControl = ControlElements[0] as IfcTypeFilterControl;
+            var comboBox = ifcTypeFilterControl.comboBox;
             if (comboBox == null) return;
 
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
@@ -478,9 +464,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 OutputPorts[0].Data = OutputInfoIfc4;
             }
-            
-            
-            
+
+
+
         }
 
 
