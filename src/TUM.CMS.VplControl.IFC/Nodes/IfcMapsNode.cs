@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
 using System.Linq;
 using System.Diagnostics;
+using TUM.CMS.VplControl.IFC.Controls;
 using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Ifc;
 
@@ -14,7 +15,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcMapsNode : Node
     {
-        private WebBrowser maps;
         public IfcStore xModel;
         public IfcMapsNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
@@ -33,27 +33,24 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var appName = Process.GetCurrentProcess().ProcessName + ".exe";
             SetIE9KeyforWebBrowserControl(appName);
 
-
-            maps = new WebBrowser
-            {
-                MinWidth = 600,
-                MinHeight = 450
-
-            };
-
-            
-
-            AddControlToNode(maps);
-            AddControlToNode(textBlock);
+            IfcMapsControl ifcMapsControl = new IfcMapsControl();
 
 
+            AddControlToNode(ifcMapsControl);
         }
 
        
         public override void Calculate()
         {
+            var ifcMapsControl = ControlElements[0] as IfcMapsControl;
+
             if (InputPorts[0].Data == null)
                 return;
+            WebBrowser maps = new WebBrowser();
+
+            maps = ifcMapsControl.Browser;
+            maps.Height = 450;
+            maps.Width = 600;
 
             Type IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
@@ -79,12 +76,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         {
                             maps.Source = null;
                             maps.Source = new Uri("https://www.google.de/maps/@" + ifcRefLat[0] + "." + ifcRefLat[1] + ifcRefLat[2] + ifcRefLat[3] + "," + ifcRefLong[0] + "." + ifcRefLong[1] + ifcRefLong[2] + ifcRefLong[3] + ",15z");
-                            var textBlock = ControlElements[1] as TextBlock;
+                            TextBlock textBlock = new TextBlock();
+                            textBlock = ifcMapsControl.TextBlock;
                             textBlock.Text = "Geo Coordinates: " + ifcsite[0].RefLatitude.Value.AsDouble + "," + ifcsite[0].RefLongitude.Value.AsDouble;
                         }
                         else
                         {
-                            var textBlock = ControlElements[1] as TextBlock;
+                            TextBlock textBlock = new TextBlock();
+                            textBlock = ifcMapsControl.TextBlock;
                             textBlock.Text = "No Geo Coordinates were found on the IFC File";
                         }
 
@@ -110,7 +109,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                         List<long> ifcRefLong = new List<long>();
                         List<long> ifcRefLat = new List<long>();
-
                         ifcRefLong = ifcsite[0].RefLongitude;
                         ifcRefLat = ifcsite[0].RefLatitude;
 
@@ -119,12 +117,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         {
                             maps.Source = null;
                             maps.Source = new Uri("https://www.google.de/maps/@" + ifcRefLat[0] + "." + ifcRefLat[1] + ifcRefLat[2] + ifcRefLat[3] + "," + ifcRefLong[0] + "." + ifcRefLong[1] + ifcRefLong[2] + ifcRefLong[3] + ",15z");
-                            var textBlock = ControlElements[1] as TextBlock;
+                            TextBlock textBlock = new TextBlock();
+                            textBlock = ifcMapsControl.TextBlock;
                             textBlock.Text = "Geo Coordinates: " + ifcsite[0].RefLatitude.Value.AsDouble + "," + ifcsite[0].RefLongitude.Value.AsDouble;
                         }
                         else
                         {
-                            var textBlock = ControlElements[1] as TextBlock;
+                            TextBlock textBlock = new TextBlock();
+                            textBlock = ifcMapsControl.TextBlock;
                             textBlock.Text = "No Geo Coordinates were found on the IFC File";
                         }
 

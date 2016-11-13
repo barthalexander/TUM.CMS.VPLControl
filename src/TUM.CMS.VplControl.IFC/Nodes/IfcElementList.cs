@@ -7,6 +7,7 @@ using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Presentation;
 using System.Collections;
+using TUM.CMS.VplControl.IFC.Controls;
 using Xbim.Ifc;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
@@ -20,29 +21,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         // private DynamicProductSelectionControl productSelectionControl;
         public IfcElementListNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
+
             IsResizeable = true;
 
-            var textBlock = new TextBlock
-            {
-                TextWrapping = TextWrapping.Wrap,
-                FontSize = 16,
-                Padding = new Thickness(5),
-                IsHitTestVisible = false
-            };
-            var scrollViewer = new ScrollViewer
-            {
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                MinWidth = 400,
-                MinHeight = 30,
-                MaxWidth = 1000,
-                MaxHeight = 400,
-                CanContentScroll = true,
-                Content = textBlock
-                //IsHitTestVisible = false
-            };
-            AddControlToNode(new Label { Content = "IFC Element Liste" });
-            AddControlToNode(scrollViewer);
+            MVDTreeControle mvdTreeControle = new MVDTreeControle();
+
+            mvdTreeControle.ScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            mvdTreeControle.ScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            mvdTreeControle.ScrollViewer.CanContentScroll = true;
+
+            mvdTreeControle.Title.Content = "IFC Element Liste";
+
+            AddControlToNode(mvdTreeControle);
+
             AddInputPortToNode("ModelInfo", typeof(object), true);
            
 
@@ -52,9 +43,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
-            var scrollViewer = ControlElements[1] as ScrollViewer;
-            if (scrollViewer == null) return;
-            var textBlock = scrollViewer.Content as TextBlock;
+            var mvdTreeControle = ControlElements[0] as MVDTreeControle;
+
+            TextBlock textBlock = new TextBlock();
+            mvdTreeControle.ScrollViewer.Content = textBlock;
+
+            mvdTreeControle.MinHeight = 100;
+            mvdTreeControle.MinWidth = 400;
+
+            mvdTreeControle.ScrollViewer.MinWidth = 400;
+            mvdTreeControle.ScrollViewer.MinHeight = 100;
+            mvdTreeControle.ScrollViewer.MaxWidth = 600;
+            mvdTreeControle.ScrollViewer.MaxHeight = 600;
+
             if (textBlock == null) return;
             textBlock.Text = "";
 

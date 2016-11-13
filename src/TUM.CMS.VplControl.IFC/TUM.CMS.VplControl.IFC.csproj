@@ -162,6 +162,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\IfcMapsControl.xaml.cs">
+      <DependentUpon>IfcMapsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IfcWriterControl.xaml.cs">
+      <DependentUpon>IfcWriterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MVDTreeControle.xaml.cs">
+      <DependentUpon>MVDTreeControle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TitleTextboxControl.xaml.cs">
+      <DependentUpon>TitleTextboxControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Nodes\EnergyVisualisationNode.cs" />
     <Compile Include="Nodes\IfcEnergyCalculateVisualizeTT.cs" />
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
@@ -183,14 +195,12 @@
     <Compile Include="Nodes\IfcTreeNode.cs" />
     <Compile Include="Nodes\MvdParserNode.cs" />
     <Compile Include="Nodes\IfcWriterNode.cs" />
-
     <Compile Include="Controls\IfcElementPropertyControl.xaml.cs">
       <DependentUpon>IfcElementPropertyControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\IFCViewerControl.xaml.cs">
       <DependentUpon>IFCViewerControl.xaml</DependentUpon>
     </Compile>
-    
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -248,7 +258,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\IfcMapsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\IFCViewerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\IfcWriterControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MVDTreeControle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TitleTextboxControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using TUM.CMS.VplControl.Core;
+using TUM.CMS.VplControl.IFC.Controls;
 using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Common;
 using Xbim.Common.Metadata;
@@ -28,17 +29,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             AddInputPortToNode("Object", typeof(object), true);
 
-            var label = new Label
-            {
-                Content = "IFC File Reading",
-                Width = 130,
-                FontSize = 15,
-                HorizontalContentAlignment = HorizontalAlignment.Center
-            };
-            var button = new Button { Content = "Save File" };
-            button.Click += button_Click;
-            AddControlToNode(label);
-            AddControlToNode(button);
+            IfcWriterControl ifcWriterControl = new IfcWriterControl();
+            ifcWriterControl.Title.Content = "IFC Writer";
+            ifcWriterControl.Button.Content = "Save File";
+            ifcWriterControl.Button.Click += button_Click;
+
+            AddControlToNode(ifcWriterControl);
 
 
         }
@@ -216,7 +212,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
-            
+            if (InputPorts[0].Data == null)
+            {
+                return;
+            }
+
+            var ifcWriterControl = ControlElements[0] as IfcWriterControl;
+            ifcWriterControl.Button.Visibility = Visibility.Visible;
+
         }
 
         public override Node Clone()

@@ -16,7 +16,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public IfcMergeNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
 
-            var labelModels = new Label { Content = "Merge Models" };
+            var labelModels = new Label { Content = "Ifc Merge Node", FontWeight = FontWeights.Bold};
             AddControlToNode(labelModels);
             var label1 = new Label {};
             AddControlToNode(label1);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
+using TUM.CMS.VplControl.IFC.Controls;
 using TUM.CMS.VplControl.IFC.Utilities;
 using TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses;
 using Xbim.Ifc;
@@ -17,24 +18,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             IsResizeable = true;
 
-            var treeview = new TreeView();
-            
-            var scrollViewer = new ScrollViewer
-            {
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                MinWidth = 400,
-                MinHeight = 100,
-                MaxWidth = 1000,
-                MaxHeight = 300,
-                CanContentScroll = true,
-                Content = treeview
-                //IsHitTestVisible = false
-            };
+            MVDTreeControle mvdTreeControle = new MVDTreeControle();
 
+            mvdTreeControle.ScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            mvdTreeControle.ScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            mvdTreeControle.ScrollViewer.CanContentScroll = true;
+
+            mvdTreeControle.Title.Content = "MVD Tree Node";
             AddInputPortToNode("Object", typeof(object));
 
-            AddControlToNode(scrollViewer);
+            AddControlToNode(mvdTreeControle);
 
 
         }
@@ -46,10 +39,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (InputPorts[0].Data != null)
             {
                 var modelView = (ModelView)InputPorts[0].Data;
+                var mvdTreeControle = ControlElements[0] as MVDTreeControle;
+                TreeView treeView = new TreeView();
+                mvdTreeControle.MinHeight = 100;
+                mvdTreeControle.MinWidth = 400;
+                mvdTreeControle.ScrollViewer.MinWidth = 400;
+                mvdTreeControle.ScrollViewer.MinHeight = 100;
+                mvdTreeControle.ScrollViewer.MaxWidth = 600;
+                mvdTreeControle.ScrollViewer.MaxHeight = 600;
 
-                var scrollViewer = ControlElements[0] as ScrollViewer;
-                if (scrollViewer == null) return;
-                var treeView = scrollViewer.Content as TreeView;
+                mvdTreeControle.ScrollViewer.Content = treeView;
                 if (treeView == null) return;
 
                 TreeViewItem treeViewItem = new TreeViewItem();

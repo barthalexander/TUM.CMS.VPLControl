@@ -529,7 +529,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                     var mb = new MeshBuilder(false, false);
 
-                    VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
+                    
+                    var element = VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
+                    _viewPort.Children.Add(element);
                 }
 
                 // Show whole building with opacity 0.03
@@ -568,7 +570,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                     var mb = new MeshBuilder(false, false);
 
-                    VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
+                    var element = VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
+                    _viewPort.Children.Add(element);
                 }
                 
              }

@@ -1,13 +1,12 @@
-﻿<UserControl x:Class="TUM.CMS.VplControl.IFC.Controls.IFCViewerControl"
+﻿<UserControl x:Class="TUM.CMS.VplControl.IFC.Controls.IfcMapsControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TUM.CMS.VplControl.IFC.Controls"
-             xmlns:h="http://helix-toolkit.org/wpf"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid MinHeight="200" MinWidth="200">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="28" />
             <RowDefinition Height="*" />
@@ -16,11 +15,11 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Left" Content="IfcViewer" Grid.Row="0"  Grid.Column="0"></Label>
-        <h:HelixViewport3D Name="Viewport3D" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0"></h:HelixViewport3D>
-        <RadioButton Name="RadioButton_1" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Content = "pass all"></RadioButton>
-        <RadioButton Name="RadioButton_2" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" Content = "pass selected" IsChecked="True" ></RadioButton>
-        
-            
+        <Label HorizontalAlignment="Center" Content="Ifc Maps" Grid.Row="0"  Grid.Column="0"></Label>
+        <WebBrowser Name="Browser" x:FieldModifier="public" Grid.Row="1" Grid.Column="0"></WebBrowser>
+        <TextBlock Name="TextBlock" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"></TextBlock>
+
+
+
     </Grid>
 </UserControl>

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using System.Linq;
+using System.Windows.Documents;
 using System.Windows.Media;
 using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Common;
@@ -13,6 +14,8 @@ using Xbim.Common.Metadata;
 using Xbim.Common.Step21;
 using Xbim.Ifc;
 using Xbim.Presentation;
+using TUM.CMS.VplControl.IFC.Controls;
+
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -25,27 +28,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             AddOutputPortToNode("GUID", typeof(object));
 
-            var label = new Label
-            {
-                Content = "IFC File Reading",
-                Width = 130,
-                FontSize = 15,
-                HorizontalContentAlignment = HorizontalAlignment.Center
-            };
-            var textBlock = new TextBlock
-            {
-                TextWrapping = TextWrapping.Wrap,
-                FontSize = 10,
-                Padding = new Thickness(5),
-                IsHitTestVisible = false
-            };
-
-            var button = new Button { Content = "Clean Database" };
-            button.Click += button_Click;
-
-            AddControlToNode(label);
-            AddControlToNode(textBlock);
-            AddControlToNode(button);
+            TitleTextboxControl titleTextboxControl = new TitleTextboxControl();
+            Label label = new Label();
+            label = titleTextboxControl.Title;
+            label.Content = "IfC Parser";
+            
+            AddControlToNode(titleTextboxControl);
 
         }
 
@@ -57,18 +45,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-            var models = DataController.Instance.ModelStorage.ToList();
-            if (models.Count > 1)
-            {
-                for (int i = 0; i < models.Count - 1; i++)
-                {
-                    DataController.Instance.RemoveModel(models[i].Key);
-                }
-            }
-
-        }
         
         private BackgroundWorker _worker;
         /// <summary>
@@ -93,7 +69,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             else
             {
-                var textBlock = ControlElements[1] as TextBlock;
+                var titleTextboxControl = ControlElements[0] as TitleTextboxControl;
+                TextBlock textBlock = new TextBlock();
+                textBlock = titleTextboxControl.TextBlock;
                 textBlock.Background = Brushes.Red;
                 textBlock.Text = "Please select a true File!";
             }
@@ -171,7 +149,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             try
             {
                 OutputPorts[0].Data = e.Result;
-                var textBlock = ControlElements[1] as TextBlock;
+                var titleTextboxControl = ControlElements[0] as TitleTextboxControl;
+                TextBlock textBlock = new TextBlock();
+                textBlock = titleTextboxControl.TextBlock;
                 textBlock.Background = Brushes.White;
                 textBlock.Text = "File is Valid!";
             }
