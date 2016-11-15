@@ -47,7 +47,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 var ifcPropertyFilterControl = ControlElements[0] as IfcPropertyFilterControl;
                 if (ifcPropertyFilterControl == null) return;
-
+                
                 var textBox = ifcPropertyFilterControl.textBox as TextBox;
                 if (textBox == null) return;
                 var button = ifcPropertyFilterControl.button as Button;
