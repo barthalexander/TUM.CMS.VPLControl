@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Linq;
 using Xbim.Ifc;
+using TUM.CMS.VplControl.Energy.Controls;
+
 namespace TUM.CMS.VplControl.Energy.Nodes
 {
     public class EnergyCalculatorNode : Node
@@ -31,51 +33,45 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         public EnergyCalculatorNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             Console.WriteLine("--1--");
-            AddInputPortToNode("text", typeof(string));//the ifc parsed file
-                                                       //AddOutputPortToNode("text", typeof(List<double>));//List with doors thermal transmittance
+            AddInputPortToNode("text", typeof(string));//the ifc parsed file                                            
 
-            // var labelTypeOfProducts = new Label { Content = "select type of ifcElements" };
-            // AddControlToNode(labelTypeOfProducts);//
-            var comboBoxFilter = new ComboBox
-            {
-                //this comboBox is like the one from IfcFilterNode
-            };
+            UserControl usercontrol = new UserControl();
+            Grid grid = new Grid();
+            usercontrol.Content = grid;
+            EnergyCalculatorControl energyCalculatorControl = new EnergyCalculatorControl();
+
+            ComboBox comboBoxFilter = energyCalculatorControl.ComboBoxFilter;
             comboBoxFilter.Items.Add(ifcLabel);
             comboBoxFilter.SelectedIndex = 0;
             comboBoxFilter.SelectionChanged += selection_changed1;//ifcElement selection changed & check whether TT is available or not... act accordingly
-            AddControlToNode(comboBoxFilter);//#0
 
-            //var label_l = new Label { Content = "Τhermal conductivity λ" };
-            //AddControlToNode(label_l);  //
-            // var textBox_l = new TextBox { MinWidth = 300, MaxWidth = 500, IsHitTestVisible = false };
-            var textBox_l = new TextBox { };
+            TextBox textBox_l = energyCalculatorControl.TextBox_l;
             textBox_l.Text = "Τhermal conductivity λ";
             textBox_l.MouseDoubleClick += TextBox_l_MouseDoubleClick;
-
             textBox_l.TextChanged += textBox_TextChanged;//when textBox is changed nothing will happen...
-            AddControlToNode(textBox_l);//#1
-                                        //  var label_Rse = new Label { Content = "Rse" };
-                                        //  AddControlToNode(label_Rse); //
-            var comboBox_Rse = new ComboBox { };
+
+            ComboBox comboBox_Rse = energyCalculatorControl.ComboBoxRse;
             comboBox_Rse.Items.Add(Rse_0);//this Rse_0 is only the label
             comboBox_Rse.Items.Add(Rse_1);
             comboBox_Rse.Items.Add(Rse_2);
             comboBox_Rse.Items.Add(Rse_3);//Ra comboBox has these 3 items
             comboBox_Rse.SelectedIndex = 0;
             comboBox_Rse.SelectionChanged += selection_changed2;//load doors' properties n calculate thermal transmittances whenever this checkbox's selection is changed...
-            AddControlToNode(comboBox_Rse);  //#2
+
             //label for Uj total thermal transm for all the doors elements
-            var label_Uj = new Label { Content = "Uj = " };
-            AddControlToNode(label_Uj);     //#3
-            var button_Uj = new Button { Content = "Sum all TTs" };
+            Label label_Uj = energyCalculatorControl.Label_Uj;
+
+            Button button_Uj = energyCalculatorControl.Button_Uj;
             button_Uj.Click += button_Click1;//sum up all elements' TT n show it
-            AddControlToNode(button_Uj);    //#4
+            
             Console.WriteLine("--2--");
+
+            AddControlToNode(energyCalculatorControl);
         }
 
         private void TextBox_l_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            var textBox_l = ControlElements[1] as TextBox;
+            TextBox textBox_l = ((EnergyCalculatorControl)ControlElements[0]).TextBox_l;
             textBox_l.Clear();
         }
 
@@ -92,7 +88,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 InfoIfc2x3 = (ModelInfoIFC2x3)(InputPorts[0].Data);
                 xModel = DataController.Instance.GetModel(modelid);
                 Console.WriteLine("--4.a.i--");
-                var comboBox = ControlElements[0] as ComboBox;
+                ComboBox comboBox = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxFilter;
                 if (comboBox != null && comboBox.Items.Count > 0)
                 {
                     // comboBox.SelectedItem = -1;
@@ -284,7 +280,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 InfoIfc4 = (ModelInfoIFC4)(InputPorts[0].Data);
                 xModel = DataController.Instance.GetModel(modelid);
 
-                var comboBox = ControlElements[0] as ComboBox;
+                ComboBox comboBox = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxFilter;
                 if (comboBox != null && comboBox.Items.Count > 0)
                 {
                     // comboBox.SelectedItem = -1;
@@ -471,8 +467,8 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
         public void Calculate1()
         {//gets λ n Rse
-            var textBox_l_in = ControlElements[1] as TextBox;
-            var comboBox_in = ControlElements[2] as ComboBox;
+            TextBox textBox_l_in = ((EnergyCalculatorControl)ControlElements[0]).TextBox_l;
+            ComboBox comboBox_in = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxRse;
 
             if (textBox_l_in == null || comboBox_in == null)
                 return;     //if λ or Rse do not have values yet, we cannot do the calculation...
@@ -1456,9 +1452,9 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         {
             //select Type of ifcElements
             //load their IfcGloballyUniqueIds in InfoIfc2x3 or InfoIfc4
-            var comboBox = ControlElements[0] as ComboBox;
+            ComboBox comboBox = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxFilter;
             if (comboBox == null) return;
-            if (comboBox.SelectedIndex == 0) return;//Rse_0 is only the label we already said
+            if (comboBox.SelectedIndex == 0) return;//in index 0 it is only a label we already said that
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = ((ComboboxItemFilter)(comboBox.SelectedItem)).ValueIfcGloballyUniqueIds2x3;
@@ -1481,36 +1477,32 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             }
 
             TTExists = ((ComboboxItemFilter)comboBox.SelectedItem).TTAvailable;
-            Label label_TT_exists;
-            try
-            {
-                label_TT_exists = ControlElements[5] as Label;
-            }
-            catch (ArgumentOutOfRangeException outtt)
-            {
-                label_TT_exists = new Label();
-                AddControlToNode(label_TT_exists);//#5
-            }//#5
-
-            //ElementsThermalT = new List<double>();
-
-
+            Label label_TT_exists = ((EnergyCalculatorControl)ControlElements[0]).Label_TT_Exists;
+            
             if (TTExists)
             {
                 label_TT_exists.Content = "TT is available";
 
                 sumExistinTTs((ComboboxItemFilter)comboBox.SelectedItem);
                 Console.WriteLine("Total Thermo is " + sumTT);
-                var label_Uj_in = ControlElements[3] as Label;
-                label_Uj_in.Content = "Uj = " + sumTT;
+                Label label_Uj_in = ((EnergyCalculatorControl)ControlElements[0]).Label_Uj;
+                label_Uj_in.Content = "Uj = " + System.Math.Round(sumTT,3);
+
+                ((EnergyCalculatorControl)ControlElements[0]).TextBox_l.Visibility = Visibility.Hidden;
+                ((EnergyCalculatorControl)ControlElements[0]).ComboBoxRse.Visibility = Visibility.Hidden;
+                ((EnergyCalculatorControl)ControlElements[0]).Button_Uj.Visibility = Visibility.Hidden;
             }
             else
             {
                 label_TT_exists.Content = "TT NOT available";
                 //we wont calculate here the sum of TTs cause we are not sure if the right values for λ, R have yet been selected
                 //the calculation will take place when the button is pressed
-                var label_Uj_in = ControlElements[3] as Label;
+                Label label_Uj_in = ((EnergyCalculatorControl)ControlElements[0]).Label_Uj;
                 label_Uj_in.Content = "Uj = ";
+
+                ((EnergyCalculatorControl)ControlElements[0]).TextBox_l.Visibility = Visibility.Visible;
+                ((EnergyCalculatorControl)ControlElements[0]).ComboBoxRse.Visibility = Visibility.Visible;
+                ((EnergyCalculatorControl)ControlElements[0]).Button_Uj.Visibility = Visibility.Visible;
             }
 
 
@@ -1534,9 +1526,9 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 return;
             }
 
-            var label_Uj_in = ControlElements[3] as Label;
+            Label label_Uj_in = ((EnergyCalculatorControl)ControlElements[0]).Label_Uj;
 
-            var comboBox = ControlElements[0] as ComboBox;
+            ComboBox comboBox = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxFilter;
             if (comboBox == null) return;
 
             if (((ComboboxItemFilter)comboBox.SelectedItem).Text == "Select type of ifcElements")
@@ -1544,7 +1536,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 Console.WriteLine("Select type of ifcElements first..!!");
                 return;
             }
-            var comboBox_Rse = ControlElements[2] as ComboBox;
+            ComboBox comboBox_Rse = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxRse;
             if (((ComboboxItemLocal)comboBox_Rse.SelectedItem).Text == "Select Rse")
             {
                 Console.WriteLine("Select Rse value first..!!");
@@ -1618,7 +1610,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             }
             Console.WriteLine("Total Thermo is calculated in " + sumTT);
 
-            label_Uj_in.Content = "Uj = " + sumTT;
+            label_Uj_in.Content = "Uj = " + System.Math.Round(sumTT,3);
         }
 
         public void sumExistinTTs(ComboboxItemFilter selectedItem)

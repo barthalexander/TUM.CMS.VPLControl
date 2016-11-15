@@ -162,6 +162,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\EnergyVisualisationControl.xaml.cs">
+      <DependentUpon>EnergyVisualisationControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\IfcMapsControl.xaml.cs">
       <DependentUpon>IfcMapsControl.xaml</DependentUpon>
     </Compile>
@@ -184,7 +187,6 @@
       <DependentUpon>TitleTextboxControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Nodes\EnergyVisualisationNode.cs" />
-    <Compile Include="Nodes\IfcEnergyCalculateVisualizeTT.cs" />
     <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
     <Compile Include="Nodes\MvdCheckerAndFilter.cs" />
     <Compile Include="Nodes\IfcElementProperty.cs" />
@@ -263,6 +265,10 @@
     <Resource Include="XbimUpdate\Xbim.PropertySets.4.ReadmeForUpdate.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\EnergyVisualisationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\IfcElementPropertyControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

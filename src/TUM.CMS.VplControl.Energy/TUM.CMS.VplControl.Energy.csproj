@@ -146,6 +146,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\EnergyCalculatorControl.xaml.cs">
+      <DependentUpon>EnergyCalculatorControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Nodes\EnergyCalculatorNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -184,6 +187,13 @@
       <Project>{593e9bfd-be78-4487-9e22-76ae7df0b84a}</Project>
       <Name>TUM.CMS.VplControl</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Page Include="Controls\EnergyCalculatorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Xbim.Geometry.4.0.8\build\Xbim.Geometry.targets" Condition="Exists('..\packages\Xbim.Geometry.4.0.8\build\Xbim.Geometry.targets')" />

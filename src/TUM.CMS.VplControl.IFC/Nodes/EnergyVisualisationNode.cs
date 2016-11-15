@@ -16,6 +16,7 @@ using Xbim.Common;
 using Xbim.Ifc;
 using System.Windows.Controls;
 using Xbim.Ifc2x3.UtilityResource;
+using TUM.CMS.VplControl.IFC.Controls;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -29,7 +30,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         // CHOSEN VALUES
         public const double l = 1;
         public const double Rse = Rse_1;
-        
+
 
         private readonly HelixViewport3D _viewPort;
         private IfcStore _xModel;
@@ -50,11 +51,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             AddInputPortToNode("Model", typeof(string));
             AddOutputPortToNode("SelectedEntities", typeof(List<IfcGloballyUniqueId>));
-            _viewPort = new HelixViewport3D
-            {
-                MinWidth = 520,
-                MinHeight = 520
-            };
+
+            EnergyVisualisationControl energyVisualisationControl = new EnergyVisualisationControl();
+
+            _viewPort = energyVisualisationControl.Viewport3D;
 
             //create a bar
             ProgressBar ColorBarAll = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
@@ -65,7 +65,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             ColorBarAll.Value = 0;//just keeps he progress bar empty
             _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
 
-            AddControlToNode(_viewPort);//#0
+            AddControlToNode(energyVisualisationControl);//#0
             AddControlToNode(ColorBarAll);//#1
         }
 
@@ -596,7 +596,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
 
-     
+
         public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat)
         {
 
