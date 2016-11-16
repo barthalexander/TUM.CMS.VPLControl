@@ -40,7 +40,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // Init UI
             IsResizeable = true;
 
-            AddInputPortToNode("Model", typeof(object), true);
+            AddInputPortToNode("Model", typeof(object), false);
             AddOutputPortToNode("FilteredElements", typeof(object));
 
 
@@ -90,167 +90,78 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             ModelListsIfc4 = new List<ModelInfoIFC4>();
             ModelListAll4 = new List<ModelInfoIFC4>();
 
-            Type t = InputPorts[0].Data.GetType();
-            if (t.IsGenericType)
+            
+            IfcVersionType = InputPorts[0].Data.GetType();
+            if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                var collection = InputPorts[0].Data as ICollection;
-                if (collection != null)
+                var modelId = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                var elementIdsList = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                if (modelId == null) return;
+                int indexOfModel = 0;
+                foreach (var item in ModelListsIfc2x3)
                 {
-                    string ifcMergeVersionType = "";
-                    foreach (var model in collection)
+                    if (item.ModelId == modelId)
                     {
-                        IfcVersionType = model.GetType();
-                        if (ifcMergeVersionType == "")
-                        {
-                            ifcMergeVersionType = IfcVersionType.Name;
-                        }
-
-                        if (IfcVersionType.Name != ifcMergeVersionType)
-                        {
-                            MessageBox.Show("The IFC Versions are not the same!", "My Application", MessageBoxButton.OK);
-                            return;
-                        }
-                        if (IfcVersionType.Name == "ModelInfoIFC2x3")
-                        {
-                            var modelId = ((ModelInfoIFC2x3)(model)).ModelId;
-                            var elementIdsList = ((ModelInfoIFC2x3)(model)).ElementIds;
-                            _xModel = DataController.Instance.GetModel(modelId, true);
-
-                            ModelListsIfc2x3.Add(new ModelInfoIFC2x3(modelId));
-                            ModelListAll2x3.Add(new ModelInfoIFC2x3(modelId));
-                            int indexOfModel = 0;
-                            foreach (var item in ModelListsIfc2x3)
-                            {
-                                if (item.ModelId == modelId)
-                                {
-                                    indexOfModel = ModelListsIfc2x3.IndexOf(item);
-                                    break;
-                                }
-                            }
-                            foreach (var item in ModelListAll2x3)
-                            {
-                                if (item.ModelId == modelId)
-                                {
-                                    indexOfModel = ModelListAll2x3.IndexOf(item);
-                                    break;
-                                }
-                            }
-
-                            var context = new Xbim3DModelContext(_xModel);
-                            //upgrade to new geometry represenation, uses the default 3D model
-                            context.CreateContext();
-                            worker_DoWork_IFC2x3(_xModel, indexOfModel, elementIdsList);
-                            button_1.Checked += (sender, e) => button_1_Checked_IFC2x3(sender, e, elementIdsList, indexOfModel);
-                        }
-                        else if (IfcVersionType.Name == "ModelInfoIFC4")
-                        {
-                            var modelId = ((ModelInfoIFC4)(model)).ModelId;
-                            var elementIdsList = ((ModelInfoIFC4)(model)).ElementIds;
-                            _xModel = DataController.Instance.GetModel(modelId, true);
-
-                            ModelListsIfc4.Add(new ModelInfoIFC4(modelId));
-                            ModelListAll4.Add(new ModelInfoIFC4(modelId));
-                            int indexOfModel = 0;
-                            foreach (var item in ModelListsIfc4)
-                            {
-                                if (item.ModelId == modelId)
-                                {
-                                    indexOfModel = ModelListsIfc4.IndexOf(item);
-                                    break;
-                                }
-                            }
-                            foreach (var item in ModelListAll4)
-                            {
-                                if (item.ModelId == modelId)
-                                {
-                                    indexOfModel = ModelListAll4.IndexOf(item);
-                                    break;
-                                }
-                            }
-
-                            var context = new Xbim3DModelContext(_xModel);
-                            //upgrade to new geometry represenation, uses the default 3D model
-                            context.CreateContext();
-                            worker_DoWork_IFC4(_xModel, indexOfModel, elementIdsList);
-                            button_1.Checked += (sender, e) => button_1_Checked_IFC4(sender, e, elementIdsList, indexOfModel);
-                        }
+                        indexOfModel = ModelListsIfc2x3.IndexOf(item);
+                        break;
                     }
                 }
+                foreach (var item in ModelListAll2x3)
+                {
+                    if (item.ModelId == modelId)
+                    {
+                        indexOfModel = ModelListAll2x3.IndexOf(item);
+                        break;
+                    }
+                }
+                _xModel = DataController.Instance.GetModel(modelId, true);
+
+
+
+
+                ModelListsIfc2x3.Add(new ModelInfoIFC2x3(modelId));
+                ModelListAll2x3.Add(new ModelInfoIFC2x3(modelId));
+                var context = new Xbim3DModelContext(_xModel);
+                //upgrade to new geometry represenation, uses the default 3D model
+                context.CreateContext();
+                worker_DoWork_IFC2x3(_xModel, indexOfModel, elementIdsList);
+                button_1.Checked += (sender, e) => button_1_Checked_IFC2x3(sender, e, elementIdsList, indexOfModel);
+
             }
-            else
+            else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
-                IfcVersionType = InputPorts[0].Data.GetType();
-                if (IfcVersionType.Name == "ModelInfoIFC2x3")
+                var modelId = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+                var elementIdsList = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
+                if (modelId == null) return;
+                int indexOfModel = 0;
+                foreach (var item in ModelListsIfc4)
                 {
-                    var modelId = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
-                    var elementIdsList = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
-                    if (modelId == null) return;
-                    int indexOfModel = 0;
-                    foreach (var item in ModelListsIfc2x3)
+                    if (item.ModelId == modelId)
                     {
-                        if (item.ModelId == modelId)
-                        {
-                            indexOfModel = ModelListsIfc2x3.IndexOf(item);
-                            break;
-                        }
+                        indexOfModel = ModelListsIfc4.IndexOf(item);
+                        break;
                     }
-                    foreach (var item in ModelListAll2x3)
-                    {
-                        if (item.ModelId == modelId)
-                        {
-                            indexOfModel = ModelListAll2x3.IndexOf(item);
-                            break;
-                        }
-                    }
-                    _xModel = DataController.Instance.GetModel(modelId, true);
-
-
-
-
-                    ModelListsIfc2x3.Add(new ModelInfoIFC2x3(modelId));
-                    ModelListAll2x3.Add(new ModelInfoIFC2x3(modelId));
-                    var context = new Xbim3DModelContext(_xModel);
-                    //upgrade to new geometry represenation, uses the default 3D model
-                    context.CreateContext();
-                    worker_DoWork_IFC2x3(_xModel, indexOfModel, elementIdsList);
-                    button_1.Checked += (sender, e) => button_1_Checked_IFC2x3(sender, e, elementIdsList, indexOfModel);
-
                 }
-                else if (IfcVersionType.Name == "ModelInfoIFC4")
+                foreach (var item in ModelListAll4)
                 {
-                    var modelId = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
-                    var elementIdsList = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
-                    if (modelId == null) return;
-                    int indexOfModel = 0;
-                    foreach (var item in ModelListsIfc4)
+                    if (item.ModelId == modelId)
                     {
-                        if (item.ModelId == modelId)
-                        {
-                            indexOfModel = ModelListsIfc4.IndexOf(item);
-                            break;
-                        }
+                        indexOfModel = ModelListAll4.IndexOf(item);
+                        break;
                     }
-                    foreach (var item in ModelListAll4)
-                    {
-                        if (item.ModelId == modelId)
-                        {
-                            indexOfModel = ModelListAll4.IndexOf(item);
-                            break;
-                        }
-                    }
-                    _xModel = DataController.Instance.GetModel(modelId, true);
-
-
-
-
-                    ModelListsIfc4.Add(new ModelInfoIFC4(modelId));
-                    ModelListAll4.Add(new ModelInfoIFC4(modelId));
-                    var context = new Xbim3DModelContext(_xModel);
-                    //upgrade to new geometry represenation, uses the default 3D model
-                    context.CreateContext();
-                    worker_DoWork_IFC4(_xModel, indexOfModel, elementIdsList);
-                    button_1.Checked += (sender, e) => button_1_Checked_IFC4(sender, e, elementIdsList, indexOfModel);
                 }
+                _xModel = DataController.Instance.GetModel(modelId, true);
+
+
+
+
+                ModelListsIfc4.Add(new ModelInfoIFC4(modelId));
+                ModelListAll4.Add(new ModelInfoIFC4(modelId));
+                var context = new Xbim3DModelContext(_xModel);
+                //upgrade to new geometry represenation, uses the default 3D model
+                context.CreateContext();
+                worker_DoWork_IFC4(_xModel, indexOfModel, elementIdsList);
+                button_1.Checked += (sender, e) => button_1_Checked_IFC4(sender, e, elementIdsList, indexOfModel);
             }
         }
 

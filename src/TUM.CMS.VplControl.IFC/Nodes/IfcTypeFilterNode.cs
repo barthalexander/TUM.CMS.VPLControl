@@ -15,6 +15,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public IfcStore xModel;
         public ModelInfoIFC2x3 OutputInfoIfc2x3;
         public ModelInfoIFC4 OutputInfoIfc4;
+        public String modelid;
         public Type IfcVersionType = null;
 
         public IfcTypeFilterNode(Core.VplControl hostCanvas)
@@ -60,10 +61,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
-                var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
 
                 if (modelid == null) return;
-                OutputInfoIfc2x3 = (ModelInfoIFC2x3)(InputPorts[0].Data);
                 xModel = DataController.Instance.GetModel(modelid);
 
                 var ifcTypeFilterControl = ControlElements[0] as IfcTypeFilterControl;
@@ -249,10 +249,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
-                var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+                modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
 
                 if (modelid == null) return;
-                OutputInfoIfc4 = (ModelInfoIFC4)(InputPorts[0].Data);
                 xModel = DataController.Instance.GetModel(modelid);
 
                 var comboBox = ControlElements[2] as ComboBox;
@@ -448,22 +447,23 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = ((ComboboxItem)(comboBox.SelectedItem)).ValueIfcGloballyUniqueIds2x3;
-                OutputInfoIfc2x3.ElementIds.Clear();
+                ModelInfoIFC2x3 modelInfoIfc2X3 = new ModelInfoIFC2x3(modelid);
+
                 foreach (var item in searchIDs)
                 {
-                    OutputInfoIfc2x3.AddElementIds(item);
+                    modelInfoIfc2X3.AddElementIds(item);
                 }
-                OutputPorts[0].Data = OutputInfoIfc2x3;
+                OutputPorts[0].Data = modelInfoIfc2X3;
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
                 List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> searchIDs = ((ComboboxItem)(comboBox.SelectedItem)).ValueIfcGloballyUniqueIds4;
-                OutputInfoIfc4.ElementIds.Clear();
+                ModelInfoIFC4 modelInfoIfc4 = new ModelInfoIFC4(modelid);
                 foreach (var item in searchIDs)
                 {
-                    OutputInfoIfc4.AddElementIds(item);
+                    modelInfoIfc4.AddElementIds(item);
                 }
-                OutputPorts[0].Data = OutputInfoIfc4;
+                OutputPorts[0].Data = modelInfoIfc4;
             }
 
 

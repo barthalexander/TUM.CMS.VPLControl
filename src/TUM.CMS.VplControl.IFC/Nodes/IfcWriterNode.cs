@@ -22,6 +22,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public IfcStore xModel;
 
         public Type IfcVersionType = null;
+       
 
 
         // private DynamicProductSelectionControl productSelectionControl;
@@ -49,8 +50,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     return value;
                 };
 
-                var newModel = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+                var newModelIfc2x3 = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+                var newModelIfc4 = IfcStore.Create(IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel);
 
+                IfcSchemaVersion ifcVersion = IfcSchemaVersion.Unsupported;
                 Type t = InputPorts[0].Data.GetType();
                 XbimInstanceHandleMap copied = null;
 
@@ -58,7 +61,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 {
 
                     var collection = InputPorts[0].Data as ICollection;
-                    var txn = newModel.BeginTransaction();
+                    var txnIfc2x3 = newModelIfc2x3.BeginTransaction();
+                    var txnIfc4 = newModelIfc4.BeginTransaction();
                     HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> buildingElementsIFC2x3 = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>();
                     HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> buildingElementsIFC4 = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>();
 
@@ -83,21 +87,23 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                             if (IfcVersionType.Name == "ModelInfoIFC2x3")
                             {
+                                
                                 var modelid = ((ModelInfoIFC2x3)(model)).ModelId;
                                 var elementIdsList = ((ModelInfoIFC2x3)(model)).ElementIds;
                                 var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
 
 
                                 xModel = DataController.Instance.GetModel(modelid);
+                                ifcVersion = xModel.IfcSchemaVersion;
                                 List<Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>().ToList();
 
-                                copied = new XbimInstanceHandleMap(xModel, newModel);
+                                copied = new XbimInstanceHandleMap(xModel, newModelIfc2x3);
 
                                 foreach (var element in elements)
                                 {
                                     if (res.Contains(element.GlobalId) && !buildingElementsIFC2x3.Contains(element.GlobalId))
                                     {
-                                        newModel.InsertCopy(element, copied, propTransform, false, false);
+                                        newModelIfc2x3.InsertCopy(element, copied, propTransform, true, true);
                                         buildingElementsIFC2x3.Add(element.GlobalId);
                                     }
                                 }
@@ -111,15 +117,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
                                 xModel = DataController.Instance.GetModel(modelid);
+                                ifcVersion = xModel.IfcSchemaVersion;
+
                                 List<Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>().ToList();
 
-                                copied = new XbimInstanceHandleMap(xModel, newModel);
+                                copied = new XbimInstanceHandleMap(xModel, newModelIfc4);
 
                                 foreach (var element in elements)
                                 {
                                     if (res.Contains(element.GlobalId) && !buildingElementsIFC4.Contains(element.GlobalId))
                                     {
-                                        newModel.InsertCopy(element, copied, propTransform, false, false);
+                                        newModelIfc4.InsertCopy(element, copied, propTransform, true, true);
                                         buildingElementsIFC4.Add(element.GlobalId);
                                     }
                                 }
@@ -128,7 +136,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         }
 
                     }
-                    txn.Commit();
+                    if (ifcVersion == IfcSchemaVersion.Ifc2X3)
+                    {
+                        txnIfc2x3.Commit();
+                    }
+                    else if (ifcVersion == IfcSchemaVersion.Ifc4)
+                    {
+                        txnIfc4.Commit();
+                    }
                 }
                 else
                 {
@@ -140,18 +155,20 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
 
                         xModel = DataController.Instance.GetModel(modelid);
+                        ifcVersion = xModel.IfcSchemaVersion;
+
                         List<Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>().ToList();
 
 
 
-                        using (var txn = newModel.BeginTransaction())
+                        using (var txn = newModelIfc2x3.BeginTransaction())
                         {
-                            copied = new XbimInstanceHandleMap(xModel, newModel);
+                            copied = new XbimInstanceHandleMap(xModel, newModelIfc2x3);
                             foreach (var element in elements)
                             {
                                 if (res.Contains(element.GlobalId))
                                 {
-                                    newModel.InsertCopy(element, copied, propTransform, false, false);
+                                    newModelIfc2x3.InsertCopy(element, copied, propTransform, true, true);
                                 }
                             }
                             txn.Commit();
@@ -168,14 +185,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
-                        using (var txn = newModel.BeginTransaction())
+                        using (var txn = newModelIfc4.BeginTransaction())
                         {
-                            copied = new XbimInstanceHandleMap(xModel, newModel);
+                            copied = new XbimInstanceHandleMap(xModel, newModelIfc4);
                             foreach (var element in elements)
                             {
                                 if (res.Contains(element.GlobalId))
                                 {
-                                    newModel.InsertCopy(element, copied, propTransform, false, false);
+                                    newModelIfc4.InsertCopy(element, copied, propTransform, true, true);
                                 }
                             }
                             txn.Commit();
@@ -190,16 +207,33 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 saveFileDialog1.ShowDialog();
                 if (saveFileDialog1.FileName != "")
                 {
-                    newModel.SaveAs(saveFileDialog1.FileName);
-                    newModel.Close();
-                    if (File.Exists(saveFileDialog1.FileName))
+                    if (ifcVersion == IfcSchemaVersion.Ifc2X3)
                     {
-                        MessageBox.Show("File saved", "My Application", MessageBoxButton.OK);
+                        newModelIfc2x3.SaveAs(saveFileDialog1.FileName);
+                        newModelIfc2x3.Close();
+                        if (File.Exists(saveFileDialog1.FileName))
+                        {
+                            MessageBox.Show("File saved", "My Application", MessageBoxButton.OK);
+                        }
+                        else
+                        {
+                            MessageBox.Show("There was an Error \n Please Try again", "My Application", MessageBoxButton.OK);
+                        }
                     }
-                    else
+                    else if (ifcVersion == IfcSchemaVersion.Ifc4)
                     {
-                        MessageBox.Show("There was an Error \n Please Try again", "My Application", MessageBoxButton.OK);
+                        newModelIfc4.SaveAs(saveFileDialog1.FileName);
+                        newModelIfc4.Close();
+                        if (File.Exists(saveFileDialog1.FileName))
+                        {
+                            MessageBox.Show("File saved", "My Application", MessageBoxButton.OK);
+                        }
+                        else
+                        {
+                            MessageBox.Show("There was an Error \n Please Try again", "My Application", MessageBoxButton.OK);
+                        }
                     }
+
                 }
             }
             else

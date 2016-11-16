@@ -4,7 +4,13 @@ using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
 using System.Collections;
+using System.IO;
+using System.Linq;
 using System.Windows;
+using Xbim.Common;
+using Xbim.Common.Metadata;
+using Xbim.Common.Step21;
+using Xbim.Ifc;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -12,7 +18,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         public ModelInfoIFC2x3 OutputIfc2x3;
         public ModelInfoIFC4 OutputIfc4;
-        public Type IfcVersionType = null;
+        public Type IfcVersionTypeModel1 = null;
+        public Type IfcVersionTypeModel2 = null;
         public IfcMergeNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
 
@@ -21,7 +28,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var label1 = new Label {};
             AddControlToNode(label1);
 
-            AddInputPortToNode("Object", typeof(object), true);
+            AddInputPortToNode("Object", typeof(object), false);
+            AddInputPortToNode("Object", typeof(object), false);
             AddOutputPortToNode("Object", typeof(object));
 
 
@@ -33,109 +41,141 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// </summary>
         public override void Calculate()
         {
-            Type t = InputPorts[0].Data.GetType();
+            if (InputPorts[0].Data == null)
+                return;
+            if (InputPorts[1].Data == null)
+                return;
+
+
+
+            IfcVersionTypeModel1 = InputPorts[0].Data.GetType();
+            IfcVersionTypeModel2 = InputPorts[1].Data.GetType();
+
+            if (IfcVersionTypeModel1 != IfcVersionTypeModel2)
+            {
+                MessageBox.Show("The IFC Versions are not the same!", "My Application", MessageBoxButton.OK);
+                return;
+            }
+
+            PropertyTranformDelegate propTransform = delegate (ExpressMetaProperty prop, object toCopy)
+            {
+                var value = prop.PropertyInfo.GetValue(toCopy, null);
+                return value;
+            };
+
+            var newModelIfc2x3 = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+            var newModelIfc4 = IfcStore.Create(IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel);
+
+            var txnIfc2x3 = newModelIfc2x3.BeginTransaction();
+            var txnIfc4 = newModelIfc4.BeginTransaction();
+
+            HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> buildingElementsIFC2x3 = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>();
+            HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> buildingElementsIFC4 = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>();
+
+            IfcSchemaVersion ifcVersion = IfcSchemaVersion.Unsupported;
+
+            XbimInstanceHandleMap copied = null;
+
             var label1 = ControlElements[1] as Label;
             label1.Content = "";
-            if (t.IsGenericType)
-            {
 
-                var collection = InputPorts[0].Data as ICollection;
-                var modelid = "";
-                if (collection != null)
+            for (var i = 0; i < 2; i++)
+            {
+                if (IfcVersionTypeModel1.Name == "ModelInfoIFC2x3")
                 {
-                    string ifcMergeVersionType = "";
-                    foreach (var model in collection)
+                    var modelid = ((ModelInfoIFC2x3)(InputPorts[i].Data)).ModelId;
+                    var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>();
+                    var elementIdsList = ((ModelInfoIFC2x3)(InputPorts[i].Data)).ElementIds;
+                    foreach (var elementID in elementIdsList)
                     {
-                        
-                        IfcVersionType = model.GetType();
-                        if (ifcMergeVersionType == "")
-                        {
-                            ifcMergeVersionType = IfcVersionType.Name;
-                        }
-
-                        if (IfcVersionType.Name != ifcMergeVersionType)
-                        {
-                            MessageBox.Show("The IFC Versions are not the same!", "My Application", MessageBoxButton.OK);
-                            return;
-                        }
-
-                        if (IfcVersionType.Name == "ModelInfoIFC2x3")
-                        {
-                            if (modelid != "" && modelid == ((ModelInfoIFC2x3)(model)).ModelId)
-                            {
-                                var elementIdsList = ((ModelInfoIFC2x3)(model)).ElementIds;
-                                var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
-                                foreach (var item in res)
-                                {
-                                    OutputIfc2x3.AddElementIds(item);
-                                }
-                            }
-                            else if (modelid == "")
-                            {
-                                modelid = ((ModelInfoIFC2x3)(model)).ModelId;
-                                OutputIfc2x3 = new ModelInfoIFC2x3(modelid);
-
-                                var elementIdsList = ((ModelInfoIFC2x3)(model)).ElementIds;
-                                var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
-                                foreach (var item in res)
-                                {
-                                    OutputIfc2x3.AddElementIds(item);
-                                }
-                            }
-                            else
-                            {
-                                label1.Content = "Your Models have not the same ModelId!";
-                            }
-                        }
-                        else if (IfcVersionType.Name == "ModelInfoIFC4")
-                        {
-                            if (modelid != "" && modelid == ((ModelInfoIFC4)(model)).ModelId)
-                            {
-                                var elementIdsList = ((ModelInfoIFC4)(model)).ElementIds;
-                                var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
-                                foreach (var item in res)
-                                {
-                                    OutputIfc4.AddElementIds(item);
-                                }
-                            }
-                            else if (modelid == "")
-                            {
-                                modelid = ((ModelInfoIFC4)(model)).ModelId;
-                                OutputIfc4 = new ModelInfoIFC4(modelid);
-
-                                var elementIdsList = ((ModelInfoIFC4)(model)).ElementIds;
-                                var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
-                                foreach (var item in res)
-                                {
-                                    OutputIfc4.AddElementIds(item);
-                                }
-                            }
-                            else
-                            {
-                                label1.Content = "Your Models have not the same ModelId!";
-                            }
-                        }
-                        
+                        res.Add(elementID);
                     }
-                    if (IfcVersionType.Name == "ModelInfoIFC2x3")
+
+                    var xModel = DataController.Instance.GetModel(modelid);
+                    ifcVersion = xModel.IfcSchemaVersion;
+                    List<Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>().ToList();
+                    copied = new XbimInstanceHandleMap(xModel, newModelIfc2x3);
+
+                    foreach (var element in elements)
                     {
-                        label1.Content = "Merge Complete!";
-                        OutputPorts[0].Data = OutputIfc2x3;
+                        if (res.Contains(element.GlobalId) && !buildingElementsIFC2x3.Contains(element.GlobalId))
+                        {
+                            newModelIfc2x3.InsertCopy(element, copied, propTransform, false, false);
+                            buildingElementsIFC2x3.Add(element.GlobalId);
+                        }
                     }
-                    else if (IfcVersionType.Name == "ModelInfoIFC4")
+                }
+                else if (IfcVersionTypeModel1.Name == "ModelInfoIFC4")
+                {
+                    var modelid = ((ModelInfoIFC4)(InputPorts[i].Data)).ModelId;
+                    var elementIdsList = ((ModelInfoIFC4)(InputPorts[i].Data)).ElementIds;
+                    var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
+
+                    var xModel = DataController.Instance.GetModel(modelid);
+                    ifcVersion = xModel.IfcSchemaVersion;
+                    List<Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>().ToList();
+                    copied = new XbimInstanceHandleMap(xModel, newModelIfc4);
+
+                    foreach (var element in elements)
                     {
-                        label1.Content = "Merge Complete!";
-                        OutputPorts[0].Data = OutputIfc4;
+                        if (res.Contains(element.GlobalId) && !buildingElementsIFC4.Contains(element.GlobalId))
+                        {
+                            newModelIfc4.InsertCopy(element, copied, propTransform, false, false);
+                            buildingElementsIFC4.Add(element.GlobalId);
+                        }
                     }
-                }    
+                }
             }
-            else
+
+            Random zufall = new Random();
+            int number = zufall.Next(1, 1000);
+
+            string result = Path.GetTempPath();
+            string copyFile = result + "copy" + number + ".ifc";
+            while (File.Exists(copyFile))
             {
-                label1.Content = "Please connect to Models !";
+                number = zufall.Next(1, 1000);
+                copyFile = result + "copy" + number + ".ifc";
             }
 
 
+            if (ifcVersion == IfcSchemaVersion.Ifc2X3)
+            {
+                txnIfc2x3.Commit();
+                newModelIfc2x3.SaveAs(copyFile);
+                newModelIfc2x3.Close();
 
+                ModelInfoIFC2x3 modelInfo = new ModelInfoIFC2x3(copyFile);
+                foreach (var id in buildingElementsIFC2x3)
+                {
+                    modelInfo.AddElementIds(id);
+                }
+                OutputIfc2x3 = modelInfo;
+            }
+            else if (ifcVersion == IfcSchemaVersion.Ifc4)
+            {
+                txnIfc4.Commit();
+                newModelIfc4.SaveAs(copyFile);
+                newModelIfc4.Close();
+
+                ModelInfoIFC4 modelInfo = new ModelInfoIFC4(copyFile);
+                foreach (var id in buildingElementsIFC4)
+                {
+                    modelInfo.AddElementIds(id);
+                }
+                OutputIfc4 = modelInfo;
+            }
+
+            if (IfcVersionTypeModel1.Name == "ModelInfoIFC2x3")
+            {
+                label1.Content = "Merge Complete!";
+                OutputPorts[0].Data = OutputIfc2x3;
+            }
+            else if (IfcVersionTypeModel1.Name == "ModelInfoIFC4")
+            {
+                label1.Content = "Merge Complete!";
+                OutputPorts[0].Data = OutputIfc4;
+            }
         }
 
         public override Node Clone()

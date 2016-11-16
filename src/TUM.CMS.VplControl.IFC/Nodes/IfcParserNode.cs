@@ -60,7 +60,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 return;
 
             var file = InputPorts[0].Data.ToString();
-            if (file != "" && File.Exists(file))
+            if (file != "" && File.Exists(file) && Path.GetExtension(file).ToUpper().ToString() == ".IFC")
             {
                 _worker = new BackgroundWorker();
                 _worker.DoWork += new DoWorkEventHandler(worker_DoWork);
@@ -73,7 +73,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 TextBlock textBlock = new TextBlock();
                 textBlock = titleTextboxControl.TextBlock;
                 textBlock.Background = Brushes.Red;
-                textBlock.Text = "Please select a true File!";
+                textBlock.Text = "Please select a true IFC File!";
             }
 
 
