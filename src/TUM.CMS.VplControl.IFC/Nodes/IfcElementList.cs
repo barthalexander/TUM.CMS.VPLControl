@@ -7,6 +7,7 @@ using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Presentation;
 using System.Collections;
+using System.Windows.Data;
 using TUM.CMS.VplControl.IFC.Controls;
 using Xbim.Ifc;
 
@@ -24,15 +25,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             IsResizeable = true;
 
-            MVDTreeControle mvdTreeControle = new MVDTreeControle();
+            TitleListControl titleListControl = new TitleListControl();
 
-            mvdTreeControle.ScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            mvdTreeControle.ScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-            mvdTreeControle.ScrollViewer.CanContentScroll = true;
+            titleListControl.Title.Content = "IFC Element Liste";
 
-            mvdTreeControle.Title.Content = "IFC Element Liste";
-
-            AddControlToNode(mvdTreeControle);
+            AddControlToNode(titleListControl);
 
             AddInputPortToNode("ModelInfo", typeof(object), true);
            
@@ -43,22 +40,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
-            var mvdTreeControle = ControlElements[0] as MVDTreeControle;
+            if(InputPorts[0].Data == null)
+                return;
 
-            TextBlock textBlock = new TextBlock();
-            mvdTreeControle.ScrollViewer.Content = textBlock;
-
-            mvdTreeControle.MinHeight = 100;
-            mvdTreeControle.MinWidth = 400;
-
-            mvdTreeControle.ScrollViewer.MinWidth = 400;
-            mvdTreeControle.ScrollViewer.MinHeight = 100;
-            mvdTreeControle.ScrollViewer.MaxWidth = 600;
-            mvdTreeControle.ScrollViewer.MaxHeight = 600;
-
-            if (textBlock == null) return;
-            textBlock.Text = "";
-
+            var titleListControl = ControlElements[0] as TitleListControl;
+            StackPanel stackPanel = new StackPanel();
+            stackPanel = titleListControl.StackPanel;
+            stackPanel.Visibility = Visibility.Visible;
+            if (stackPanel.Children.Count > 0)
+            {
+                stackPanel.Children.Clear();
+            }
             Type t = InputPorts[0].Data.GetType();
             if (t.IsGenericType)
             {
@@ -67,8 +59,33 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 if (collection != null)
                     foreach (var model in collection)
                     {
-                        textBlock.Text += "Model " + i + "\n\n";
-                        Type ifcVersion = InputPorts[0].Data.GetType();
+                        if(model == null)
+                            return;
+
+                        Label label = new Label();
+                        label.Content = "Model" + i;
+
+                        ListView listView = new ListView();
+                        listView.Name = "lvElementList" + i;
+                        listView.MaxHeight = 200;
+                        GridView gridView = new GridView();
+
+                        gridView.Columns.Add(new GridViewColumn
+                        {
+                            Header = "Name",
+                            DisplayMemberBinding = new Binding("Name")
+                        });
+
+                        gridView.Columns.Add(new GridViewColumn
+                        {
+                            Header = "GUID",
+                            DisplayMemberBinding = new Binding("GUID")
+                        });
+
+                        listView.View = gridView;
+
+                        Type ifcVersion = model.GetType();
+
                         if (ifcVersion.Name == "ModelInfoIFC2x3")
                         {
                             var modelid = ((ModelInfoIFC2x3)(model)).ModelId;
@@ -85,18 +102,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                     var text = "";
                                     if (element.Name == "")
                                     {
-                                        text = "n.N" + " (" + element.GlobalId + ")";
+                                        listView.Items.Add(new ElementListClass() { Name = "n.N.", GUID = element.GlobalId });
                                     }
                                     else
                                     {
-                                        text = element.Name + " (" + element.GlobalId + ")";
+                                        listView.Items.Add(new ElementListClass() { Name = element.Name, GUID = element.GlobalId });
                                     }
-
-                                    textBlock.Text += text + "\n";
                                 }
                             }
-                            textBlock.Text += "\n\n";
-                            i++;
                         }
                         else if (ifcVersion.Name == "ModelInfoIFC4")
                         {
@@ -114,27 +127,48 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                     var text = "";
                                     if (element.Name == "")
                                     {
-                                        text = "n.N" + " (" + element.GlobalId + ")";
+                                        listView.Items.Add(new ElementListClass() { Name = "n.N.", GUID = element.GlobalId });
                                     }
                                     else
                                     {
-                                        text = element.Name + " (" + element.GlobalId + ")";
+                                        listView.Items.Add(new ElementListClass() { Name = element.Name, GUID = element.GlobalId });
                                     }
 
-                                    textBlock.Text += text + "\n";
                                 }
                             }
-                            textBlock.Text += "\n\n";
-                            i++;
+                           
                         }
-
+                        i++;
+                        stackPanel.Children.Add(label);
+                        stackPanel.Children.Add(listView);
                     }
             }
             else
             {
-                textBlock.Text += "Model 1 \n\n";
+                Label label = new Label();
+                label.Content = "Model 1" ;
 
+                ListView listView = new ListView();
+                listView.Name = "lvElementList";
+                listView.MaxHeight = 500;
+                GridView gridView = new GridView();
+
+                gridView.Columns.Add(new GridViewColumn
+                {
+                    Header = "Name",
+                    DisplayMemberBinding = new Binding("Name")
+                });
+
+                gridView.Columns.Add(new GridViewColumn
+                {
+                    Header = "GUID",
+                    DisplayMemberBinding = new Binding("GUID")
+                });
+
+                listView.View = gridView;
                 Type ifcVersion = InputPorts[0].Data.GetType();
+
+
                 if (ifcVersion.Name == "ModelInfoIFC2x3")
                 {
                     var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
@@ -151,17 +185,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             var text = "";
                             if (element.Name == "")
                             {
-                                text = "n.N" + " (" + element.GlobalId + ")";
+                                listView.Items.Add(new ElementListClass() { Name = "n.N.", GUID = element.GlobalId });
                             }
                             else
                             {
-                                text = element.Name + " (" + element.GlobalId + ")";
+                                listView.Items.Add(new ElementListClass() { Name = element.Name, GUID = element.GlobalId });
                             }
-
-                            textBlock.Text += text + "\n";
                         }
                     }
-                    textBlock.Text += "\n\n";
                 }
                 else if(ifcVersion.Name == "ModelInfoIFC4")
                 {
@@ -179,21 +210,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             var text = "";
                             if (element.Name == "")
                             {
-                                text = "n.N" + " (" + element.GlobalId + ")";
+                                listView.Items.Add(new ElementListClass() { Name = "n.N.", GUID = element.GlobalId });
                             }
                             else
                             {
-                                text = element.Name + " (" + element.GlobalId + ")";
+                                listView.Items.Add(new ElementListClass() { Name = element.Name, GUID = element.GlobalId });
                             }
-
-                            textBlock.Text += text + "\n";
                         }
                     }
-                    textBlock.Text += "\n\n";
-
                 }
-
-                
+                stackPanel.Children.Add(label);
+                stackPanel.Children.Add(listView);
             }
             
         }

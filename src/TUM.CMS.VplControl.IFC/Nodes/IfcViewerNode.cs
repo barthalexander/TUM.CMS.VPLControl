@@ -384,6 +384,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         }
 
                     });
+                        // AddRange(elementList);
                     foreach (var element in elementList)
                     {
                         if (element != null)
@@ -433,7 +434,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             var mb = new MeshBuilder(false, false);
 
                             var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
-                            _viewPort.Children.Add(element);
+                            elementList.Add(element);
+
+                            //                            _viewPort.Children.Add(element);
                         }
 
                         // Show whole building with opacity 0.03
@@ -477,8 +480,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             var mb = new MeshBuilder(false, false);
 
                             var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
-                            _viewPort.Children.Add(element);
+                            elementList.Add(element);
+//                            _viewPort.Children.Add(element);
                         }
+                    }
+                    foreach (var element in elementList)
+                    {
+                        if (element != null)
+                            _viewPort.Children.Add(element);
                     }
                     break;
             }
@@ -489,6 +498,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // Loop through Entities and visualze them in the viewport
             var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
             // xModel = (IfcStore) e.Argument;
+            List<ModelUIElement3D> elementList = new List<ModelUIElement3D>();
+
             foreach (var item in xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
             {
                 if (res.Contains(item.GlobalId))
@@ -531,7 +542,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                     
                     var element = VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
-                    _viewPort.Children.Add(element);
+                    elementList.Add(element);
+                    //                    _viewPort.Children.Add(element);
                 }
 
                 // Show whole building with opacity 0.03
@@ -571,10 +583,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     var mb = new MeshBuilder(false, false);
 
                     var element = VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
-                    _viewPort.Children.Add(element);
+                    //                    _viewPort.Children.Add(element);
+                    elementList.Add(element);
                 }
                 
              }
+            foreach (var element in elementList)
+            {
+                if (element != null)
+                    _viewPort.Children.Add(element);
+            }
 
         }
 

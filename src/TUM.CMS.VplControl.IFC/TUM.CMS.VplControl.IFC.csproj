@@ -183,6 +183,9 @@
     <Compile Include="Controls\MVDTreeControle.xaml.cs">
       <DependentUpon>MVDTreeControle.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TitleListControl.xaml.cs">
+      <DependentUpon>TitleListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TitleTextboxControl.xaml.cs">
       <DependentUpon>TitleTextboxControl.xaml</DependentUpon>
     </Compile>
@@ -221,6 +224,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Utilities\DataController.cs" />
+    <Compile Include="Utilities\ElementListClass.cs" />
     <Compile Include="Utilities\ModelInfoIFC.cs" />
     <Compile Include="Utilities\ModelInfoIFC4.cs" />
     <Compile Include="Utilities\ModelInfoIFC2x3.cs" />
@@ -295,6 +299,10 @@
     <Page Include="Controls\MVDTreeControle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TitleListControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\TitleTextboxControl.xaml">
       <SubType>Designer</SubType>
