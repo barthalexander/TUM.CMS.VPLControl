@@ -54,6 +54,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null) return;
             OutputPorts[0].Data = null;
 
             IfcVersionType = InputPorts[0].Data.GetType();

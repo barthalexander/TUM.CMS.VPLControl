@@ -80,7 +80,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     string propertyType = oneProperty.GetType().ToString();
                     if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
                     {
-                        var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                        var property2 = oneProperty as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                         var propertyValue = property2.NominalValue;
                         object propertyValueTrue = property2.NominalValue.Value;
                         string propertyValueType = propertyValue.UnderlyingSystemType.Name;
@@ -216,7 +216,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     string propertyType = oneProperty.GetType().ToString();
                     if (propertyType == "Xbim.Ifc4.PropertyResource.IfcPropertySingleValue")
                     {
-                        var property2 = property as Xbim.Ifc4.PropertyResource.IfcPropertySingleValue;
+                        var property2 = oneProperty as Xbim.Ifc4.PropertyResource.IfcPropertySingleValue;
                         var propertyValue = property2.NominalValue;
                         object propertyValueTrue = property2.NominalValue.Value;
                         string propertyValueType = propertyValue.UnderlyingSystemType.Name;
@@ -336,6 +336,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null) return;
             OutputPorts[0].Data = null;
             IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
@@ -535,7 +536,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     string propertyType = oneProperty.GetType().ToString();
                     if (propertyType == "Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue")
                     {
-                        var property2 = property as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                        var property2 = oneProperty as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                         var propertyValue = property2.NominalValue;
                         object propertyValueTrue = property2.NominalValue.Value;
                         string propertyValueType = propertyValue.UnderlyingSystemType.Name;
@@ -625,7 +626,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     string propertyType = oneProperty.GetType().ToString();
                     if (propertyType == "Xbim.Ifc4.PropertyResource.IfcPropertySingleValue")
                     {
-                        var property2 = property as Xbim.Ifc4.PropertyResource.IfcPropertySingleValue;
+                        var property2 = oneProperty as Xbim.Ifc4.PropertyResource.IfcPropertySingleValue;
                         var propertyValue = property2.NominalValue;
                         object propertyValueTrue = property2.NominalValue.Value;
                         string propertyValueType = propertyValue.UnderlyingSystemType.Name;
