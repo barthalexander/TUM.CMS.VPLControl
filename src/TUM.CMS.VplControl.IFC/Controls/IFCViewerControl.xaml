@@ -16,7 +16,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Left" Content="IfcViewer" Grid.Row="0"  Grid.Column="0"></Label>
+        <Label HorizontalAlignment="Center" Content="IfcViewer" Grid.Row="0"  Grid.Column="0"></Label>
         <h:HelixViewport3D Name="Viewport3D" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0"></h:HelixViewport3D>
         <RadioButton Name="RadioButton_1" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Content = "pass all"></RadioButton>
         <RadioButton Name="RadioButton_2" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" Content = "pass selected" IsChecked="True" ></RadioButton>

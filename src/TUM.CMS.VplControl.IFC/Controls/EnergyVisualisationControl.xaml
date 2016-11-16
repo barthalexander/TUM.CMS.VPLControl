@@ -16,7 +16,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Left" Content="Energy Visualisation" Grid.Row="0"  Grid.Column="0"></Label>
+        <Label HorizontalAlignment="Center" Content="Energy Visualisation" Grid.Row="0"  Grid.Column="0"></Label>
         <h:HelixViewport3D Name="Viewport3D" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0"/>
     </Grid>
 </UserControl>

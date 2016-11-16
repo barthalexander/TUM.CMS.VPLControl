@@ -187,20 +187,15 @@
       <DependentUpon>TitleTextboxControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Nodes\EnergyVisualisationNode.cs" />
-    <Compile Include="Nodes\IfcBuidingPartsNode.cs" />
     <Compile Include="Nodes\MvdCheckerAndFilter.cs" />
     <Compile Include="Nodes\IfcElementProperty.cs" />
-    <Compile Include="Nodes\IfcPartialModel.cs" />
     <Compile Include="Nodes\IfcPropertyFilterNode.cs" />
     <Compile Include="Nodes\IfcTypeFilterNode.cs" />
     <Compile Include="Nodes\IfcMapsNode.cs" />
     <Compile Include="Nodes\IfcViewerNode.cs" />
     <Compile Include="Nodes\IfcParserNode.cs" />
-    <Compile Include="Nodes\IfcReaderNode.cs" />
     <Compile Include="Nodes\IfcReadPropertiesNode.cs" />
-    <Compile Include="Nodes\IfcReadSpaceNode.cs" />
     <Compile Include="Nodes\IfcMergeNode.cs" />
-    <Compile Include="Nodes\IfcSelectModel.cs" />
     <Compile Include="Nodes\IfcElementList.cs" />
     <Compile Include="Nodes\MvdTreeNode.cs" />
     <Compile Include="Nodes\IfcTreeNode.cs" />
