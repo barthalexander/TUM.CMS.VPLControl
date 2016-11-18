@@ -254,7 +254,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 if (modelid == null) return;
                 xModel = DataController.Instance.GetModel(modelid);
 
-                var comboBox = ControlElements[2] as ComboBox;
+                var ifcTypeFilterControl = ControlElements[0] as IfcTypeFilterControl;
+                var comboBox = ifcTypeFilterControl.comboBox;
                 if (comboBox != null && comboBox.Items.Count > 0)
                 {
                     comboBox.SelectedItem = -1;
