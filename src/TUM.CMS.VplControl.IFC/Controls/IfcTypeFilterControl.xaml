@@ -13,7 +13,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Type Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" />
+        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Type Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" FontWeight="Bold" />
         <ComboBox Name="comboBox" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Height="24" Visibility="Visible"></ComboBox>
     </Grid>
 </UserControl>

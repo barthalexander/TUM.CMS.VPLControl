@@ -22,7 +22,8 @@ using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Presentation;
 using System.Reflection;
 using TUM.CMS.VplControl.IFC.Controls;
-
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -34,6 +35,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         public Type IfcVersionType = null;
         public bool match;
         public List<IfcProduct> elements = new List<IfcProduct> { };
+        
 
         public HashSet<String> ChosenEntities;
         
@@ -52,11 +54,56 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             AddControlToNode(mvdCheckerAndFilterControl);
 
-        
+            
+
 
         }
 
-        
+        private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
+            var tabControl = mvdCheckerAndFilterControl.tabControl as TabControl;
+
+            var tabitem1 = tabControl.Items.GetItemAt(0) as TabItem;
+            var resultScroll = mvdCheckerAndFilterControl.StackPanel1.Children[0] as ScrollViewer;
+            var resultText = resultScroll.Content as TextBlock;
+
+            var tabitem2 = tabControl.Items.GetItemAt(1) as TabItem;
+            var errorListScroll = mvdCheckerAndFilterControl.StackPanel2.Children[0] as ScrollViewer;
+            var errorListText = errorListScroll.Content as TextBlock;
+
+            var tabitem3 = tabControl.Items.GetItemAt(2) as TabItem;
+            var fullReportScroll = mvdCheckerAndFilterControl.StackPanel3.Children[0] as ScrollViewer;
+            var fullReportText = fullReportScroll.Content as TextBlock;
+
+
+
+
+
+            if (tabitem1 != null && tabitem1.IsSelected)
+            {
+                
+                if (match == true)
+                {                    
+                    resultText.Text = "Ifc file is valid according to this specific MVD!";
+                }
+                else
+                {
+                    resultText.Text = "Ifc file doesn't match with MVD! Information Missing! See details in Error List and Full Report!";
+                }
+            }
+
+            if (tabitem2 != null && tabitem2.IsSelected)
+            {  }
+
+            if (tabitem3 != null && tabitem3.IsSelected)
+            {
+
+                  
+            }
+            
+        }
 
         public override void Calculate()
         {
@@ -64,13 +111,87 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (InputPorts[1].Data == null) return;
             match = true;
 
+
+            ScrollViewer resultScroll = new ScrollViewer
+            {
+                Visibility = Visibility.Visible,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                CanContentScroll=true,
+                MinWidth=300,
+                MaxWidth=400,
+                MinHeight=240,
+                MaxHeight=240
+            
+
+            };
+            ScrollViewer errorListScroll = new ScrollViewer {
+                Visibility = Visibility.Visible,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                CanContentScroll = true,
+                MinWidth = 300,
+                MaxWidth = 400,
+                MinHeight = 240,
+                MaxHeight = 240
+            };
+            ScrollViewer fullReportScroll = new ScrollViewer {
+                Visibility = Visibility.Visible,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                CanContentScroll = true,
+                MinWidth = 300,
+                MaxWidth = 400,
+                MinHeight = 240,
+                MaxHeight = 240
+            };
+            TextBlock resultText = new TextBlock {
+                Visibility = Visibility.Visible,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                TextWrapping = TextWrapping.Wrap,
+                FontSize=14,
+                Padding= new Thickness(5, 10, 5, 10),
+                 IsHitTestVisible =false
+                 
+
+            };
+            resultScroll.Content = resultText;
+
+            TextBlock errorListText = new TextBlock {
+                Visibility = Visibility.Visible,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 14,
+                Padding = new Thickness(5, 10, 5, 10),
+                IsHitTestVisible = false,
+                Foreground = Brushes.Red
+            };
+            errorListScroll.Content = errorListText;
+            TextBlock fullReportText = new TextBlock
+            {
+                Visibility = Visibility.Visible,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 14,
+                Padding = new Thickness(5, 10, 5, 10),
+                IsHitTestVisible = false,
+                Foreground = Brushes.Green
+            };
+            fullReportScroll.Content = fullReportText;
+
             var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
-            if (mvdCheckerAndFilterControl == null) return;
-            var scrollViewer = mvdCheckerAndFilterControl.scrollViewer as ScrollViewer;
-            if (scrollViewer == null) return;
-            var textBlock = scrollViewer.Content as TextBlock;
-            if (textBlock == null) return;
-            textBlock.Text = "";
+            var tabControl = mvdCheckerAndFilterControl.tabControl as TabControl;
+            if (tabControl == null) return;
+
+            mvdCheckerAndFilterControl.StackPanel1.Children.Add(resultScroll);
+            mvdCheckerAndFilterControl.StackPanel2.Children.Add(errorListScroll);
+            mvdCheckerAndFilterControl.StackPanel3.Children.Add(fullReportScroll);
+
+            tabControl.SelectionChanged += tabControl_SelectionChanged;
+
 
             var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
              xModel = DataController.Instance.GetModel(modelid);            
@@ -80,13 +201,22 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             ModelView modelView = (ModelView)(InputPorts[1].Data);
             Dictionary<string, ConceptRoot> allConceptRoots = modelView.GetAllConceptRoots();
-            List<string> mvdRootString = new List<string>();
+            
             if (allConceptRoots.Count > 0)
             {
                 foreach (var conceptRoot in allConceptRoots)
                 {
-                    match = CheckConceptRoot(conceptRoot.Value);
-                    mvdRootString.Add(conceptRoot.Value.ToString());
+                    if(CheckConceptRoot(conceptRoot.Value))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        match = false;
+                        continue;
+
+                    }
+                    
                 }
 
             }
@@ -98,24 +228,34 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 {                  
                     OutputInfoIfc2x3.AddElementIds(item.GlobalId);
                 }
+                resultText.Text = "Ifc file is valid according to this specific MVD!";
+                
                 OutputPorts[0].Data = OutputInfoIfc2x3;
-                MessageBox.Show("Ifc file matches with MVD! Ifc file is filtered according to MVD!", "My Application", MessageBoxButton.OK);
+                
 
             }
             else
             {
-                MessageBox.Show("Ifc file doesn't match with MVD! Information Missing!", "My Application", MessageBoxButton.OK);
+                resultText.Text = "Ifc file doesn't match with MVD! Information Missing! See details in Error List and Full Report!";
             }
         }
-
+        
         public bool CheckConceptRoot(ConceptRoot conceptRoot)
         {
-            var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
-            if (mvdCheckerAndFilterControl == null) return true;
-            var scrollViewer = mvdCheckerAndFilterControl.scrollViewer as ScrollViewer;
-            if (scrollViewer == null) return true;
-            var textBlock = scrollViewer.Content as TextBlock;
-            if (textBlock == null) return true;
+            var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;          
+            var tabControl = mvdCheckerAndFilterControl.tabControl as TabControl;
+
+            var tabitem1 = tabControl.Items.GetItemAt(0) as TabItem;
+            var resultScroll = mvdCheckerAndFilterControl.StackPanel1.Children[0] as ScrollViewer;            
+            var resultText = resultScroll.Content as TextBlock;
+            
+            var tabitem2 = tabControl.Items.GetItemAt(1) as TabItem;
+            var errorListScroll = mvdCheckerAndFilterControl.StackPanel2.Children[0] as ScrollViewer;
+            var errorListText = errorListScroll.Content as TextBlock;
+            
+            var tabitem3 = tabControl.Items.GetItemAt(2) as TabItem;
+            var fullReportScroll = mvdCheckerAndFilterControl.StackPanel3.Children[0] as ScrollViewer;
+            var fullReportText = fullReportScroll.Content as TextBlock;
             
 
             bool conceptRootMatch = true;
@@ -128,28 +268,47 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList() == null)
                     {
                         conceptRootMatch = false;
-                        textBlock.Text += "missing concept root Slab\r\n!";                                                                      
+                        errorListText.Text += "missing concept root Slab\r\n!";                                                                      
                         return conceptRootMatch;
                     }
                     else
                     {
                         elements.AddRange(xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList());
-                        textBlock.Text += "Concept Root Slab matches!\r\n";                        
+                        fullReportText.Text += "Concept Root Slab matches!\r\n";                        
                     }
                     break;
                 case "Wall":
-                    if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList() == null) { conceptRootMatch = false; Console.WriteLine("missing concept root Wall"); return conceptRootMatch; }
+                    if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList() == null)
+                    { conceptRootMatch = false; Console.WriteLine("missing concept root Wall"); return conceptRootMatch; }
                     break;
                 case "Column":
                     if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList() == null) { conceptRootMatch = false; Console.WriteLine("missing concept root Column"); return conceptRootMatch; }
                     break;
                 case "Window":
-                    if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList() == null) { conceptRootMatch = false; Console.WriteLine("missing concept root Window"); return conceptRootMatch; }
-                    else { elements.AddRange(xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList()); textBlock.Text += "Concept Root Window matches!\r\n"; }
+                    if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList() == null)
+                    {
+                        conceptRootMatch = false;
+                        errorListText.Text += "missing concept root Window!\r\n";
+                        return conceptRootMatch;
+                    }
+                    else
+                    {
+                        elements.AddRange(xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList());
+                        fullReportText.Text += "Concept Root Window matches!\r\n";
+                    }
                     break;
                 case "Door":
-                    if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList() == null) { conceptRootMatch = false; Console.WriteLine("missing concept root Door"); return conceptRootMatch; }
-                    else { elements.AddRange(xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList()); textBlock.Text += "Concept Root Door matches!\r\n"; }
+                    if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList() == null)
+                    {
+                        conceptRootMatch = false;
+                        errorListText.Text += "missing concept root Door!\r\n";
+                        return conceptRootMatch;
+                    }
+                    else
+                    {
+                        elements.AddRange(xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcDoor>().ToList());
+                        fullReportText.Text += "Concept Root Door matches!\r\n";
+                    }
                     break;
                 case "CurtainWall":
                     if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcCurtainWall>().ToList() == null) { conceptRootMatch = false; Console.WriteLine("missing concept root CurtainWall"); return conceptRootMatch; }
@@ -180,14 +339,21 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 foreach (var item in allConcepts)
                 {
-                    conceptRootMatch = CheckConcept(item.Value);
-                    if (conceptRootMatch == false) { return conceptRootMatch; }
+                    if(CheckConcept(item.Value))
+                    {
+                        continue;
+                    }
+                    {
+                        conceptRootMatch = false;
+                        continue;
+                    }
+                   
                 }
             }
 
 
 
-            return true;
+            return conceptRootMatch;
 
         }
 
@@ -224,36 +390,60 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             
         }
 
-        public T Cast<T>(object input)
-        {
-            return (T)input;
-        }
+       
         public bool CheckConcept(Concept concept)//Material Layer Set Usage
         {
 
             var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
-            if (mvdCheckerAndFilterControl == null) return true;
-            var scrollViewer = mvdCheckerAndFilterControl.scrollViewer as ScrollViewer;
-            if (scrollViewer == null) return true;
-            var textBlock = scrollViewer.Content as TextBlock;
-            if (textBlock == null) return true;
+            var tabControl = mvdCheckerAndFilterControl.tabControl as TabControl;
+
+            var tabitem1 = tabControl.Items.GetItemAt(0) as TabItem;
+            var resultScroll = mvdCheckerAndFilterControl.StackPanel1.Children[0] as ScrollViewer;
+            var resultText = resultScroll.Content as TextBlock;
+
+            var tabitem2 = tabControl.Items.GetItemAt(1) as TabItem;
+            var errorListScroll = mvdCheckerAndFilterControl.StackPanel2.Children[0] as ScrollViewer;
+            var errorListText = errorListScroll.Content as TextBlock;
+
+            var tabitem3 = tabControl.Items.GetItemAt(2) as TabItem;
+            var fullReportScroll = mvdCheckerAndFilterControl.StackPanel3.Children[0] as ScrollViewer;
+            var fullReportText = fullReportScroll.Content as TextBlock;
 
             string conceptName = concept.name;                                                    
             bool conceptMatch = true;
             ConceptTemplate conceptTemplate = concept.getConceptTemplate();
-            conceptMatch = CheckConceptTemplate(conceptTemplate);
-            if (conceptMatch == false) { return conceptMatch; } else { textBlock.Text += "Concept " + conceptName + " matches!\r\n"; }
+            
+            if(CheckConceptTemplate(conceptTemplate))
+            {
+                fullReportText.Text += "Concept " + conceptName + " matches!\r\n";
+
+            }
+            else
+            {
+                errorListText.Text += "Concept" + conceptName + " is missing!\r\n";
+                conceptMatch = false;
+
+            }
+            
 
             Dictionary<string, Concept> allSubConcepts = concept.GetAllSubConcepts();
             if (allSubConcepts.Count > 0)
             {
                 foreach (var item in allSubConcepts)
                 {
-                    conceptMatch = CheckConcept(item.Value);
+                    if(CheckConcept(item.Value))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        conceptMatch = false;
+                        continue;
+                    }
 
                 }
             }
-            return true;
+            return conceptMatch;
         }
 
         public bool CheckConceptTemplate(ConceptTemplate conceptTemplate)
@@ -267,8 +457,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 foreach (var item in subConceptTemplates)
                 {
-                    conceptTemplateMatch=CheckConceptTemplate(item.Value);
-                    if (conceptTemplateMatch == false) { return conceptTemplateMatch; } 
+                    if(CheckConceptTemplate(item.Value))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        conceptTemplateMatch = false;
+                        continue;
+                    }
+                   
                 }
             }
 
@@ -278,8 +476,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 foreach (var item in subTemplates)
                 {
-                    conceptTemplateMatch= CheckTemplate(item);
-                    if (conceptTemplateMatch == false) { return conceptTemplateMatch; } 
+                    if(CheckTemplate(item))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        conceptTemplateMatch = false;
+                        continue;
+                    }
+                    
                 }
             }
 
@@ -289,12 +495,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 foreach (var item in attributeRules)
                 {
-
-                    conceptTemplateMatch = CheckAttributeRuleBegin(item);
-                    if (conceptTemplateMatch == false) { return conceptTemplateMatch; }
+                    if(CheckAttributeRuleBegin(item))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        conceptTemplateMatch = false;
+                        continue;
+                    }
+                    
                 }
             }
-            return true;
+            return conceptTemplateMatch;
         }
 
 
@@ -307,23 +520,38 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 foreach (var item in allConceptTemplates)
                 {
-
-                    templateMatch=CheckConceptTemplate(item.Value);
-                    if (templateMatch == false) { return templateMatch; }
+                    if(CheckConceptTemplate(item.Value))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        templateMatch = false;
+                        continue;
+                    }
+                    
 
                 }
             }
-            return true;
+            return templateMatch;
         }
 
         public bool CheckAttributeRuleBegin(AttributeRule attributeRule)
         {
             var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
-            if (mvdCheckerAndFilterControl == null) return true;
-            var scrollViewer = mvdCheckerAndFilterControl.scrollViewer as ScrollViewer;
-            if (scrollViewer == null) return true;
-            var textBlock = scrollViewer.Content as TextBlock;
-            if (textBlock == null) return true;
+            var tabControl = mvdCheckerAndFilterControl.tabControl as TabControl;
+
+            var tabitem1 = tabControl.Items.GetItemAt(0) as TabItem;
+            var resultScroll = mvdCheckerAndFilterControl.StackPanel1.Children[0] as ScrollViewer;
+            var resultText = resultScroll.Content as TextBlock;
+
+            var tabitem2 = tabControl.Items.GetItemAt(1) as TabItem;
+            var errorListScroll = mvdCheckerAndFilterControl.StackPanel2.Children[0] as ScrollViewer;
+            var errorListText = errorListScroll.Content as TextBlock;
+
+            var tabitem3 = tabControl.Items.GetItemAt(2) as TabItem;
+            var fullReportScroll = mvdCheckerAndFilterControl.StackPanel3.Children[0] as ScrollViewer;
+            var fullReportText = fullReportScroll.Content as TextBlock;
 
             object transportingEntity;
 
@@ -331,104 +559,133 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             string attributeRuleName = attributeRule.attributeName;//HasAssociations
             foreach (IfcProduct element in elements)
             {
+                string elementName = element.Name;
                 if (element.GetType().GetProperty(attributeRuleName).GetValue(element) == null)
                 {
+                    errorListText.Text += "=========" + elementName + "=========";
+                    errorListText.Text += "Attribute " + attributeRuleName+"is missing!\r\n";
                     attributeRuleMatch = false;
-                    textBlock.Text += "missing Attribute " + attributeRuleName+"!\r\n";
-                    return attributeRuleMatch;
+                    continue;
                 }
-            }
-            if (attributeRuleMatch == true)
-            {
-                textBlock.Text += "Attribute Rule " + attributeRuleName + " matches!" + "\r\n";
-                
-            }
-
-            List<EntityRule> allEntityRules = attributeRule.getEntityRules();
-
-            foreach (EntityRule entityRule in allEntityRules)//IfcRelAssociatesMaterial
-            {
-
-                string entityName = entityRule.entityName;
-                Type TypeOfEntityRuleInMvd = getTypeByNameFromIfc2x3(entityName)[0];
-
-                // foreach (IfcProduct element in elements)
-                //{
-
-                var IfcProperties = elements[0].GetType().GetProperties();
-
-                
-                Type baseType = TypeOfEntityRuleInMvd.BaseType;
-                
-                foreach (PropertyInfo property in IfcProperties)
+                else
                 {
-                    if (property.PropertyType.IsGenericType)
+                    fullReportText.Text += "=========" + elementName + "=========";
+                    fullReportText.Text += "Attribute Rule " + attributeRuleName + " matches!" + "\r\n";
+
+                    List<EntityRule> allEntityRules = attributeRule.getEntityRules();
+                    foreach (EntityRule entityRule in allEntityRules)//IfcRelAssociatesMaterial
                     {
-                        if (property.PropertyType.GetGenericArguments()[0] == baseType || property.PropertyType.GetGenericArguments()[0]== TypeOfEntityRuleInMvd)
+
+                        string entityName = entityRule.entityName;
+                        Type TypeOfEntityRuleInMvd = getTypeByNameFromIfc2x3(entityName)[0];
+
+                        // foreach (IfcProduct element in elements)
+                        //{
+
+                        var IfcProperties = element.GetType().GetProperties();
+
+
+                        Type baseType = TypeOfEntityRuleInMvd.BaseType;
+
+                        foreach (PropertyInfo property in IfcProperties)
                         {
-                            PropertyInfo IfcPropertyNeeded = property;
-                            var obj = IfcPropertyNeeded.GetValue(elements[0]) as IEnumerable;
-                            if (obj != null)
+                            if (property.PropertyType.IsGenericType)
                             {
-                                foreach (var item in obj)
+                                if (property.PropertyType.GetGenericArguments()[0] == baseType || property.PropertyType.GetGenericArguments()[0] == TypeOfEntityRuleInMvd)
                                 {
-                                    transportingEntity = item;//IfcRelAssociatesMaterial
-                                    if (item.GetType() == TypeOfEntityRuleInMvd)
+                                    PropertyInfo IfcPropertyNeeded = property;
+                                    var obj = IfcPropertyNeeded.GetValue(elements[0]) as IEnumerable;
+                                    if (obj != null)
                                     {
-                                        textBlock.Text += "Entity Rule " + entityName + " matches!\r\n";
-                                        attributeRuleMatch = CheckEntityRule(entityRule,transportingEntity); //IfcRelAssociatesMaterial
-                                        if (attributeRuleMatch == false) { return attributeRuleMatch; }
+                                        foreach (var item in obj)
+                                        {
+                                            transportingEntity = item;//IfcRelAssociatesMaterial
+                                            if (item.GetType() == TypeOfEntityRuleInMvd)
+                                            {
+                                                fullReportText.Text += "Entity Rule " + entityName + " matches!\r\n";
+                                                if (CheckEntityRule(entityRule, transportingEntity))//IfcRelAssociatesMaterial
+                                                {
+                                                    continue;
+                                                }
+                                                else
+                                                {
+                                                    attributeRuleMatch = false;
+                                                    continue;
+                                                }
+
+                                            }
+                                        }
+
                                     }
+
                                 }
 
                             }
+                            /* else
+                             {
+                                 if (property.PropertyType == baseType)
+                                 {
+                                     PropertyInfo IfcPropertyNeeded = property;
+                                     var obj = IfcPropertyNeeded.GetValue(element);
+
+                                 }
+                             }*/
 
                         }
-                       
+                        //}
+
+
                     }
-                    /* else
-                     {
-                         if (property.PropertyType == baseType)
-                         {
-                             PropertyInfo IfcPropertyNeeded = property;
-                             var obj = IfcPropertyNeeded.GetValue(element);
-
-                         }
-                     }*/
-
+                    
                 }
-                //}
-
             }
 
-            return true;
+            if (attributeRuleMatch == true)
+            {
+                fullReportText.Text += "All Elements' Attribute Rule " + attributeRuleName + " matches!" + "\r\n";
+                
+            }
+
+            return attributeRuleMatch;
         }
 
         public bool CheckAttributeRule(AttributeRule attributeRule,object transportingEntity)
         {
             var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
-            if (mvdCheckerAndFilterControl == null) return true;
-            var scrollViewer = mvdCheckerAndFilterControl.scrollViewer as ScrollViewer;
-            if (scrollViewer == null) return true;
-            var textBlock = scrollViewer.Content as TextBlock;
-            if (textBlock == null) return true;
+            var tabControl = mvdCheckerAndFilterControl.tabControl as TabControl;
+
+            var tabitem1 = tabControl.Items.GetItemAt(0) as TabItem;
+            var resultScroll = mvdCheckerAndFilterControl.StackPanel1.Children[0] as ScrollViewer;
+            var resultText = resultScroll.Content as TextBlock;
+
+            var tabitem2 = tabControl.Items.GetItemAt(1) as TabItem;
+            var errorListScroll = mvdCheckerAndFilterControl.StackPanel2.Children[0] as ScrollViewer;
+            var errorListText = errorListScroll.Content as TextBlock;
+
+            var tabitem3 = tabControl.Items.GetItemAt(2) as TabItem;
+            var fullReportScroll = mvdCheckerAndFilterControl.StackPanel3.Children[0] as ScrollViewer;
+            var fullReportText = fullReportScroll.Content as TextBlock;
 
 
             bool attributeRuleMatch = true;
             string attributeRuleName = attributeRule.attributeName;//Error: attribute = RelatingElement
 
             if (transportingEntity.GetType().GetProperty(attributeRuleName) == null
-                || transportingEntity.GetType().GetProperty(attributeRuleName).GetValue(transportingEntity) ==null)
-            {                           
+                || transportingEntity.GetType().GetProperty(attributeRuleName).GetValue(transportingEntity) == null)
+            {
+                errorListText.Text += "Attribute " + attributeRuleName + "is missing!\r\n";
                 attributeRuleMatch = false;
-                textBlock.Text +="missing Attribute " + attributeRuleName+ "\r\n";
-                return attributeRuleMatch;
             }
-            if (attributeRuleMatch == true) textBlock.Text += "AttributeRule " + attributeRuleName + " matches!\r\n";
+            else
+            {
+                fullReportText.Text+= "AttributeRule " + attributeRuleName + " matches!\r\n";
+
+            }
+           
 
             List<EntityRule> allEntityRules = attributeRule.getEntityRules();
 
-            if (allEntityRules.Any())
+            if (allEntityRules.Any()&& attributeRuleMatch)
             {
                 foreach (EntityRule entityRule in allEntityRules)
                 {
@@ -455,40 +712,68 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                 
                                 if (obj.GetType() == TypeOfEntityRuleInMvd)
                                 {
-                                    textBlock.Text += "Entity Rule " + entityName + " matches!\r\n";
-                                    attributeRuleMatch = CheckEntityRule(entityRule,obj);
-                                    if (attributeRuleMatch == false) { return attributeRuleMatch; }
-                                    return true;
+                                    fullReportText.Text += "Entity Rule " + entityName + " matches!\r\n";
+                                    if(CheckEntityRule(entityRule, obj))
+                                    {
+                                        
+                                    }
+                                    else
+                                    {
+                                        attributeRuleMatch = false;
+                                        
+                                    }
+                                    
+                                   
                                 }
+                                break;
                             }
                         }
                     }
-
-                    if (IfcProperties.FirstOrDefault(a => a.PropertyType == TypeOfEntityRuleInMvd) != null)
+                    else if (IfcProperties.FirstOrDefault(a => a.PropertyType == TypeOfEntityRuleInMvd) != null)
                     {
                         PropertyInfo IfcPropertyNeeded = IfcProperties.FirstOrDefault(a => a.PropertyType == TypeOfEntityRuleInMvd);
                         var obj = IfcPropertyNeeded.GetValue(transportingEntity);
 
                         if (obj.GetType() == TypeOfEntityRuleInMvd)
                         {
-                            textBlock.Text += "Entity Rule " + entityName + " matches!\r\n";
-                            attributeRuleMatch = CheckEntityRule(entityRule, obj);
-                            if (attributeRuleMatch == false) { return attributeRuleMatch; }
-                            return true;
+                            fullReportText.Text += "Entity Rule " + entityName + " matches!\r\n";
+                            if (CheckEntityRule(entityRule, obj))
+                            {
+                                
+                            }
+                            else
+                            {
+                                attributeRuleMatch = false;
+                                
+
+                            }
+
                         }
                     }
-
-                    else
+                    else if(transportingEntity.GetType().GetRuntimeProperties().FirstOrDefault(a => a.Name == attributeRuleName)!=null)
                     {
                         PropertyInfo IfcPropertyNeeded = transportingEntity.GetType().GetRuntimeProperties().FirstOrDefault(a => a.Name == attributeRuleName);
                         var obj = IfcPropertyNeeded.GetValue(transportingEntity);
                         if (obj != null)
                         {
-                            textBlock.Text += "EntityRule " + entityName + " matches!\r\n";
-                            attributeRuleMatch = CheckEntityRule(entityRule,obj);
-                            if (attributeRuleMatch == false) { return attributeRuleMatch; }
-                            return true;
+                            fullReportText.Text += "EntityRule " + entityName + " matches!\r\n";
+                            if (CheckEntityRule(entityRule, obj))
+                            {
+
+                            }
+                            else
+                            {
+                                attributeRuleMatch = false;
+
+                            }                          
+
                         }
+                    }
+                    else
+                    {
+                        attributeRuleMatch = false;
+                        errorListText.Text += "Entity Rule " + entityName + " is missing!\r\n";
+                        continue;
                     }
                     
 
@@ -496,7 +781,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
             }
 
-            return true;
+            return attributeRuleMatch;
         }
 
         public bool CheckEntityRule(EntityRule entityRule,object transportingEntity)
@@ -509,11 +794,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 foreach (var item in allAttributeRules)
                 {
-                    entityRuleMatch=CheckAttributeRule(item, transportingEntity);
-                    if (entityRuleMatch == false) return entityRuleMatch;
+                    if(CheckAttributeRule(item, transportingEntity))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        entityRuleMatch = false;
+                        continue;
+                    }
+                   
                 }
             }
-            return true;
+            return entityRuleMatch;
         }
         public override Node Clone()
         {

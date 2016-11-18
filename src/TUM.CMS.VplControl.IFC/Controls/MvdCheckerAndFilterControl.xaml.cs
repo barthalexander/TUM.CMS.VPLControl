@@ -24,5 +24,10 @@ namespace TUM.CMS.VplControl.IFC.Controls
         {
             InitializeComponent();
         }
+
+        private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

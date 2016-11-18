@@ -9,18 +9,24 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Mvd Checker And Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" />
-        <ScrollViewer Name="scrollViewer" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"
-                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                      MinWidth="300" MaxWidth="400" MinHeight="270" MaxHeight="300" CanContentScroll="True">
-            <TextBlock Name="textBlock" TextWrapping="Wrap" FontSize="14" Padding="5" IsHitTestVisible="false"
-                       x:FieldModifier="public" Visibility="Visible">
-            </TextBlock>
-        </ScrollViewer>
+        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Mvd Checker And Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" FontWeight="Bold" />
+        <TabControl Name="tabControl" Grid.Column="0" MinWidth="300" MaxWidth="400" MinHeight="240" MaxHeight="240" Height="240" Margin="0,30,0,0" Grid.RowSpan="3" VerticalAlignment="Top" SelectionChanged="tabControl_SelectionChanged" >
+            <TabItem Name="TabItem1" Header="Result" x:FieldModifier="public" >
+                <StackPanel Name="StackPanel1" x:FieldModifier="public"></StackPanel>
+            </TabItem>
+            <TabItem Name="TabItem2" Header="Error List" x:FieldModifier="public" >
+                <StackPanel Name="StackPanel2" x:FieldModifier="public"></StackPanel>
+            </TabItem>
+            <TabItem Name="TabItem3" Header="Ful Report" x:FieldModifier="public" >
+                <StackPanel Name="StackPanel3" x:FieldModifier="public"></StackPanel>
+            </TabItem>
+           
+        </TabControl>
     </Grid>
 </UserControl>

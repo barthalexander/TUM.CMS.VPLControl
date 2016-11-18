@@ -18,7 +18,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Property Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" />
+        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Property Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" FontWeight="Bold"  />
         <ComboBox Name="comboBoxPropertySet" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Height="24" Visibility="Visible"></ComboBox>
         <ComboBox Name="comboBoxProperties" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Height="24" Visibility="Visible"></ComboBox>
         <TextBox Name="textBox" x:FieldModifier="public" Grid.Row="3" Grid.Column="0" VerticalAlignment="Top" Height="24" Visibility="Visible"></TextBox>
