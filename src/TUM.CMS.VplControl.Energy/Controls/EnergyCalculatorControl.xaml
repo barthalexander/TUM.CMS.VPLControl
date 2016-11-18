@@ -15,7 +15,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Center" Content="Energy Calculator" Grid.Row="0"  Grid.Column="0" Margin="68,3,58,0"/>
+        <Label HorizontalAlignment="Center" Content="Energy Calculator" Grid.Row="0"  Grid.Column="0" Margin="68,3,58,0" FontWeight="Bold"/>
         <ComboBox Name="ComboBoxFilter" x:FieldModifier="public" Grid.Row="0"  Grid.Column="0" VerticalAlignment="Top" Height="24" Margin="10,25,0,0" Grid.RowSpan="2">
             <!--<ComboBoxItem Content="Select Rse"/> -->
         </ComboBox>

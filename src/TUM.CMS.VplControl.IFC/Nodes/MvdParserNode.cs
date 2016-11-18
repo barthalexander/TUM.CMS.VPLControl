@@ -31,6 +31,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         }
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null) return;
             var file = InputPorts[0].Data.ToString();
             if (file != "" && File.Exists(file))
             {

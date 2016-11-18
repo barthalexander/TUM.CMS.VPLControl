@@ -59,7 +59,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
 
-        private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+      /*  private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
             var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
@@ -103,7 +103,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                   
             }
             
-        }
+        }*/
 
         public override void Calculate()
         {
@@ -181,6 +181,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Foreground = Brushes.Green
             };
             fullReportScroll.Content = fullReportText;
+            fullReportText.Text = "";
+            errorListText.Text = "";
 
             var mvdCheckerAndFilterControl = ControlElements[0] as MvdCheckerAndFilterControl;
             var tabControl = mvdCheckerAndFilterControl.tabControl as TabControl;
@@ -190,7 +192,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             mvdCheckerAndFilterControl.StackPanel2.Children.Add(errorListScroll);
             mvdCheckerAndFilterControl.StackPanel3.Children.Add(fullReportScroll);
 
-            tabControl.SelectionChanged += tabControl_SelectionChanged;
+            //tabControl.SelectionChanged += tabControl_SelectionChanged;
 
 
             var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
@@ -236,7 +238,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             else
             {
-                resultText.Text = "Ifc file doesn't match with MVD! Information Missing! See details in Error List and Full Report!";
+                resultText.Text = "Ifc file doesn't match with MVD!\r\n Information Missing! \r\nSee details in Error List and Full Report!";
             }
         }
         
@@ -268,7 +270,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     if (xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList() == null)
                     {
                         conceptRootMatch = false;
-                        errorListText.Text += "missing concept root Slab\r\n!";                                                                      
+                        errorListText.Text += "missing concept root Slab!\r\n";                                                                      
                         return conceptRootMatch;
                     }
                     else
@@ -420,7 +422,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             else
             {
-                errorListText.Text += "Concept" + conceptName + " is missing!\r\n";
+                errorListText.Text += "Concept " + conceptName + " is missing!\r\n";
                 conceptMatch = false;
 
             }
@@ -560,7 +562,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             foreach (IfcProduct element in elements)
             {
                 string elementName = element.Name;
-                if (element.GetType().GetProperty(attributeRuleName).GetValue(element) == null)
+                if (element.GetType().GetProperty(attributeRuleName)==null ||element.GetType().GetProperty(attributeRuleName).GetValue(element) == null)
                 {
                     errorListText.Text += "=========" + elementName + "=========";
                     errorListText.Text += "Attribute " + attributeRuleName+"is missing!\r\n";
