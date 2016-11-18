@@ -15,7 +15,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Center" Content="Ifc Maps" Grid.Row="0"  Grid.Column="0"></Label>
+        <Label HorizontalAlignment="Center" Content="Ifc Maps" Grid.Row="0"  Grid.Column="0" FontWeight="Bold"></Label>
         <WebBrowser Name="Browser" x:FieldModifier="public" Grid.Row="1" Grid.Column="0"></WebBrowser>
         <TextBlock Name="TextBlock" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"></TextBlock>
 
