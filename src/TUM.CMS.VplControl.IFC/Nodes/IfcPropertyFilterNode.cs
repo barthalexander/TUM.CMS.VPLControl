@@ -11,6 +11,7 @@ using Xbim.Properties;
 using Version = System.Version;
 using TUM.CMS.VplControl.IFC.Controls;
 
+
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcPropertyFilterNode : Node
@@ -501,6 +502,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var textBox = ifcPropertyFilterControl.textBox as TextBox;
             if (textBox == null) return;
+            var label = ifcPropertyFilterControl.conditionLabel as Label;
+            if (label == null) return;
+            
             var button = ifcPropertyFilterControl.button as Button;
             if (button == null) return;
             var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
@@ -544,13 +548,21 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         {
                             double propertyValueDouble = (double)propertyValueTrue;
                             propertyValueDoubles.Add(propertyValueDouble);
-                            textBox.Text = "Double: give range";
+                            
+                            double max = propertyValueDoubles.Max();
+                            max = System.Math.Round(max,2);
+                            double min = propertyValueDoubles.Min();
+                            min = System.Math.Round(min, 2);
+                            
+                            label.Content = "Double: give any range in\r\n (" + min.ToString() + " ," + max.ToString()+")";
+                           
                         }
                         if (propertyValueType == "Boolean")
                         {
                             bool propertyValueBool = (bool)propertyValueTrue;
                             propertyValueBools.Add(propertyValueBool);
-                            textBox.Text = "Boolean: True or False";
+                            label.Content = "Boolean: True or False";
+                           
                         }
                         if (propertyValueType == "String")
                         {
@@ -581,12 +593,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             }
 
 
-                            textBox.Text = "String: has ";
+                            label.Content = "String: has ";
                             for (int i = 0; i < diffString.Count; i++)
                             {
                                 if (diffString[i] == true)
                                 {
-                                    textBox.Text += propertyValueStrings[i];
+                                    label.Content += propertyValueStrings[i]+ "\r\n";
 
                                 }
                             }
