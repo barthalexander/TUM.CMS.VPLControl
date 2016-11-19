@@ -57,21 +57,21 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             _viewPort = energyVisualisationControl.Viewport3D;
 
             //create a bar
-            ProgressBar ColorBarAll = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
-
-            ColorBarAll.Height = 20;//defines the height
-            ColorBarAll.Width = 400;//defines the width
+            //  ProgressBar ColorBarAll = new ProgressBar();//creates a new progress bar, it can be any other control, but this will work
+            ProgressBar ColorBar = energyVisualisationControl.ColorBarAll;
+            //  ColorBarAll.Height = 20;//defines the height
+            //  ColorBarAll.Width = 400;//defines the width
             //ColorBar.Background=new Color(Color)
-            ColorBarAll.Value = 0;//just keeps he progress bar empty
+            ColorBar.Value = 0;//just keeps the progress bar empty
             _Colors = GetStaticPropertyBag(typeof(Colors)).ToList();
 
             AddControlToNode(energyVisualisationControl);//#0
-            AddControlToNode(ColorBarAll);//#1
+                                                         //   AddControlToNode(ColorBarAll);//#1
         }
 
         public override void Calculate()
         {
-            if(InputPorts[0].Data == null)
+            if (InputPorts[0].Data == null)
                 return;
 
             //in TTValueColor hashTable
@@ -163,6 +163,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             SortedTTs.Sort();
             ((TTColorAvailable2)TTValueColorAll[SortedTTs[1]]).col = Colors.Green;
             ((TTColorAvailable2)TTValueColorAll[SortedTTs[SortedTTs.Count - 1]]).col = Colors.Red;
+
             foreach (var item in _xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
             {
                 var m = new MeshGeometry3D();
@@ -197,8 +198,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Console.WriteLine("**** TT of " + SortedTTs[k] + " is now in " + col + " ****");
             }
             LinearGradientBrush colors = new LinearGradientBrush(colorsCollection, 0);
-            ProgressBar ColorBarAll = ControlElements[1] as ProgressBar;
+            // ProgressBar ColorBarAll = ControlElements[1] as ProgressBar;
+            // ColorBarAll.Background = colors;
+            ProgressBar ColorBarAll = ((EnergyVisualisationControl)ControlElements[0]).ColorBarAll;
             ColorBarAll.Background = colors;
+            ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + SortedTTs[0] + "-" + (SortedTTs[0] + 1) + ")";
+            ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + SortedTTs[SortedTTs.Count - 1] + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")";
         }
 
         private void worker_DoWork_IFC4(IfcStore xModel)
@@ -278,8 +283,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Console.WriteLine("**** TT of " + SortedTTs[k] + " is now in " + col + " ****");
             }
             LinearGradientBrush colors = new LinearGradientBrush(colorsCollection, 0);
-            ProgressBar ColorBarAll = ControlElements[1] as ProgressBar;
+            // ProgressBar ColorBarAll = ControlElements[1] as ProgressBar;
+            // ColorBarAll.Background = colors;
+            ProgressBar ColorBarAll = ((EnergyVisualisationControl)ControlElements[0]).ColorBarAll;
             ColorBarAll.Background = colors;
+            ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + SortedTTs[0] + "-" + (SortedTTs[0] + 1) + ")";
+            ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + SortedTTs[SortedTTs.Count - 1] + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")";
         }
 
         public /*static*/ Dictionary<string, object> GetStaticPropertyBag(Type t)

@@ -21,7 +21,7 @@
         </ComboBox>
         <TextBox Name="TextBox_l" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0" VerticalAlignment="Top" Height="24" Margin="10,25,0,0" Text="1.1" Grid.RowSpan="2" Visibility="Hidden"></TextBox>
         <ComboBox Name="ComboBoxRse" x:FieldModifier="public" Grid.Row="2"  Grid.Column="0" VerticalAlignment="Top" Height="24" Margin="10,15,0,-8" Visibility="Hidden"></ComboBox>
-        <Label Name="Label_Uj" x:FieldModifier="public" Grid.Row="2"  Grid.Column="0" VerticalAlignment="Top" Height="24" Margin="10,45,154,-38" Content="Uj =" FontSize="15"></Label>
+        <Label Name="Label_Uj" x:FieldModifier="public" Grid.Row="2"  Grid.Column="0" VerticalAlignment="Top" Height="24" Margin="10,45,154,-38" Content="Uj =" ></Label>
         <Button Name="Button_Uj" x:FieldModifier="public" Content="Sum all TTs" Margin="141,45,10,22" Grid.Row="2" Visibility="Hidden"/>
         <Label Name="Label_TT_Exists" x:FieldModifier="public" Margin="10,77,0,0" Grid.Row="2" ></Label>
     </Grid>
