@@ -72,7 +72,25 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 {
                     comboBox.SelectedItem = -1;
                     comboBox.Items.Clear();
+                    ComboboxItem preselectedItem = new ComboboxItem()
+                    {
+                        Text = "Select Type",
+                        ValueIfcGloballyUniqueIds2x3 = null
+                    };
+                    comboBox.Items.Add(preselectedItem);
+                    comboBox.SelectedItem = preselectedItem;
                 }
+                else
+                {
+                    ComboboxItem preselectedItem = new ComboboxItem()
+                    {
+                        Text = "Select Type",
+                        ValueIfcGloballyUniqueIds2x3 = null
+                    };
+                    comboBox.Items.Add(preselectedItem);
+                    comboBox.SelectedItem = preselectedItem;
+                }
+
                 var ifcwall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
                 var ifcbeam = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
                 var ifccolumn = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>().ToList();
@@ -198,7 +216,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 ComboboxItem ifcplates = new ComboboxItem() { Text = "ifcplate", ValueIfcGloballyUniqueIds2x3 = ifcPlatesFiltered };
                 ComboboxItem ifcdoors = new ComboboxItem() { Text = "ifcdoor", ValueIfcGloballyUniqueIds2x3 = ifcDoorsFiltered };
                 ComboboxItem ifccurtainwalls = new ComboboxItem() { Text = "ifccurtainwall", ValueIfcGloballyUniqueIds2x3 = ifcCurtainwallsFiltered };
-                ComboboxItem defaultItem = new ComboboxItem() { Text = "-Ifc Type-", ValueIfcGloballyUniqueIds2x3 = null };
+                
                 if (ifcWallsFiltered.Count != 0)
                 {
                     comboBox.Items.Add(ifcwalls);
@@ -244,8 +262,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     comboBox.Items.Add(ifccurtainwalls);
                 }
 
-
-                comboBox.SelectedItem = defaultItem;
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
@@ -260,6 +276,23 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 {
                     comboBox.SelectedItem = -1;
                     comboBox.Items.Clear();
+                    ComboboxItem preselectedItem = new ComboboxItem()
+                    {
+                        Text = "Select Type",
+                        ValueIfcGloballyUniqueIds4 = null
+                    };
+                    comboBox.Items.Add(preselectedItem);
+                    comboBox.SelectedItem = preselectedItem;
+                }
+                else
+                {
+                    ComboboxItem preselectedItem = new ComboboxItem()
+                    {
+                        Text = "Select Type",
+                        ValueIfcGloballyUniqueIds4 = null
+                    };
+                    comboBox.Items.Add(preselectedItem);
+                    comboBox.SelectedItem = preselectedItem;
                 }
                 var ifcwall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWall>().ToList();
                 var ifcbeam = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcBeam>().ToList();
@@ -386,7 +419,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 ComboboxItem ifcplates = new ComboboxItem() { Text = "ifcplate", ValueIfcGloballyUniqueIds4 = ifcPlatesFiltered };
                 ComboboxItem ifcdoors = new ComboboxItem() { Text = "ifcdoor", ValueIfcGloballyUniqueIds4 = ifcDoorsFiltered };
                 ComboboxItem ifccurtainwalls = new ComboboxItem() { Text = "ifccurtainwall", ValueIfcGloballyUniqueIds4 = ifcCurtainwallsFiltered };
-                ComboboxItem defaultItem = new ComboboxItem() { Text = "-Ifc Type-", ValueIfcGloballyUniqueIds4 = null };
+               
 
                 if (ifcWallsFiltered.Count != 0)
                 {
@@ -434,7 +467,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
 
 
-                comboBox.SelectedItem = defaultItem;
+               
             }
         }
 
@@ -443,28 +476,36 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             var ifcTypeFilterControl = ControlElements[0] as IfcTypeFilterControl;
             var comboBox = ifcTypeFilterControl.comboBox;
-            if (comboBox == null) return;
-
-            if (IfcVersionType.Name == "ModelInfoIFC2x3")
+            if (comboBox == null||comboBox.Items.Count==0) return;
+ 
+            if (IfcVersionType.Name == "ModelInfoIFC2x3" & comboBox.SelectedItem!=null)
             {
+                
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> searchIDs = ((ComboboxItem)(comboBox.SelectedItem)).ValueIfcGloballyUniqueIds2x3;
                 ModelInfoIFC2x3 modelInfoIfc2X3 = new ModelInfoIFC2x3(modelid);
-
-                foreach (var item in searchIDs)
+                if (searchIDs != null)
                 {
-                    modelInfoIfc2X3.AddElementIds(item);
+                    foreach (var item in searchIDs)
+                    {
+                        modelInfoIfc2X3.AddElementIds(item);
+                    }
+                    OutputPorts[0].Data = modelInfoIfc2X3;
                 }
-                OutputPorts[0].Data = modelInfoIfc2X3;
+                
             }
-            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            else if (IfcVersionType.Name == "ModelInfoIFC4" & comboBox.SelectedItem != null)
             {
                 List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> searchIDs = ((ComboboxItem)(comboBox.SelectedItem)).ValueIfcGloballyUniqueIds4;
                 ModelInfoIFC4 modelInfoIfc4 = new ModelInfoIFC4(modelid);
-                foreach (var item in searchIDs)
+                if (searchIDs != null)
                 {
-                    modelInfoIfc4.AddElementIds(item);
+                    foreach (var item in searchIDs)
+                    {
+                        modelInfoIfc4.AddElementIds(item);
+                    }
+                    OutputPorts[0].Data = modelInfoIfc4;
                 }
-                OutputPorts[0].Data = modelInfoIfc4;
+                
             }
 
 

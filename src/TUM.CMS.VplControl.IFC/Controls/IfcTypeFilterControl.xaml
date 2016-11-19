@@ -4,16 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TUM.CMS.VplControl.IFC.Controls"
-             mc:Ignorable="d" d:DesighHeight="150" d:DesighWidth="100"  >
+             mc:Ignorable="d" d:DesighHeight="60" d:DesighWidth="150"  >
     <Grid >
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="60" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Type Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" FontWeight="Bold" />
-        <ComboBox Name="comboBox" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Height="24" Visibility="Visible"></ComboBox>
+        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Type Filter" Height="25" Grid.Row="0"  Grid.Column="0" Visibility="Visible" FontWeight="Bold" />
+        <ComboBox Name="comboBox" x:FieldModifier="public" Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom" Height="26" Visibility="Visible"></ComboBox>
     </Grid>
 </UserControl>

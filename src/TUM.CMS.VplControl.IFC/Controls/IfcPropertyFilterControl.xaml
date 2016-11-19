@@ -5,29 +5,26 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TUM.CMS.VplControl.IFC.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="210" d:DesignWidth="150">
+             d:DesignHeight="209" d:DesignWidth="150">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="32"/>
-            <RowDefinition Height="32"/>
-            <RowDefinition Height="32"/>
-            <RowDefinition Height="56"/>
             <RowDefinition Height="28"/>
+            <RowDefinition Height="93"/>
+            <RowDefinition Height="88"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Property Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" FontWeight="Bold" Height="25" Margin="26,5,25.4,0" Width="99"  />
-        <ComboBox Name="comboBoxPropertySet" x:FieldModifier="public" Grid.Column="0" VerticalAlignment="Top" Height="25" Visibility="Visible" Margin="5,30,5.4,0" Grid.RowSpan="2" SelectionChanged="comboBoxPropertySet_SelectionChanged"/>
-        <ComboBox Name="comboBoxProperties" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Height="25" Visibility="Visible" Margin="5,0,5.4,0"/>
-        <TextBox Name="textBox" x:FieldModifier="public" Grid.Row="3" Grid.Column="0" VerticalAlignment="Top" Height="25" Visibility="Visible" Margin="5,0,5.4,0"></TextBox>
-        <Label Name="conditionLabel" x:FieldModifier="public" Grid.Row="4" Grid.Column="0" VerticalAlignment="Top" Height="50" Visibility="Visible" Margin="5,2,5.4,0">
+        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Content="Ifc Property Filter" Grid.Row="0"  Grid.Column="0" Visibility="Visible" FontWeight="Bold" Height="25" Width="99"  />
+        <ComboBox Name="comboBoxPropertySet" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Height="26" Visibility="Visible"  SelectionChanged="comboBoxPropertySet_SelectionChanged" />
+        <ComboBox Name="comboBoxProperties" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Height="26" Visibility="Visible" />
+        <TextBox Name="textBox" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Bottom" Height="26" Visibility="Visible" ></TextBox>
+        <Label Name="conditionLabel" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Height="50" Visibility="Visible" Margin="5,2,5.4,0">
             <Label.Content>
-            <AccessText TextWrapping="Wrap"></AccessText>
+                <AccessText TextWrapping="Wrap"></AccessText>
             </Label.Content>
         </Label>
-        <Button Name="button" Content="filter"  x:FieldModifier="public" Grid.Row="4" Grid.Column="0" VerticalAlignment="Top" Height="25" Visibility="Visible" Margin="5,55.6,5.4,0" Grid.RowSpan="2"></Button>
+        <Button Name="button" Content="filter"  x:FieldModifier="public" Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" Height="26" Visibility="Visible" ></Button>
     </Grid>
 </UserControl>

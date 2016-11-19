@@ -353,6 +353,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
                 if (comboBoxPropertySet == null) return;
                 comboBoxPropertySet.Items.Clear();
+                ComboboxItem preselectedPropertySet = new ComboboxItem() { Text = "select Property Set", Value = null };
+                comboBoxPropertySet.Items.Add(preselectedPropertySet);
+                comboBoxPropertySet.SelectedItem=preselectedPropertySet;
 
                 var selectedItemIds = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
                 if (selectedItemIds == null) return;
@@ -394,6 +397,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
                 PropertySet = selectedProduct.PropertySets.ToList();
+                
                 for (int i = 0; i < PropertySet.Count(); i++)
                 {
                     ComboboxItem onePropertySet = new ComboboxItem() { Text = PropertySet[i].Name.ToString(), Value = PropertySet[i] };
@@ -416,13 +420,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var comboBoxPropertySet = ifcPropertyFilterControl.comboBoxPropertySet as ComboBox;
                 if (comboBoxPropertySet == null) return;
                 comboBoxPropertySet.Items.Clear();
+                ComboboxItem preselectedPropertySet = new ComboboxItem() { Text = "select Property Set", Value = null };
+                comboBoxPropertySet.Items.Add(preselectedPropertySet);
+                comboBoxPropertySet.SelectedItem = preselectedPropertySet;
 
                 var selectedItemIds = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
                 if (selectedItemIds == null) return;
-
-                // MemberInfo info = typeof(Xbim.Ifc4.Kernel.IfcProduct).GetMethod("GlobalId");
-                // IfcPersistedEntityAttribute attr = (IfcPersistedEntityAttribute)Attribute.GetCustomAttribute(info, typeof(IfcPersistedEntityAttribute));
-
 
                 var selectedProduct = xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcElement>().ToList().Find(x => x.GlobalId == selectedItemIds[0]);
 
@@ -456,39 +459,51 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var comboBoxProperties = ifcPropertyFilterControl.comboBoxProperties as ComboBox;
             if (comboBoxProperties == null) return;
             comboBoxProperties.Items.Clear();
+            ComboboxItem preselectedProperty = new ComboboxItem { Text = "select Property", Value = null };
+            comboBoxProperties.Items.Add(preselectedProperty);
+            comboBoxProperties.SelectedItem = preselectedProperty;
+
             if (comboBoxPropertySet.Items.Count == 0) return;
 
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
                 var selectedItem = (ComboboxItem)(comboBoxPropertySet.SelectedItem);
-                var propertySet = selectedItem.Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
-                if (propertySet == null) return;
-                var hasProperties = propertySet.HasProperties.ToList();
-
-
-                for (int i = 0; i < hasProperties.Count; i++)
+                if (selectedItem != null)
                 {
-                    ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };
-                    comboBoxProperties.Items.Add(oneHasProperties);
-                }
+                    var propertySet = selectedItem.Value as Xbim.Ifc2x3.Kernel.IfcPropertySet;
+                    if (propertySet == null) return;
+                    var hasProperties = propertySet.HasProperties.ToList();
 
-                comboBoxProperties.SelectedIndex = 0;
+
+                    for (int i = 0; i < hasProperties.Count; i++)
+                    {
+                        ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };
+                        comboBoxProperties.Items.Add(oneHasProperties);
+                    }
+
+                    comboBoxProperties.SelectedIndex = 0;
+                }
+                
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
                 var selectedItem = (ComboboxItem)(comboBoxPropertySet.SelectedItem);
-                var propertySet = selectedItem.Value as Xbim.Ifc4.Kernel.IfcPropertySet;
-                if (propertySet == null) return;
-                var hasProperties = propertySet.HasProperties.ToList();
-
-
-                for (int i = 0; i < hasProperties.Count; i++)
+                if (selectedItem != null)
                 {
-                    ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };
-                    comboBoxProperties.Items.Add(oneHasProperties);
-                }
+                    var propertySet = selectedItem.Value as Xbim.Ifc4.Kernel.IfcPropertySet;
+                    if (propertySet == null) return;
+                    var hasProperties = propertySet.HasProperties.ToList();
 
-                comboBoxProperties.SelectedIndex = 0;
+
+                    for (int i = 0; i < hasProperties.Count; i++)
+                    {
+                        ComboboxItem oneHasProperties = new ComboboxItem() { Text = hasProperties[i].Name.ToString(), Value = hasProperties[i] };
+                        comboBoxProperties.Items.Add(oneHasProperties);
+                    }
+
+                    comboBoxProperties.SelectedIndex = 0;
+                }              
+                
             }
 
 
@@ -554,14 +569,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             double min = propertyValueDoubles.Min();
                             min = System.Math.Round(min, 2);
                             
-                            label.Content = "Double: give any range in\r\n (" + min.ToString() + " ," + max.ToString()+")";
+                            label.Content = "Property Type: Double\r\nplease give any range in (" + min.ToString() + " , " + max.ToString()+")";
                            
                         }
                         if (propertyValueType == "Boolean")
                         {
                             bool propertyValueBool = (bool)propertyValueTrue;
                             propertyValueBools.Add(propertyValueBool);
-                            label.Content = "Boolean: True or False";
+                            label.Content = "Property Type: Boolean\r\nplease give 'True' or 'False'";
                            
                         }
                         if (propertyValueType == "String")
@@ -593,12 +608,19 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             }
 
 
-                            label.Content = "String: has ";
+                            label.Content = "Property Type: String\r\n";
+                            int q = 0;
                             for (int i = 0; i < diffString.Count; i++)
                             {
                                 if (diffString[i] == true)
                                 {
-                                    label.Content += propertyValueStrings[i]+ "\r\n";
+                                    q++;
+                                    if (q % 2 == 1)
+                                    { label.Content += "'" + propertyValueStrings[i] + "' "; }
+                                    else
+                                    {
+                                        label.Content += "'" + propertyValueStrings[i] + "'\r\n";
+                                    }
 
                                 }
                             }
@@ -646,13 +668,20 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         {
                             double propertyValueDouble = (double)propertyValueTrue;
                             propertyValueDoubles.Add(propertyValueDouble);
-                            textBox.Text = "Double: give range";
+
+                            double max = propertyValueDoubles.Max();
+                            max = System.Math.Round(max, 2);
+                            double min = propertyValueDoubles.Min();
+                            min = System.Math.Round(min, 2);
+
+                            label.Content = "Double: give any range in\r\n (" + min.ToString() + " , " + max.ToString() + ")";
+
                         }
                         if (propertyValueType == "Boolean")
                         {
                             bool propertyValueBool = (bool)propertyValueTrue;
                             propertyValueBools.Add(propertyValueBool);
-                            textBox.Text = "Boolean: True or False";
+                            label.Content = "Boolean: True or False";
                         }
                         if (propertyValueType == "String")
                         {
@@ -683,12 +712,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             }
 
 
-                            textBox.Text = "String: has ";
+                            label.Content = "String: has ";
                             for (int i = 0; i < diffString.Count; i++)
                             {
                                 if (diffString[i] == true)
                                 {
-                                    textBox.Text += propertyValueStrings[i];
+                                    label.Content += propertyValueStrings[i] + "\r\n";
 
                                 }
                             }
