@@ -105,8 +105,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
             TextBlock resultText = new TextBlock {
                 Visibility = Visibility.Visible,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
+               // HorizontalAlignment = HorizontalAlignment.Stretch,
+                //VerticalAlignment = VerticalAlignment.Stretch,
                 TextWrapping = TextWrapping.Wrap,
                 FontSize=14,
                 Padding= new Thickness(5, 10, 5, 10),
@@ -118,20 +118,21 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             TextBlock errorListText = new TextBlock {
                 Visibility = Visibility.Visible,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
+               // HorizontalAlignment = HorizontalAlignment.Stretch,
+                //VerticalAlignment = VerticalAlignment.Stretch,
                 TextWrapping = TextWrapping.Wrap,
                 FontSize = 14,
-                Padding = new Thickness(5, 10, 5, 10),
+                Padding = new Thickness(5),
                 IsHitTestVisible = false,
                 Foreground = Brushes.Red
             };
             errorListScroll.Content = errorListText;
+
             TextBlock fullReportText = new TextBlock
             {
                 Visibility = Visibility.Visible,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
+                //HorizontalAlignment = HorizontalAlignment.Stretch,
+                //VerticalAlignment = VerticalAlignment.Stretch,
                 TextWrapping = TextWrapping.Wrap,
                 FontSize = 14,
                 Padding = new Thickness(5, 10, 5, 10),
@@ -190,7 +191,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     {
                         OutputInfoIfc2x3.AddElementIds(item.GlobalId);
                     }
-                    resultText.Text = "Ifc file is valid according to this specific MVD!";
+                    resultText.Text = "Ifc file is valid according to this specific MVD!\r\nA filtered IFC file is generated according to the input MVD!";
 
                     OutputPorts[0].Data = OutputInfoIfc2x3;
 
