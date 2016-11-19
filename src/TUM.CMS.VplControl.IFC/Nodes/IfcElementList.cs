@@ -73,6 +73,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         ListView listView = new ListView();
                         listView.Name = "lvElementList" + i;
                         listView.MaxHeight = 200;
+                        listView.HorizontalAlignment = HorizontalAlignment.Stretch;
+                        listView.VerticalAlignment = VerticalAlignment.Stretch;
+
                         GridView gridView = new GridView();
 
                         gridView.Columns.Add(new GridViewColumn
@@ -156,6 +159,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 ListView listView = new ListView();
                 listView.Name = "lvElementList";
                 listView.MaxHeight = 500;
+                listView.HorizontalAlignment = HorizontalAlignment.Stretch;
+                listView.VerticalAlignment = VerticalAlignment.Stretch;
+
                 GridView gridView = new GridView();
 
                 gridView.Columns.Add(new GridViewColumn

@@ -15,6 +15,6 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Label Name="Title" VerticalAlignment="Center" HorizontalAlignment="Center"  x:FieldModifier="public" Grid.Row="0"  Grid.Column="0" FontWeight="Bold" ></Label>
-        <ScrollViewer Name="ScrollViewer" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <ScrollViewer Name="ScrollViewer" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
     </Grid>
 </UserControl>

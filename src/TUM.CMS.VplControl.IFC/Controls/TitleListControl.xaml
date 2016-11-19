@@ -15,6 +15,6 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Label Name="Title" VerticalAlignment="Center" x:FieldModifier="public" Grid.Row="0"  Grid.Column="0" FontWeight="Bold" ></Label>
-        <StackPanel Name="StackPanel" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" Visibility="Collapsed" MinHeight="200" MinWidth="200"></StackPanel>
+        <StackPanel Name="StackPanel" x:FieldModifier="public" Grid.Row="1" Grid.Column="0" Visibility="Collapsed" MinHeight="200" MinWidth="200" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></StackPanel>
     </Grid>
 </UserControl>

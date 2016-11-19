@@ -11,6 +11,7 @@ using Xbim.Presentation;
 using System.Reflection;
 using System.Collections;
 using System.ComponentModel;
+using System.Windows;
 using TUM.CMS.VplControl.IFC.Utilities;
 using Xbim.Common;
 using Xbim.Ifc;
@@ -161,8 +162,29 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             Console.WriteLine("The distinct TT-Values are " + TTValueColorAll.Keys.Count + " (distinct TT-Values).");
             List<double> SortedTTs = TTValueColorAll.Keys.OfType<double>().ToList();
             SortedTTs.Sort();
-            ((TTColorAvailable2)TTValueColorAll[SortedTTs[1]]).col = Colors.Green;
-            ((TTColorAvailable2)TTValueColorAll[SortedTTs[SortedTTs.Count - 1]]).col = Colors.Red;
+
+            try
+            {
+                ((TTColorAvailable2) TTValueColorAll[SortedTTs[1]]).col = Colors.Green;
+
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.WriteLine("Out of Range");
+            }
+
+            try
+            {
+                ((TTColorAvailable2) TTValueColorAll[SortedTTs[SortedTTs.Count - 1]]).col = Colors.Red;
+
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.WriteLine("Out of Range");
+            }
+
+
+
 
             foreach (var item in _xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
             {
@@ -172,7 +194,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 TTColorAvailable2 thisOne = GetTTifExistsCalculateifNot_IFC2x3(item);
                 thisOne.divedTT = Math.Truncate(thisOne.TT);
-                Color thisColor = ((TTColorAvailable2)TTValueColorAll[thisOne.divedTT]).col;
+                Color thisColor;
+                if (TTValueColorAll.Count >= 1)
+                {
+                    thisColor = ((TTColorAvailable2) TTValueColorAll[thisOne.divedTT]).col;
+                }
+                else
+                {
+                    thisColor = Colors.Gray;
+                }
+
 
                 Material = new DiffuseMaterial(new SolidColorBrush(thisColor));
                 var mb = new MeshBuilder(false, false);
@@ -202,8 +233,38 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // ColorBarAll.Background = colors;
             ProgressBar ColorBarAll = ((EnergyVisualisationControl)ControlElements[0]).ColorBarAll;
             ColorBarAll.Background = colors;
-            ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + SortedTTs[0] + "-" + (SortedTTs[0] + 1) + ")";
-            ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + SortedTTs[SortedTTs.Count - 1] + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")";
+
+
+
+            try
+            {
+                var progressLabel = (SortedTTs[SortedTTs.Count - 1] + 1) / 5;
+
+                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + 0 + "-" + (progressLabel * 1) + ")"; // 0 - 1
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + (progressLabel * 1) + "-" + (progressLabel * 2) + ")"; // 1,66 - 3
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + (progressLabel * 2) + "-" + (progressLabel * 3) + ")"; // 1,66 - 3
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + (progressLabel * 3) + "-" + (progressLabel * 4) + ")"; // 2,8 - 4
+
+                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + (progressLabel * 4) + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")"; // 5
+
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).ColorBarAll.Visibility = Visibility.Hidden;
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "Problems while Reading";
+
+
+            }
+
+            
         }
 
         private void worker_DoWork_IFC4(IfcStore xModel)
@@ -247,8 +308,29 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             Console.WriteLine("The distinct TT-Values are " + TTValueColorAll.Keys.Count + " (distinct TT-Values).");
             List<double> SortedTTs = TTValueColorAll.Keys.OfType<double>().ToList();
             SortedTTs.Sort();
-            ((TTColorAvailable2)TTValueColorAll[SortedTTs[1]]).col = Colors.Green;
-            ((TTColorAvailable2)TTValueColorAll[SortedTTs[SortedTTs.Count - 1]]).col = Colors.Red;
+
+            try
+            {
+                ((TTColorAvailable2)TTValueColorAll[SortedTTs[1]]).col = Colors.Green;
+
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.WriteLine("Out of Range");
+            }
+
+            try
+            {
+                ((TTColorAvailable2)TTValueColorAll[SortedTTs[SortedTTs.Count - 1]]).col = Colors.Red;
+
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.WriteLine("Out of Range");
+            }
+
+
+
             foreach (var item in _xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
             {
                 var m = new MeshGeometry3D();
@@ -257,7 +339,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 TTColorAvailable2 thisOne = GetTTifExistsCalculateifNot_IFC4(item);
                 thisOne.divedTT = Math.Truncate(thisOne.TT);
-                Color thisColor = ((TTColorAvailable2)TTValueColorAll[thisOne.divedTT]).col;
+
+                Color thisColor;
+                if (TTValueColorAll.Count >= 1)
+                {
+                    thisColor = ((TTColorAvailable2)TTValueColorAll[thisOne.divedTT]).col;
+                }
+                else
+                {
+                    thisColor = Colors.Gray;
+                }
 
                 Material = new DiffuseMaterial(new SolidColorBrush(thisColor));
                 var mb = new MeshBuilder(false, false);
@@ -287,8 +378,32 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // ColorBarAll.Background = colors;
             ProgressBar ColorBarAll = ((EnergyVisualisationControl)ControlElements[0]).ColorBarAll;
             ColorBarAll.Background = colors;
-            ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + SortedTTs[0] + "-" + (SortedTTs[0] + 1) + ")";
-            ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + SortedTTs[SortedTTs.Count - 1] + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")";
+            try
+            {
+                var progressLabel = (SortedTTs[SortedTTs.Count - 1] + 1) / 5;
+
+                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + 0 + "-" + (progressLabel * 1) + ")"; // 0 - 1
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + (progressLabel * 1) + "-" + (progressLabel * 2) + ")"; // 1,66 - 3
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + (progressLabel * 2) + "-" + (progressLabel * 3) + ")"; // 1,66 - 3
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + (progressLabel * 3) + "-" + (progressLabel * 4) + ")"; // 2,8 - 4
+
+                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + (progressLabel * 4) + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")"; // 5
+
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Visibility = Visibility.Hidden;
+                ((EnergyVisualisationControl)ControlElements[0]).ColorBarAll.Visibility = Visibility.Hidden;
+
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "Problems while Reading";
+
+            }
         }
 
         public /*static*/ Dictionary<string, object> GetStaticPropertyBag(Type t)

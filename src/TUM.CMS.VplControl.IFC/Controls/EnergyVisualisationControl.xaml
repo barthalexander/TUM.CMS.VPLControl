@@ -18,8 +18,21 @@
         </Grid.ColumnDefinitions>
         <Label HorizontalAlignment="Center" Content="Energy Visualisation" Grid.Row="0"  Grid.Column="0" FontWeight="Bold"></Label>
         <h:HelixViewport3D Name="Viewport3D" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0"/>
-        <ProgressBar Name="ColorBarAll" Height="20" Width="400" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0"></ProgressBar>
-        <Label HorizontalAlignment="Left" VerticalAlignment="Top" Name="MinTT" Content="0" x:FieldModifier="public" Grid.Row="3"  Grid.Column="0" ></Label>
-        <Label HorizontalAlignment="Right" VerticalAlignment="Top" Name="MaxTT" x:FieldModifier="public" Grid.Row="3"  Grid.Column="0" ></Label>
+        <ProgressBar Name="ColorBarAll" Height="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0"></ProgressBar>
+        <Grid Grid.Row="3" VerticalAlignment="Center" Name="ScalingGrid" x:FieldModifier="public">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label HorizontalAlignment="Center" VerticalAlignment="Top" Name="MinTT" Content="0" x:FieldModifier="public" Grid.Column="0" ></Label>
+            <Label HorizontalAlignment="Center" VerticalAlignment="Top" Name="ProgressLabel1" x:FieldModifier="public" Grid.Column="1" ></Label>
+            <Label HorizontalAlignment="Center" VerticalAlignment="Top" Name="ProgressLabel2" x:FieldModifier="public" Grid.Column="2"></Label>
+            <Label HorizontalAlignment="Center" VerticalAlignment="Top" Name="ProgressLabel3" x:FieldModifier="public" Grid.Column="3"></Label>
+            <Label HorizontalAlignment="Center" VerticalAlignment="Top" Name="MaxTT" x:FieldModifier="public" Grid.Column="4"></Label>
+        </Grid>
+        
     </Grid>
 </UserControl>
