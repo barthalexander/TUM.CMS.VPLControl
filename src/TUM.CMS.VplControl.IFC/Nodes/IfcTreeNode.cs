@@ -43,6 +43,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null)
+                return;
+
             Type IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {

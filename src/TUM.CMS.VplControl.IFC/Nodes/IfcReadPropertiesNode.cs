@@ -56,6 +56,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null)
+                return;
+
             var scrollViewer = ControlElements[0] as ScrollViewer;
             if (scrollViewer == null) return;
             var textBlock = scrollViewer.Content as TextBlock;

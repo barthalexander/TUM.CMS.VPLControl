@@ -64,22 +64,50 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
-            if (InputPorts[0].Data == null)
-                return;
-            IfcVersionType = InputPorts[0].Data.GetType();
-
             var ifcElementPropertyControl = ControlElements[0] as IfcElementPropertyControl;
             var comboBox = ifcElementPropertyControl.ComboBox_IfcProducts;
-           
+
+            ifcElementPropertyControl.ComboBox_IfcPropertySets.Visibility = Visibility.Hidden;
+            ifcElementPropertyControl.StackPanel.Visibility = Visibility.Hidden;
+            
+            if (InputPorts[0].Data == null)
+            {
+                return;
+            }
+            IfcVersionType = InputPorts[0].Data.GetType();
+
+            
+
             if (comboBox != null && comboBox.Items.Count > 0)
             {
                 comboBox.SelectedItem = -1;
                 comboBox.Items.Clear();
+
+                ComboboxItem_IfcProduct preselectedItem = new ComboboxItem_IfcProduct()
+                {
+                    Text = "Select Element",
+                    IfcProduct_IFC2x3 = null
+                };
+                comboBox.Items.Add(preselectedItem);
+
+                comboBox.SelectedItem = preselectedItem;
+            }
+            else
+            {
+                ComboboxItem_IfcProduct preselectedItem = new ComboboxItem_IfcProduct()
+                {
+                    Text = "Select Element",
+                    IfcProduct_IFC2x3 = null
+                };
+                comboBox.Items.Add(preselectedItem);
+
+                comboBox.SelectedItem = preselectedItem;
             }
 
             Type ifcVersion = InputPorts[0].Data.GetType();
             if (ifcVersion.Name == "ModelInfoIFC2x3")
             {
+                comboBox.Visibility = Visibility.Visible;
                 var modelid = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
                 modelID = modelid;
                 var elementIdsList = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
@@ -112,6 +140,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             else if (ifcVersion.Name == "ModelInfoIFC4")
             {
+                comboBox.Visibility = Visibility.Visible;
                 var modelid = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
                 modelID = modelid;
                 var elementIdsList = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
@@ -154,31 +183,60 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (comboBox_PropertySets != null && comboBox_PropertySets.Items.Count > 0)
             {
                 comboBox_PropertySets.SelectedItem = -1;
+
                 comboBox_PropertySets.Items.Clear();
+                ComboboxItem_PropertySet preselectedItem = new ComboboxItem_PropertySet()
+                {
+                    Text = "Select Property Set",
+                    PropertySet_IFC2x3 = null
+                };
+                comboBox_PropertySets.Items.Add(preselectedItem);
+                comboBox_PropertySets.SelectedItem = preselectedItem;
             }
-            comboBox_PropertySets.Visibility = Visibility.Visible;
-            if (IfcVersionType.Name == "ModelInfoIFC2x3")
+            else
+            {
+                ComboboxItem_PropertySet preselectedItem = new ComboboxItem_PropertySet()
+                {
+                    Text = "Select Property Set",
+                    PropertySet_IFC2x3 = null
+                };
+                comboBox_PropertySets.Items.Add(preselectedItem);
+                comboBox_PropertySets.SelectedItem = preselectedItem;
+            }
+            if (IfcVersionType.Name == "ModelInfoIFC2x3" && comboBox_IfcProducts.SelectedItem != null)
             {
                 var element = ((ComboboxItem_IfcProduct)(comboBox_IfcProducts.SelectedItem)).IfcProduct_IFC2x3;
-                var propertySets = element.PropertySets;
-                foreach (var propertySet in propertySets)
+                if (element != null)
                 {
-                    ComboboxItem_PropertySet item = new ComboboxItem_PropertySet() { Text = propertySet.Name, PropertySet_IFC2x3 = propertySet };
+                    comboBox_PropertySets.Visibility = Visibility.Visible;
 
-                    comboBox_PropertySets.Items.Add(item);
+                    var propertySets = element.PropertySets;
+                    foreach (var propertySet in propertySets)
+                    {
+                        ComboboxItem_PropertySet item = new ComboboxItem_PropertySet() { Text = propertySet.Name, PropertySet_IFC2x3 = propertySet };
+
+                        comboBox_PropertySets.Items.Add(item);
+                    }
                 }
+                
 
             }
-            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            else if (IfcVersionType.Name == "ModelInfoIFC4" & comboBox_IfcProducts.SelectedItem != null)
             {
                 var element = ((ComboboxItem_IfcProduct)(comboBox_IfcProducts.SelectedItem)).IfcProduct_IFC4;
-                var propertySets = element.PropertySets;
-                foreach (var propertySet in propertySets)
+                if (element != null)
                 {
-                    ComboboxItem_PropertySet item = new ComboboxItem_PropertySet() { Text = propertySet.Name, PropertySet_IFC4 = propertySet };
+                    comboBox_PropertySets.Visibility = Visibility.Visible;
 
-                    comboBox_PropertySets.Items.Add(item);
+                    var propertySets = element.PropertySets;
+                    foreach (var propertySet in propertySets)
+                    {
+                        ComboboxItem_PropertySet item = new ComboboxItem_PropertySet() { Text = propertySet.Name, PropertySet_IFC4 = propertySet };
+
+                        comboBox_PropertySets.Items.Add(item);
+                    }
                 }
+                    
             }
 
 
@@ -195,7 +253,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             StackPanel stackPanel = new StackPanel();
             stackPanel = ifcElementPropertyControl.StackPanel;
             stackPanel.Orientation = Orientation.Vertical;
-            stackPanel.Visibility = Visibility.Visible;
             ScrollViewer scrollViewer = new ScrollViewer();
             if (stackPanel.Children.Count > 0)
             {
@@ -215,74 +272,85 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             
 
-            if (IfcVersionType.Name == "ModelInfoIFC2x3")
+            if (IfcVersionType.Name == "ModelInfoIFC2x3" & comboBoxPropertySet.SelectedItem != null)
             {
                 var element = ((ComboboxItem_PropertySet) (comboBoxPropertySet.SelectedItem)).PropertySet_IFC2x3;
-                foreach (var prop in element.HasProperties)
+                if (element != null)
                 {
-                    StackPanel subStackPanel = new StackPanel();
-                    subStackPanel.Orientation = Orientation.Horizontal;
-                    Label label = new Label();
-                    label.MinWidth = 60;
-                    label.Content = prop.Name;
+                    stackPanel.Visibility = Visibility.Visible;
 
-                    TextBox textBox = new TextBox();
-                    textBox.MinWidth = 100;
-                    textBox.HorizontalAlignment = HorizontalAlignment.Right;
-                    textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-                    textBox.Text = ((Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue) prop).NominalValue.ToString();
-                    subStackPanel.Children.Add(label);
-                    subStackPanel.Children.Add(textBox);
-
-                    stackPanel.Children.Add(subStackPanel);
-
-                    textBox.KeyUp += (o, args) =>
+                    foreach (var prop in element.HasProperties)
                     {
-                        using (var txn = xModel.BeginTransaction("Properties"))
+                        StackPanel subStackPanel = new StackPanel();
+                        subStackPanel.Orientation = Orientation.Horizontal;
+                        Label label = new Label();
+                        label.MinWidth = 60;
+                        label.Content = prop.Name;
+
+                        TextBox textBox = new TextBox();
+                        textBox.MinWidth = 100;
+                        textBox.HorizontalAlignment = HorizontalAlignment.Right;
+                        textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                        textBox.Text = ((Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue)prop).NominalValue.ToString();
+                        subStackPanel.Children.Add(label);
+                        subStackPanel.Children.Add(textBox);
+
+                        stackPanel.Children.Add(subStackPanel);
+
+                        textBox.KeyUp += (o, args) =>
                         {
-                            
-                            Xbim.Ifc2x3.MeasureResource.IfcLabel temp = new Xbim.Ifc2x3.MeasureResource.IfcLabel(textBox.Text);
-                            ((Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue)prop).NominalValue = temp;
-                            txn.Commit();
-                        }
-                        OutputPorts[0].Data = OutputInfoIfc2x3;
-                        xModel.SaveAs(modelID);
-                    };
+                            using (var txn = xModel.BeginTransaction("Properties"))
+                            {
+
+                                Xbim.Ifc2x3.MeasureResource.IfcLabel temp = new Xbim.Ifc2x3.MeasureResource.IfcLabel(textBox.Text);
+                                ((Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue)prop).NominalValue = temp;
+                                txn.Commit();
+                            }
+                            OutputPorts[0].Data = OutputInfoIfc2x3;
+                            xModel.SaveAs(modelID);
+                        };
+                    }
                 }
+                
             }
-            else if (IfcVersionType.Name == "ModelInfoIFC4")
+            else if (IfcVersionType.Name == "ModelInfoIFC4" & comboBoxPropertySet.SelectedItem != null)
             {
                 var element = ((ComboboxItem_PropertySet)(comboBoxPropertySet.SelectedItem)).PropertySet_IFC4;
-                foreach (var prop in element.HasProperties)
+                if (element != null)
                 {
-                    StackPanel subStackPanel = new StackPanel();
-                    subStackPanel.Orientation = Orientation.Horizontal;
-                    Label label = new Label();
-                    label.MinWidth = 60;
-                    label.Content = prop.Name;
+                    stackPanel.Visibility = Visibility.Visible;
 
-                    TextBox textBox = new TextBox();
-                    textBox.MinWidth = 100;
-                    textBox.HorizontalAlignment = HorizontalAlignment.Right;
-                    textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-                    textBox.Text = ((Xbim.Ifc4.PropertyResource.IfcPropertySingleValue)prop).NominalValue.ToString();
-                    subStackPanel.Children.Add(label);
-                    subStackPanel.Children.Add(textBox);
-
-                    stackPanel.Children.Add(subStackPanel);
-
-                    textBox.KeyUp += (o, args) =>
+                    foreach (var prop in element.HasProperties)
                     {
-                        using (var txn = xModel.BeginTransaction("Properties"))
-                        {
+                        StackPanel subStackPanel = new StackPanel();
+                        subStackPanel.Orientation = Orientation.Horizontal;
+                        Label label = new Label();
+                        label.MinWidth = 60;
+                        label.Content = prop.Name;
 
-                            Xbim.Ifc4.MeasureResource.IfcLabel temp = new Xbim.Ifc4.MeasureResource.IfcLabel(textBox.Text);
-                            ((Xbim.Ifc4.PropertyResource.IfcPropertySingleValue)prop).NominalValue = temp;
-                            txn.Commit();
-                        }
-                        OutputPorts[0].Data = OutputInfoIfc4;
-                        xModel.SaveAs(modelID);
-                    };
+                        TextBox textBox = new TextBox();
+                        textBox.MinWidth = 100;
+                        textBox.HorizontalAlignment = HorizontalAlignment.Right;
+                        textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                        textBox.Text = ((Xbim.Ifc4.PropertyResource.IfcPropertySingleValue)prop).NominalValue.ToString();
+                        subStackPanel.Children.Add(label);
+                        subStackPanel.Children.Add(textBox);
+
+                        stackPanel.Children.Add(subStackPanel);
+
+                        textBox.KeyUp += (o, args) =>
+                        {
+                            using (var txn = xModel.BeginTransaction("Properties"))
+                            {
+
+                                Xbim.Ifc4.MeasureResource.IfcLabel temp = new Xbim.Ifc4.MeasureResource.IfcLabel(textBox.Text);
+                                ((Xbim.Ifc4.PropertyResource.IfcPropertySingleValue)prop).NominalValue = temp;
+                                txn.Commit();
+                            }
+                            OutputPorts[0].Data = OutputInfoIfc4;
+                            xModel.SaveAs(modelID);
+                        };
+                    }
                 }
             }
         }

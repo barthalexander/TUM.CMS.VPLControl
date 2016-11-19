@@ -40,10 +40,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
-            if(InputPorts[0].Data == null)
-                return;
-
             var titleListControl = ControlElements[0] as TitleListControl;
+
+            if (InputPorts[0].Data == null)
+            {
+                titleListControl.StackPanel.Children.Clear();
+                return;
+            }
+
+
             StackPanel stackPanel = new StackPanel();
             stackPanel = titleListControl.StackPanel;
             stackPanel.Visibility = Visibility.Visible;

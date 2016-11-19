@@ -42,10 +42,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
        
         public override void Calculate()
         {
-            var ifcMapsControl = ControlElements[0] as IfcMapsControl;
-
             if (InputPorts[0].Data == null)
                 return;
+
+            var ifcMapsControl = ControlElements[0] as IfcMapsControl;
+
             WebBrowser maps = new WebBrowser();
 
             maps = ifcMapsControl.Browser;

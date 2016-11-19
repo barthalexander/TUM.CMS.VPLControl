@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -9,6 +10,7 @@ using TUM.CMS.VPL.Scripting.Nodes;
 using TUM.CMS.VplControl.Energy.Nodes;
 using TUM.CMS.VplControl.IFC.Nodes;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Controls;
 using PropertyTools.Wpf;
 
@@ -98,6 +100,29 @@ namespace TUM.CMS.VplControl.Test
             namespaceMenuItem1.Header = "All";
             namespaceMenuItem1.Click += ChangeNodesFilter_Click;
             SelectShownNodes.Items.Add(namespaceMenuItem1);
+
+
+            string dirPath = Directory.GetParent(Directory.GetCurrentDirectory()) + "\\Templates\\";
+            string[] files = Directory.GetFiles(dirPath);
+
+
+            foreach (var file in files)
+            {
+                FileInfo info = new FileInfo(file);
+                FileAttributes attributes = info.Attributes;
+                if (info.Extension.ToUpper() == ".VPLXML")
+                {
+                    MenuItem menuItem = new MenuItem();
+
+                    menuItem.Header = Path.GetFileNameWithoutExtension(info.Name);
+                    menuItem.Click += OpenTemplateNode;
+                    NodesTemplate.Items.Add(menuItem);
+                }
+                
+            }
+
+
+            
         }
 
         public TUM.CMS.VplControl.Core.VplControl HostCanvas { get; private set; }
@@ -188,9 +213,12 @@ namespace TUM.CMS.VplControl.Test
             MessageBoxResult result = MessageBox.Show("Do you want to override your workspace?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                VplControl.DeserializeNetwork(@"Templates\ParseGeo.vplxml");
+                MenuItem obMenuItem = e.OriginalSource as MenuItem;
+                var fileName = obMenuItem.Header;
+                VplControl.DeserializeNetwork(Directory.GetParent(Directory.GetCurrentDirectory()) + "\\Templates\\" + fileName + ".vplxml");
+
             }
-            
+
         }
     }
 }

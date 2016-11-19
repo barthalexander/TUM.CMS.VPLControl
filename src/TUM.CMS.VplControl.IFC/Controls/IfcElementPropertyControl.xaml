@@ -16,7 +16,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Label HorizontalAlignment="Center" Content="Ifc Element Properties" Grid.Row="0"  Grid.Column="0" FontWeight="Bold"></Label>
-        <ComboBox Name="ComboBox_IfcProducts" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0" VerticalAlignment="Top" Height="24"></ComboBox>
+        <ComboBox Name="ComboBox_IfcProducts" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0" VerticalAlignment="Top" Height="24" Visibility="Hidden"></ComboBox>
         <ComboBox Name="ComboBox_IfcPropertySets" x:FieldModifier="public" Grid.Row="1"  Grid.Column="0" VerticalAlignment="Bottom" Height="24" Visibility="Hidden"/>
 <!--        <ScrollViewer Name="ScrollViewer" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" MinHeight="200"></ScrollViewer>-->
         <StackPanel Name="StackPanel" x:FieldModifier="public" Grid.Row="2" Grid.Column="0" Visibility="Visible" MinHeight="200" MinWidth="200">

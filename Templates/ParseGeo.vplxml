@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document GraphFlowDirection="Horizontal">
+  <Nodes>
+    <TUM.CMS.VplControl.Nodes.Input.FilePathNode GUID="762f9537-8fcf-46e9-ba71-88238f4cfc60" TOP="146.40000000000003" Left="22.199999999999967" Text="Selected File: BIM-Modell..." />
+    <TUM.CMS.VplControl.IFC.Nodes.IfcParserNode GUID="7a1ad883-9c55-45af-807b-5cc47e19aacb" TOP="174.6" Left="284.6" />
+    <TUM.CMS.VplControl.IFC.Nodes.IfcViewerNode GUID="2e957294-42a1-4103-88b1-f70cda41beb9" TOP="18.000000000000007" Left="475.80000000000018" />
+  </Nodes>
+  <Connectors>
+    <TUM.CMS.VplControl.Core.Connector StartNode="762f9537-8fcf-46e9-ba71-88238f4cfc60" StartIndex="0" EndNode="7a1ad883-9c55-45af-807b-5cc47e19aacb" EndIndex="0" />
+    <TUM.CMS.VplControl.Core.Connector StartNode="7a1ad883-9c55-45af-807b-5cc47e19aacb" StartIndex="0" EndNode="2e957294-42a1-4103-88b1-f70cda41beb9" EndIndex="0" />
+  </Connectors>
+</Document>

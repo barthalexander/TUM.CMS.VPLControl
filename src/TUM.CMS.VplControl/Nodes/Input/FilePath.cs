@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xml;
 using Microsoft.Win32;
+using TUM.CMS.VplControl.Controls;
 using TUM.CMS.VplControl.Core;
 
 namespace TUM.CMS.VplControl.Nodes.Input
@@ -11,24 +12,20 @@ namespace TUM.CMS.VplControl.Nodes.Input
     {
         private readonly TextBlock textBlock;
         private string file;
-        public FilePathNode(Core.VplControl hostCanvas)
-            : base(hostCanvas)
+        public FilePathNode(Core.VplControl hostCanvas): base(hostCanvas)
         {
             AddOutputPortToNode("String", typeof (string));
 
+            FilePathControl filePathControl = new FilePathControl();
+            filePathControl.Button.Click += button_Click;
 
-            textBlock = new TextBlock {MinWidth = 120, MaxWidth = 300, IsHitTestVisible = false};
-
-            var button = new Button {Content = "Search"};
-            button.Click += button_Click;
-            button.Width = 50;
-
-            AddControlToNode(textBlock);
-            AddControlToNode(button);
+            AddControlToNode(filePathControl);
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
+            var filePathControl = ControlElements[0] as FilePathControl;
+
             var openFileDialog = new OpenFileDialog
             {
                 Multiselect = false
@@ -38,7 +35,21 @@ namespace TUM.CMS.VplControl.Nodes.Input
 
             if (openFileDialog.ShowDialog() == true)
             {
-                textBlock.Text = openFileDialog.SafeFileName;
+                filePathControl.SelectedFile.Visibility = Visibility.Visible;
+                filePathControl.MainGrid.Width = 170;
+                var shortFileName = "";
+                if (openFileDialog.SafeFileName.Length >= 10)
+                {
+                    shortFileName = openFileDialog.SafeFileName.Substring(0, 10);
+                }
+                else
+                {
+                    shortFileName = openFileDialog.SafeFileName;
+                }
+
+
+                filePathControl.SelectedFile.Content = "Selected File: " + shortFileName + "...";
+                filePathControl.SelectedFile.ToolTip = openFileDialog.SafeFileName;
                 file = openFileDialog.FileName;
                 Calculate();
             }
@@ -63,12 +74,11 @@ namespace TUM.CMS.VplControl.Nodes.Input
         public override void SerializeNetwork(XmlWriter xmlWriter)
         {
             base.SerializeNetwork(xmlWriter);
-
-            var textBox = ControlElements[0] as TextBox;
-            if (textBox == null) return;
+            var filePathControl = ControlElements[0] as FilePathControl;
+            if (filePathControl == null) return;
 
             xmlWriter.WriteStartAttribute("Text");
-            xmlWriter.WriteValue(textBox.Text);
+            xmlWriter.WriteValue(filePathControl.SelectedFile.Content);
             xmlWriter.WriteEndAttribute();
         }
 
@@ -76,10 +86,10 @@ namespace TUM.CMS.VplControl.Nodes.Input
         {
             base.DeserializeNetwork(xmlReader);
 
-            var textBox = ControlElements[0] as TextBox;
-            if (textBox == null) return;
+            var filePathControl = ControlElements[0] as FilePathControl;
+            if (filePathControl == null) return;
 
-            textBox.Text = xmlReader.GetAttribute("Text");
+            filePathControl.SelectedFile.Content = xmlReader.GetAttribute("Text");
         }
 
         public override Node Clone()

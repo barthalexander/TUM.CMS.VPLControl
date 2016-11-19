@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document GraphFlowDirection="Horizontal">
+  <Nodes>
+    <TUM.CMS.VplControl.Nodes.Input.FilePathNode GUID="1ba819c9-53c9-42c2-94b1-87fd011ce366" TOP="221.8" Left="191.8" />
+    <TUM.CMS.VplControl.IFC.Nodes.IfcParserNode GUID="aa75b150-85a1-4619-b2d1-385992449116" TOP="236.2" Left="403.80000000000007" />
+    <TUM.CMS.VplControl.IFC.Nodes.IfcElementPropertyNode GUID="6471e30e-ceca-42a3-8e64-55df8e191065" TOP="242.8" Left="723.00000000000011" />
+  </Nodes>
+  <Connectors>
+    <TUM.CMS.VplControl.Core.Connector StartNode="1ba819c9-53c9-42c2-94b1-87fd011ce366" StartIndex="0" EndNode="aa75b150-85a1-4619-b2d1-385992449116" EndIndex="0" />
+    <TUM.CMS.VplControl.Core.Connector StartNode="aa75b150-85a1-4619-b2d1-385992449116" StartIndex="0" EndNode="6471e30e-ceca-42a3-8e64-55df8e191065" EndIndex="0" />
+  </Connectors>
+</Document>

@@ -71,6 +71,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         public override void Calculate()
         {
+            if(InputPorts[0].Data == null)
+                return;
+
             //in TTValueColor hashTable
             TTValueColorAll = new Hashtable();
             TTValueColorExistin = new Hashtable();

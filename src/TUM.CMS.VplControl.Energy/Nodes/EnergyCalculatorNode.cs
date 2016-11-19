@@ -77,6 +77,9 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
         public override void Calculate()
         {
+            if (InputPorts[0].Data == null)
+                return;
+
             // OutputPorts[0].Data = null;
             Console.WriteLine("--3--");
             IfcVersionType = InputPorts[0].Data.GetType();

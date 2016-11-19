@@ -86,6 +86,9 @@
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ExpanderColor.cs" />
+    <Compile Include="Controls\FilePathControl.xaml.cs">
+      <DependentUpon>FilePathControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\SliderExpanderDouble.cs" />
     <Compile Include="Controls\SliderExpanderInteger.cs" />
     <Compile Include="Core\BindingPoint.cs" />
@@ -125,6 +128,10 @@
     <Compile Include="Nodes\WatchNode.cs" />
     <Compile Include="Utilities\Utilities.cs" />
     <Page Include="ContentMenu\Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FilePathControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

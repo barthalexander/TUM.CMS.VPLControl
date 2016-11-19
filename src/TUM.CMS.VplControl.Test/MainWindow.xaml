@@ -40,9 +40,7 @@
             <MenuItem Name="Nodes" Header="Nodes">
 
                 <MenuItem Header="Select Showable Nodes" Name="SelectShownNodes"></MenuItem>
-                <MenuItem Header="Template" Name="NodesTemplate">
-                    <MenuItem Header="ParseGeo" Click="OpenTemplateNode"></MenuItem>
-                </MenuItem>
+                <MenuItem Header="Template" Name="NodesTemplate"></MenuItem>
 
 
             </MenuItem>

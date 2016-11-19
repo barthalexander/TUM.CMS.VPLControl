@@ -18,6 +18,7 @@ using System.Windows.Controls;
 using Xbim.Common;
 using Xbim.Ifc;
 using TUM.CMS.VplControl.IFC.Controls;
+using Xbim.Ifc2x3.UtilityResource;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -26,11 +27,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         private HelixViewport3D _viewPort;
         //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
         private IfcStore _xModel;
-        public List<ModelInfoIFC2x3> ModelListsIfc2x3;
-        public List<ModelInfoIFC2x3> ModelListAll2x3;
+        public ModelInfoIFC2x3 ModelInfoIfc2X3;
+        public ModelInfoIFC4 ModelInfoIfc4;
 
-        public List<ModelInfoIFC4> ModelListsIfc4;
-        public List<ModelInfoIFC4> ModelListAll4;
+        public List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> elementIdsList2x3;
+        public List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> SelectedProductsIFC2x3;
+
+        public List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementIdsList4;
+        public List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> SelectedProductsIFC4;
 
         private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
         private BackgroundWorker worker;
@@ -77,6 +81,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (button_2 == null) return;
             // Init the viewport
 
+            
+
             _viewPort = ifcViewerControl.Viewport3D;
             _viewPort.MinWidth = 300;
             _viewPort.MinHeight = 300;
@@ -84,121 +90,128 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             _viewPort.Children.Add(new SunLight());
             _viewPort.ZoomExtentsWhenLoaded = true;
 
-            ModelListsIfc2x3 = new List<ModelInfoIFC2x3>();
-            ModelListAll2x3 = new List<ModelInfoIFC2x3>();
-
-            ModelListsIfc4 = new List<ModelInfoIFC4>();
-            ModelListAll4 = new List<ModelInfoIFC4>();
-
             
             IfcVersionType = InputPorts[0].Data.GetType();
+
+            button_2.IsChecked = false;
+            button_2.IsChecked = true;
+
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
                 var modelId = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
-                var elementIdsList = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
+                elementIdsList2x3 = null;
+
+                elementIdsList2x3 = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ElementIds;
                 if (modelId == null) return;
-                int indexOfModel = 0;
-                foreach (var item in ModelListsIfc2x3)
-                {
-                    if (item.ModelId == modelId)
-                    {
-                        indexOfModel = ModelListsIfc2x3.IndexOf(item);
-                        break;
-                    }
-                }
-                foreach (var item in ModelListAll2x3)
-                {
-                    if (item.ModelId == modelId)
-                    {
-                        indexOfModel = ModelListAll2x3.IndexOf(item);
-                        break;
-                    }
-                }
+                
                 _xModel = DataController.Instance.GetModel(modelId, true);
 
+                SelectedProductsIFC2x3 = null;
+                SelectedProductsIFC4 = null;
 
+                SelectedProductsIFC2x3 = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>();
 
-
-                ModelListsIfc2x3.Add(new ModelInfoIFC2x3(modelId));
-                ModelListAll2x3.Add(new ModelInfoIFC2x3(modelId));
                 var context = new Xbim3DModelContext(_xModel);
                 //upgrade to new geometry represenation, uses the default 3D model
                 context.CreateContext();
-                worker_DoWork_IFC2x3(_xModel, indexOfModel, elementIdsList);
-                button_1.Checked += (sender, e) => button_1_Checked_IFC2x3(sender, e, elementIdsList, indexOfModel);
+                worker_DoWork_IFC2x3(_xModel, elementIdsList2x3);
+
+                List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementIdsList4 = null;
+
+                button_1.Checked += (sender, e) => button_1_Checked(sender, e);
+                button_2.Checked += (sender, e) => button_2_Checked(sender, e);
 
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
                 var modelId = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
-                var elementIdsList = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
+                elementIdsList4 = null;
+
+                elementIdsList4 = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
                 if (modelId == null) return;
-                int indexOfModel = 0;
-                foreach (var item in ModelListsIfc4)
-                {
-                    if (item.ModelId == modelId)
-                    {
-                        indexOfModel = ModelListsIfc4.IndexOf(item);
-                        break;
-                    }
-                }
-                foreach (var item in ModelListAll4)
-                {
-                    if (item.ModelId == modelId)
-                    {
-                        indexOfModel = ModelListAll4.IndexOf(item);
-                        break;
-                    }
-                }
+                
                 _xModel = DataController.Instance.GetModel(modelId, true);
 
+                SelectedProductsIFC2x3 = null;
+                SelectedProductsIFC4 = null;
+
+                SelectedProductsIFC4 = new List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>();
 
 
-
-                ModelListsIfc4.Add(new ModelInfoIFC4(modelId));
-                ModelListAll4.Add(new ModelInfoIFC4(modelId));
                 var context = new Xbim3DModelContext(_xModel);
                 //upgrade to new geometry represenation, uses the default 3D model
                 context.CreateContext();
-                worker_DoWork_IFC4(_xModel, indexOfModel, elementIdsList);
-                button_1.Checked += (sender, e) => button_1_Checked_IFC4(sender, e, elementIdsList, indexOfModel);
+                worker_DoWork_IFC4(_xModel, elementIdsList4);
+
+                List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> elementIdsList2x3 = null;
+
+                button_1.Checked += (sender, e) => button_1_Checked(sender, e);
+                button_2.Checked += (sender, e) => button_2_Checked(sender, e);
+
             }
         }
 
-        private void button_1_Checked_IFC2x3(object sender, RoutedEventArgs e, List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> elementIdsList, int indexOfModel )
+        
+
+        private void button_1_Checked(object sender, RoutedEventArgs e)
         {
-            
-            if (ModelListAll2x3.Count == 1)
+            if (IfcVersionType.Name == "ModelInfoIFC2x3" && elementIdsList2x3 != null)
             {
-                ModelListAll2x3[0].ElementIds = elementIdsList;
-                OutputPorts[0].Data = ModelListAll2x3[0];             
+                var modelId = ((ModelInfoIFC2x3) (InputPorts[0].Data)).ModelId;
+                ModelInfoIFC2x3 modelInfoIfc2X3 = new ModelInfoIFC2x3(modelId);
+                foreach (var item in elementIdsList2x3)
+                {
+                    modelInfoIfc2X3.AddElementIds(item);
+                }
+                OutputPorts[0].Data = modelInfoIfc2X3;
+            }
+            else if (IfcVersionType.Name == "ModelInfoIFC4" && elementIdsList4 != null)
+            {
+                var modelId = ((ModelInfoIFC4) (InputPorts[0].Data)).ModelId;
+                ModelInfoIFC4 modelInfoIfc4 = new ModelInfoIFC4(modelId);
+                foreach (var item in elementIdsList4)
+                {
+                    modelInfoIfc4.AddElementIds(item);
+                }
+                OutputPorts[0].Data = modelInfoIfc4;
             }
 
-            if (ModelListAll2x3.Count > 1)
+            else
             {
-                ModelListAll2x3[indexOfModel].ElementIds = elementIdsList;
-                OutputPorts[0].Data = ModelListAll2x3;
-               
+                OutputPorts[0].Data = null;
             }
+
         }
-        private void button_1_Checked_IFC4(object sender, RoutedEventArgs e, List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementIdsList, int indexOfModel )
+        
+        private void button_2_Checked(object sender, RoutedEventArgs routedEventArgs)
         {
-            
-            if (ModelListAll4.Count == 1)
+            if (IfcVersionType.Name == "ModelInfoIFC2x3" && SelectedProductsIFC2x3 != null)
             {
-                ModelListAll4[0].ElementIds = elementIdsList;
-                OutputPorts[0].Data = ModelListAll4[0];             
+                var modelId = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                ModelInfoIFC2x3 modelInfoIfc2X3 = new ModelInfoIFC2x3(modelId);
+                foreach (var item in SelectedProductsIFC2x3)
+                {
+                    modelInfoIfc2X3.AddElementIds(item);
+                }
+                OutputPorts[0].Data = modelInfoIfc2X3;
             }
-
-            if (ModelListAll4.Count > 1)
+            else if (IfcVersionType.Name == "ModelInfoIFC4" && SelectedProductsIFC4 != null)
             {
-                ModelListAll4[indexOfModel].ElementIds = elementIdsList;
-                OutputPorts[0].Data = ModelListAll4;
-               
+                var modelId = ((ModelInfoIFC4) (InputPorts[0].Data)).ModelId;
+                ModelInfoIFC4 modelInfoIfc4 = new ModelInfoIFC4(modelId);
+                foreach (var item in SelectedProductsIFC4)
+                {
+                    modelInfoIfc4.AddElementIds(item);
+                }
+                OutputPorts[0].Data = modelInfoIfc4;
+            }
+            else
+            {
+                OutputPorts[0].Data = null;
             }
         }
-
-        private void worker_DoWork_IFC2x3(IfcStore xModel, int indexOfModel, List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> elementIdsList)
+        
+        private void worker_DoWork_IFC2x3(IfcStore xModel, List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> elementIdsList)
         {
             // Loop through Entities and visualze them in the viewport
             var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
@@ -249,7 +262,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                             var mb = new MeshBuilder(false, false);
 
-                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item);
                             elementList.Add(element);
                         }
 
@@ -290,7 +303,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                             var mb = new MeshBuilder(false, false);
 
-                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item);
                             elementList.Add(element);
                         }
 
@@ -344,7 +357,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                             var mb = new MeshBuilder(false, false);
 
-                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item);
                             elementList.Add(element);
 
                             //                            _viewPort.Children.Add(element);
@@ -390,7 +403,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                             var mb = new MeshBuilder(false, false);
 
-                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item, indexOfModel);
+                            var element = VisualizeMesh_IFC2x3(mb, m, mat, item);
                             elementList.Add(element);
 //                            _viewPort.Children.Add(element);
                         }
@@ -404,7 +417,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
             
         }
-        private void worker_DoWork_IFC4(IfcStore xModel, int indexOfModel, List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementIdsList)
+        private void worker_DoWork_IFC4(IfcStore xModel, List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementIdsList)
         {
             // Loop through Entities and visualze them in the viewport
             var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
@@ -452,7 +465,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     var mb = new MeshBuilder(false, false);
 
                     
-                    var element = VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
+                    var element = VisualizeMesh_IFC4(mb, m, mat, item);
                     elementList.Add(element);
                     //                    _viewPort.Children.Add(element);
                 }
@@ -493,7 +506,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                     var mb = new MeshBuilder(false, false);
 
-                    var element = VisualizeMesh_IFC4(mb, m, mat, item, indexOfModel);
+                    var element = VisualizeMesh_IFC4(mb, m, mat, item);
                     //                    _viewPort.Children.Add(element);
                     elementList.Add(element);
                 }
@@ -526,7 +539,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="mat"></param>
         /// <param name="itemModel"></param>
         /// <param name="indexOfModel"></param>
-        public ModelUIElement3D VisualizeMesh_IFC2x3(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc2x3.Kernel.IfcProduct itemModel, int indexOfModel)
+        public ModelUIElement3D VisualizeMesh_IFC2x3(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc2x3.Kernel.IfcProduct itemModel)
         {
             
 
@@ -560,7 +573,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
            
                 var element = new ModelUIElement3D { Model = myGeometryModel };
-                element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC2x3(sender1, e1, this, itemModel, indexOfModel);
+                element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC2x3(sender1, e1, this, itemModel);
 
 
             // Add the Mesh to the ViewPort
@@ -578,7 +591,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             
             return element;
         }
-        public ModelUIElement3D VisualizeMesh_IFC4(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
+        public ModelUIElement3D VisualizeMesh_IFC4(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc4.Kernel.IfcProduct itemModel)
         {
             
 
@@ -612,7 +625,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
            
                 var element = new ModelUIElement3D { Model = myGeometryModel };
-                element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC4(sender1, e1, this, itemModel, indexOfModel);
+                element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC4(sender1, e1, this, itemModel);
 
 
                 // Add the Mesh to the ViewPort
@@ -641,7 +654,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="ifcParseGeometryNode"></param>
         /// <param name="itemModel"></param>
         /// <param name="indexOfModel"></param>
-        protected void OnElementMouseDown_IFC2x3(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc2x3.Kernel.IfcProduct itemModel, int indexOfModel)
+        protected void OnElementMouseDown_IFC2x3(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc2x3.Kernel.IfcProduct itemModel)
         {
             // Check null expression
             // if (e == null) throw new ArgumentNullException(nameof(e));
@@ -660,42 +673,41 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     return;
 
                 // If it is already selected ... Deselect
-                if (ModelListsIfc2x3[indexOfModel].ElementIds.Contains(itemModel.GlobalId))
+                if (SelectedProductsIFC2x3 != null && SelectedProductsIFC2x3.Contains(itemModel.GlobalId))
                 {
                     geometryModel3D.Material = geometryModel3D.BackMaterial;
-                    ModelListsIfc2x3[indexOfModel].ElementIds.Remove(itemModel.GlobalId);
+                    SelectedProductsIFC2x3.Remove(itemModel.GlobalId);
                 }
                 // If not ... Select!
                 else
                 {
-                    ModelListsIfc2x3[indexOfModel].AddElementIds(itemModel.GlobalId);
+                    SelectedProductsIFC2x3.Add(itemModel.GlobalId);
                     geometryModel3D.Material = _selectionMaterial;
                 }
             }
             var ifcViewerControl = ControlElements[0] as IFCViewerControl;
             var button_2 = ifcViewerControl.RadioButton_2;
+
             if (button_2 == null) return;
-            if((bool)button_2.IsChecked)
+
+            if ((bool)button_2.IsChecked)
             {
-                if (ModelListsIfc2x3.Count == 1)
-            {
-                OutputPorts[0].Data = ModelListsIfc2x3[0];
+                var modelId = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
+                ModelInfoIFC2x3 modelInfoIfc2X3 = new ModelInfoIFC2x3(modelId);
+                foreach (var item in SelectedProductsIFC2x3)
+                {
+                    modelInfoIfc2X3.AddElementIds(item);
+                }
+                OutputPorts[0].Data = modelInfoIfc2X3;
 
             }
-            // Set selected models to Output ...  
-            if (ModelListsIfc2x3.Count > 1)
-            {
-                OutputPorts[0].Data = ModelListsIfc2x3;
-
-            }
-
-            }
+           
             
            // button_2.Checked += (sender2,e2)=>button_2_Checked(sender2,e2,indexOfModel);
             
             e.Handled = true;
         }
-        protected void OnElementMouseDown_IFC4(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc4.Kernel.IfcProduct itemModel, int indexOfModel)
+        protected void OnElementMouseDown_IFC4(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc4.Kernel.IfcProduct itemModel)
         {
             // Check null expression
             // if (e == null) throw new ArgumentNullException(nameof(e));
@@ -713,40 +725,36 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 if (geometryModel3D == null)
                     return;
 
-                // If it is already selected ... Deselect
-                if (ModelListsIfc4[indexOfModel].ElementIds.Contains(itemModel.GlobalId))
+                if (SelectedProductsIFC4 != null && SelectedProductsIFC4.Contains(itemModel.GlobalId))
                 {
                     geometryModel3D.Material = geometryModel3D.BackMaterial;
-                    ModelListsIfc4[indexOfModel].ElementIds.Remove(itemModel.GlobalId);
+                    SelectedProductsIFC4.Remove(itemModel.GlobalId);
                 }
-                // If not ... Select!
                 else
                 {
-                    ModelListsIfc4[indexOfModel].AddElementIds(itemModel.GlobalId);
+                    SelectedProductsIFC4.Add(itemModel.GlobalId);
                     geometryModel3D.Material = _selectionMaterial;
                 }
             }
             var ifcViewerControl = ControlElements[0] as IFCViewerControl;
             var button_2 = ifcViewerControl.RadioButton_2;
+
             if (button_2 == null) return;
-            if((bool)button_2.IsChecked)
+
+            if ((bool)button_2.IsChecked)
             {
-                if (ModelListsIfc4.Count == 1)
-            {
-                OutputPorts[0].Data = ModelListsIfc4[0];
+                var modelId = ((ModelInfoIFC4)(InputPorts[0].Data)).ModelId;
+                ModelInfoIFC4 modelInfoIfc4 = new ModelInfoIFC4(modelId);
+                foreach (var item in SelectedProductsIFC4)
+                {
+                    modelInfoIfc4.AddElementIds(item);
+                }
+                OutputPorts[0].Data = modelInfoIfc4;
 
             }
-            // Set selected models to Output ...  
-            if (ModelListsIfc4.Count > 1)
-            {
-                OutputPorts[0].Data = ModelListsIfc4;
 
-            }
+            // button_2.Checked += (sender2,e2)=>button_2_Checked(sender2,e2,indexOfModel);
 
-            }
-            
-           // button_2.Checked += (sender2,e2)=>button_2_Checked(sender2,e2,indexOfModel);
-            
             e.Handled = true;
         }
 
