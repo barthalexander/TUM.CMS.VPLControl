@@ -165,7 +165,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             try
             {
-                ((TTColorAvailable2) TTValueColorAll[SortedTTs[1]]).col = Colors.Green;
+                ((TTColorAvailable2)TTValueColorAll[SortedTTs[1]]).col = Colors.Green;
 
             }
             catch (ArgumentOutOfRangeException)
@@ -175,7 +175,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             try
             {
-                ((TTColorAvailable2) TTValueColorAll[SortedTTs[SortedTTs.Count - 1]]).col = Colors.Red;
+                ((TTColorAvailable2)TTValueColorAll[SortedTTs[SortedTTs.Count - 1]]).col = Colors.Red;
 
             }
             catch (ArgumentOutOfRangeException)
@@ -197,7 +197,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Color thisColor;
                 if (TTValueColorAll.Count >= 1)
                 {
-                    thisColor = ((TTColorAvailable2) TTValueColorAll[thisOne.divedTT]).col;
+                    thisColor = ((TTColorAvailable2)TTValueColorAll[thisOne.divedTT]).col;
                 }
                 else
                 {
@@ -238,18 +238,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             try
             {
-                var progressLabel = (SortedTTs[SortedTTs.Count - 1] + 1) / 5;
+                //  var progressLabel = (SortedTTs[SortedTTs.Count - 1] + 1) / 5;
 
-                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + 0 + "-" + (progressLabel * 1) + ")"; // 0 - 1
-
-                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + (progressLabel * 1) + "-" + (progressLabel * 2) + ")"; // 1,66 - 3
-
-                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + (progressLabel * 2) + "-" + (progressLabel * 3) + ")"; // 1,66 - 3
-
-                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + (progressLabel * 3) + "-" + (progressLabel * 4) + ")"; // 2,8 - 4
-
-                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + (progressLabel * 4) + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")"; // 5
-
+                // ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + 0 + "-" + (progressLabel * 1) + ")"; // 0 - 1
+                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + SortedTTs[0] + "-" + (SortedTTs[0] + 1) + ")";
+                //  ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + (progressLabel * 1) + "-" + (progressLabel * 2) + ")"; // 1,66 - 3
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + SortedTTs[1] + "-" + (SortedTTs[1] + 1) + ")";
+                // ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + (progressLabel * 2) + "-" + (progressLabel * 3) + ")"; // 1,66 - 3
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + SortedTTs[2] + "-" + (SortedTTs[2] + 1) + ")";
+                // ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + (progressLabel * 3) + "-" + (progressLabel * 4) + ")"; // 2,8 - 4
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + SortedTTs[3] + "-" + (SortedTTs[3] + 1) + ")";
+                // ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + (progressLabel * 4) + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")"; // 5
+                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + SortedTTs[4] + "-" + (SortedTTs[4] + 1) + ")";
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -264,7 +264,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             }
 
-            
+
         }
 
         private void worker_DoWork_IFC4(IfcStore xModel)
@@ -380,17 +380,18 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             ColorBarAll.Background = colors;
             try
             {
-                var progressLabel = (SortedTTs[SortedTTs.Count - 1] + 1) / 5;
+                //  var progressLabel = (SortedTTs[SortedTTs.Count - 1] + 1) / 5;
 
-                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + 0 + "-" + (progressLabel * 1) + ")"; // 0 - 1
-
-                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + (progressLabel * 1) + "-" + (progressLabel * 2) + ")"; // 1,66 - 3
-
-                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + (progressLabel * 2) + "-" + (progressLabel * 3) + ")"; // 1,66 - 3
-
-                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + (progressLabel * 3) + "-" + (progressLabel * 4) + ")"; // 2,8 - 4
-
-                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + (progressLabel * 4) + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")"; // 5
+                // ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + 0 + "-" + (progressLabel * 1) + ")"; // 0 - 1
+                ((EnergyVisualisationControl)ControlElements[0]).MinTT.Content = "[" + SortedTTs[0] + "-" + (SortedTTs[0] + 1) + ")";
+                //  ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + (progressLabel * 1) + "-" + (progressLabel * 2) + ")"; // 1,66 - 3
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel1.Content = "[" + SortedTTs[1] + "-" + (SortedTTs[1] + 1) + ")";
+                // ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + (progressLabel * 2) + "-" + (progressLabel * 3) + ")"; // 1,66 - 3
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "[" + SortedTTs[2] + "-" + (SortedTTs[2] + 1) + ")";
+                // ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + (progressLabel * 3) + "-" + (progressLabel * 4) + ")"; // 2,8 - 4
+                ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel3.Content = "[" + SortedTTs[3] + "-" + (SortedTTs[3] + 1) + ")";
+                // ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + (progressLabel * 4) + "-" + (SortedTTs[SortedTTs.Count - 1] + 1) + ")"; // 5
+                ((EnergyVisualisationControl)ControlElements[0]).MaxTT.Content = "[" + SortedTTs[4] + "-" + (SortedTTs[4] + 1) + ")";
 
             }
             catch (ArgumentOutOfRangeException)
