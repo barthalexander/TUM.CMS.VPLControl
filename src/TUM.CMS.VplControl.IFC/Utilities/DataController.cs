@@ -59,7 +59,7 @@ namespace TUM.CMS.VplControl.IFC.Utilities
         }
 
         /// <summary>
-        /// Reading / Opening the xBIM File. 
+        /// Reading / Opening the IFC file 
         /// 
         /// This Method must be implemented in each Node which needs this file
         /// 

@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
-using Xbim.Presentation;
 using System.Collections;
 using System.Windows.Data;
 using TUM.CMS.VplControl.IFC.Controls;
@@ -18,8 +17,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         private readonly TextBox _textBox;
         public IfcStore xModel;
 
-        private XbimTreeview treeview;
-        // private DynamicProductSelectionControl productSelectionControl;
         public IfcElementListNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
 
@@ -37,7 +34,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         }
 
 
-
+        /// <summary>
+        /// Displays a list of Elements
+        /// 
+        /// Input could be one ModelInfoClass or an Collection of ModelInfoClasses
+        /// </summary>
         public override void Calculate()
         {
             var titleListControl = ControlElements[0] as TitleListControl;
@@ -52,10 +53,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             StackPanel stackPanel = new StackPanel();
             stackPanel = titleListControl.StackPanel;
             stackPanel.Visibility = Visibility.Visible;
+
+            // Important for refreshing the stackPanel
             if (stackPanel.Children.Count > 0)
             {
                 stackPanel.Children.Clear();
             }
+
+            // Differs between single or multi ModelInfoClasses
             Type t = InputPorts[0].Data.GetType();
             if (t.IsGenericType)
             {
@@ -92,6 +97,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                         listView.View = gridView;
 
+                        // Check which IFC Version should be used
                         Type ifcVersion = model.GetType();
 
                         if (ifcVersion.Name == "ModelInfoIFC2x3")
@@ -177,6 +183,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 });
 
                 listView.View = gridView;
+
+                // Check which IFC Version should be used
                 Type ifcVersion = InputPorts[0].Data.GetType();
 
 

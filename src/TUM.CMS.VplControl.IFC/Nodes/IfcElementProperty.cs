@@ -39,6 +39,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddControlToNode(ifcElementPropertyControl);
         }
 
+        /// <summary>
+        /// Important for Combobox IfcProduct
+        /// 
+        /// </summary>
         public class ComboboxItem_IfcProduct
         {
             public string Text { get; set; }
@@ -50,6 +54,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
            
         }
+
+        /// <summary>
+        /// Important for Combobox of PropertySets
+        /// 
+        /// </summary>
         public class ComboboxItem_PropertySet
         {
             public string Text { get; set; }
@@ -61,7 +70,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
         }
-
+        /// <summary>
+        /// Create a list of elements for the first combobox
+        /// </summary>
         public override void Calculate()
         {
             var ifcElementPropertyControl = ControlElements[0] as IfcElementPropertyControl;
@@ -74,9 +85,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 return;
             }
-            IfcVersionType = InputPorts[0].Data.GetType();
-
             
+            // Check the used IFC Version
+            IfcVersionType = InputPorts[0].Data.GetType();
 
             if (comboBox != null && comboBox.Items.Count > 0)
             {
@@ -118,6 +129,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 OutputInfoIfc2x3 = new ModelInfoIFC2x3(modelid);
 
+                // Filter for selected ElementIDs
                 List<Xbim.Ifc2x3.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>().ToList();
                 foreach (var element in elements)
                 {
@@ -146,11 +158,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var elementIdsList = ((ModelInfoIFC4)(InputPorts[0].Data)).ElementIds;
                 var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
 
-
                 xModel = DataController.Instance.GetModel(modelid);
 
                 OutputInfoIfc4 = new ModelInfoIFC4(modelid);
-
+               
+                // Filter for selected ElementIDs
                 List<Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>().ToList();
                 foreach (var element in elements)
                 {
@@ -170,7 +182,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 OutputPorts[0].Data = OutputInfoIfc4;
             }
         }
-
+        /// <summary>
+        /// Function for selection change of combobox IfcProducts
+        /// 
+        /// Creates the combobox for Proberty Sets
+        /// Show Property Set Combobox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void comboBox_IfcProduct_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var ifcElementPropertyControl = ControlElements[0] as IfcElementPropertyControl;
@@ -178,7 +197,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
             if (comboBox_IfcProducts == null) return;
 
-
+            // Important for refreshing the node
             var comboBox_PropertySets = ifcElementPropertyControl.ComboBox_IfcPropertySets;
             if (comboBox_PropertySets != null && comboBox_PropertySets.Items.Count > 0)
             {
@@ -203,6 +222,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 comboBox_PropertySets.Items.Add(preselectedItem);
                 comboBox_PropertySets.SelectedItem = preselectedItem;
             }
+
+            // Differs between choose IFC Version
             if (IfcVersionType.Name == "ModelInfoIFC2x3" && comboBox_IfcProducts.SelectedItem != null)
             {
                 var element = ((ComboboxItem_IfcProduct)(comboBox_IfcProducts.SelectedItem)).IfcProduct_IFC2x3;
@@ -243,7 +264,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
         /// <summary>
+        /// Function for selection change of combobox Property Sets
         /// 
+        /// Creates the list of proberties
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -253,16 +276,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             StackPanel stackPanel = new StackPanel();
             stackPanel = ifcElementPropertyControl.StackPanel;
             stackPanel.Orientation = Orientation.Vertical;
-            ScrollViewer scrollViewer = new ScrollViewer();
+
+            // Important for refreshing of the node
             if (stackPanel.Children.Count > 0)
             {
                 stackPanel.Children.Clear();
             }
-//            stackPanel.Children.Add(scrollViewer);
-//            TextBlock textBlock = new TextBlock();
-//            scrollViewer.Content = textBlock;
-//            // var textBlock = scrollViewer.Content as TextBlock;
-//            textBlock.Text = "";
 
             var comboBoxPropertySet = ifcElementPropertyControl.ComboBox_IfcPropertySets;
             if (comboBoxPropertySet == null || comboBoxPropertySet.Items.Count == 0)
@@ -271,7 +290,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
 
             
-
+            // Differs the choosen IFC Version
             if (IfcVersionType.Name == "ModelInfoIFC2x3" & comboBoxPropertySet.SelectedItem != null)
             {
                 var element = ((ComboboxItem_PropertySet) (comboBoxPropertySet.SelectedItem)).PropertySet_IFC2x3;
@@ -296,7 +315,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         subStackPanel.Children.Add(textBox);
 
                         stackPanel.Children.Add(subStackPanel);
-
+                        
+                        // Safe changes after key up
                         textBox.KeyUp += (o, args) =>
                         {
                             using (var txn = xModel.BeginTransaction("Properties"))
@@ -337,7 +357,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         subStackPanel.Children.Add(textBox);
 
                         stackPanel.Children.Add(subStackPanel);
-
+                       
+                        // Safe changes after key up
                         textBox.KeyUp += (o, args) =>
                         {
                             using (var txn = xModel.BeginTransaction("Properties"))

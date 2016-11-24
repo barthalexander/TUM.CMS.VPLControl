@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
-using System.Linq;
-using System.Windows.Documents;
 using System.Windows.Media;
 using TUM.CMS.VplControl.IFC.Utilities;
-using Xbim.Common;
-using Xbim.Common.Metadata;
 using Xbim.Common.Step21;
 using Xbim.Ifc;
-using Xbim.Presentation;
 using TUM.CMS.VplControl.IFC.Controls;
 
 
@@ -37,22 +30,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
 
-        /// <summary>
-        /// Cleaning the DataController
-        /// 
-        /// When Reading Files, they are stored in the DataController.
-        /// To prevent a big DataController, the user can delete all stored Models except the actual Model
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        
         private BackgroundWorker _worker;
         /// <summary>
         /// Reads the file String and looks if its existing.
         /// Create a new xModel inside the Temp Folder with a Random Number in the FileName
         /// Safe the Model in an Dictonary (DataController)
         /// 
-        /// Output is the GUID (FilePath)
+        /// Output is the ModelInfoClass
         /// </summary>
         public override void Calculate()
         {
@@ -75,24 +59,22 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 textBlock.Background = Brushes.Red;
                 textBlock.Text = "Please select a true IFC File!";
             }
-
-
-
         }
         
         /// <summary>
         /// Background Worker
         /// 
-        /// Create xBIM File and Add it to the new DataController.
-        /// The xBIM File is therefor stored in a Database
+        /// Open IFC File and read all elements.
+        /// Add all elements to the ModelInfoClass
         /// 
-        /// The ModelId (FilePath) and the ElementList are stored in the ModelInfo Class
-        /// 
+        /// Safes the new xModel to the DataController
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e">Value File is the FilePath</param>
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            // Dublicate the File for multi access
+
             var file = e.Argument.ToString();
             Random zufall = new Random();
             int number = zufall.Next(1, 1000);
@@ -129,17 +111,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     e.Result = modelInfo;
                 }
             }
-
-
             xModel.Close();
 
             DataController.Instance.AddModel(copyFile, xModel);
-
-           
         }
 
         /// <summary>
-        /// Its important to split the Creation of the xBIM File and the OutputPort
+        /// Output the ModelInfoClass
+        /// 
+        /// Prints the result in a textBlock
         /// 
         /// </summary>
         /// <param name="sender"></param>
@@ -160,13 +140,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Console.WriteLine("An error occurred: '{0}'", exception);
             }
             DataController.Instance.CloseModel(xModel);
-            
         }
-
-
-
-            
-       
 
         public override Node Clone()
         {
@@ -176,8 +150,5 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Left = Left
             };
         }
-
-
-
     }
 }

@@ -20,26 +20,22 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
            
             IsResizeable = true;
-            var textBlock = new TextBlock
-            {
-                TextWrapping = TextWrapping.Wrap,
-                FontSize = 14,
-                Padding = new Thickness(5),
-                IsHitTestVisible = false
-            };
 
             AddInputPortToNode("Object", typeof(string));
-
+            
+            // Change Version if Internet Explorer
             var appName = Process.GetCurrentProcess().ProcessName + ".exe";
             SetIE9KeyforWebBrowserControl(appName);
 
-            IfcMapsControl ifcMapsControl = new IfcMapsControl();
 
+            IfcMapsControl ifcMapsControl = new IfcMapsControl();
 
             AddControlToNode(ifcMapsControl);
         }
 
-       
+        /// <summary>
+        /// Read in the coordinates of the IFC file and print it in google maps
+        /// </summary>
         public override void Calculate()
         {
             if (InputPorts[0].Data == null)
@@ -53,6 +49,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             maps.Height = 450;
             maps.Width = 600;
 
+            // Check for IFC Version
             Type IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
@@ -66,9 +63,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     {
                         var ifcsite = xModel.Instances.OfType<Xbim.Ifc2x3.ProductExtension.IfcSite>().ToList();
 
+                        // Split the coordinates of the IFC file
                         List<long> ifcRefLong = new List<long>();
                         List<long> ifcRefLat = new List<long>();
-
+                        
                         ifcRefLong = ifcsite[0].RefLongitude;
                         ifcRefLat = ifcsite[0].RefLatitude;
 
@@ -87,8 +85,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             textBlock = ifcMapsControl.TextBlock;
                             textBlock.Text = "No Geo Coordinates were found on the IFC File";
                         }
-
-
                     }
                     catch (Exception e)
                     {
@@ -108,8 +104,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     {
                         var ifcsite = xModel.Instances.OfType<Xbim.Ifc4.ProductExtension.IfcSite>().ToList();
 
+                        // Split the coordinates of the IFC file
                         List<long> ifcRefLong = new List<long>();
                         List<long> ifcRefLat = new List<long>();
+
                         ifcRefLong = ifcsite[0].RefLongitude;
                         ifcRefLat = ifcsite[0].RefLatitude;
 
@@ -138,10 +136,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
 
             }
-            
-
-            
-
         }
 
         public override Node Clone()
@@ -152,6 +146,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Left = Left
             };
         }
+
+        /// <summary>
+        /// Change the Internet Explorer Version in the registry
+        /// 
+        /// Important: Application must be run in admin mode
+        /// </summary>
+        /// <param name="appName"></param>
         private void SetIE9KeyforWebBrowserControl(string appName)
         {
             RegistryKey Regkey = null;
@@ -209,10 +210,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 if (Regkey != null)
                     Regkey.Close();
             }
-
-
         }
-
-
     }
-    }
+}

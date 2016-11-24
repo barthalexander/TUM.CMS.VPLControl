@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Controls;
-using TUM.CMS.VplControl.IFC.Utilities;
 using TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses;
-using Xbim.Ifc;
-using Xbim.Presentation;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
@@ -28,12 +24,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddInputPortToNode("Object", typeof(object));
 
             AddControlToNode(mvdTreeControle);
-
-
         }
 
 
-
+        /// <summary>
+        /// Visualize the mvdXML file in a tree
+        /// 
+        /// Using classes in the utilities folder
+        /// </summary>
         public override void Calculate()
         {
             if (InputPorts[0].Data != null)
@@ -56,10 +54,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 treeView.Items.Add(treeViewItem);
             }
-    
-            
-            
-
         }
 
         public override Node Clone()
@@ -70,7 +64,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Left = Left
             };
         }
-
+        
+        /// <summary>
+        /// Prints the ModelView
+        /// 
+        /// </summary>
+        /// <param name="modelView"></param>
+        /// <returns></returns>
         public TreeViewItem PrintModelView(ModelView modelView)
         {
             TreeViewItem treeViewItem = new TreeViewItem();
@@ -111,12 +111,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 treeViewItem.Items.Add(mvdExchangeTreeViewItem);
             }
-                
-
             return treeViewItem;
-
         }
 
+        /// <summary>
+        /// Print the exchange requirements
+        /// 
+        /// </summary>
+        /// <param name="exchangeRequirement"></param>
+        /// <returns></returns>
         private TreeViewItem PrintExchangeRequirement(ExchangeRequirement exchangeRequirement)
         {
             TreeViewItem treeViewItem = new TreeViewItem();
@@ -128,6 +131,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
 
+        /// <summary>
+        /// Print the concept root
+        /// 
+        /// </summary>
+        /// <param name="conceptRoot"></param>
+        /// <returns></returns>
         public TreeViewItem PrintConceptRoot(ConceptRoot conceptRoot)
         {
             TreeViewItem treeViewItem = new TreeViewItem();
@@ -148,11 +157,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 treeViewItem.Items.Add(conceptItem);
             }
-            
-
             return treeViewItem;
         }
 
+        /// <summary>
+        /// Print the concept
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private TreeViewItem PrintConcept(Concept value)
         {
             TreeViewItem treeViewItem = new TreeViewItem();
@@ -192,10 +205,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 treeViewItem.Items.Add(subConceptsItems);
             }
-
             return treeViewItem;
         }
 
+        /// <summary>
+        /// Print the requirements
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private TreeViewItem PrintRequirement(Requirement value)
         {
             TreeViewItem treeViewItem = new TreeViewItem();
@@ -210,6 +227,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             return treeViewItem;
         }
 
+        /// <summary>
+        /// Print the concept template
+        /// 
+        /// </summary>
+        /// <param name="conceptTemplate"></param>
+        /// <returns></returns>
         private TreeViewItem PrintConceptTemplate(ConceptTemplate conceptTemplate)
         {
             TreeViewItem treeViewItem = new TreeViewItem();
@@ -252,7 +275,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 treeViewItem.Items.Add(subTemplatesItems);
             }
 
-
             List<AttributeRule> allAttributeRules = conceptTemplate.getAttributeRules();
             if (allAttributeRules.Any())
             {
@@ -269,10 +291,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 treeViewItem.Items.Add(attributeRulesItems);
             }
             
-
             return treeViewItem;
         }
 
+        /// <summary>
+        /// Print the attribute
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         private TreeViewItem PrintAttribute(AttributeRule item)
         {
             TreeViewItem attributeItem = new TreeViewItem();
@@ -292,10 +319,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 attributeItem.Items.Add(entityRulesItems);
             }
-            
             return attributeItem;
         }
 
+        /// <summary>
+        /// Print the entity rule
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         private TreeViewItem PrintEntityRule(EntityRule item)
         {
             TreeViewItem entityRuleItem = new TreeViewItem();
@@ -316,10 +348,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 }
                 entityRuleItem.Items.Add(AttributesItems);
             }
-            
             return entityRuleItem;
         }
 
+        /// <summary>
+        /// Print the template
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         private TreeViewItem PrintTemplate(Templates item)
         {
             TreeViewItem subConceptItems = new TreeViewItem();
@@ -335,7 +372,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     subConceptItems.Items.Add(treeViewItem1);
                 }
             }
-            
             return subConceptItems;
         }
     }

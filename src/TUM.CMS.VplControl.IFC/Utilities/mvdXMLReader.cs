@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using TUM.CMS.VplControl.IFC.Utilities.mvdXMLReaderClasses;
 
@@ -26,10 +22,8 @@ namespace TUM.CMS.VplControl.IFC.Utilities
             Templates templateClass = new Templates();
             ModelView modelViewClass = new ModelView();
 
-
             templates = DisplayTemplates(rootNode, null, templateClass, false, false, null, null);
             modelView = DisplayModelView(rootNode, templates, modelViewClass, null, null, null);
-
         }
 
         public ModelView GetModelView()
@@ -331,7 +325,5 @@ namespace TUM.CMS.VplControl.IFC.Utilities
             }
             return conceptTemplate;
         }
-
-
     }
 }

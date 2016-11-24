@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -18,14 +17,12 @@ using System.Windows.Controls;
 using Xbim.Common;
 using Xbim.Ifc;
 using TUM.CMS.VplControl.IFC.Controls;
-using Xbim.Ifc2x3.UtilityResource;
 
 namespace TUM.CMS.VplControl.IFC.Nodes
 {
     public class IfcViewerNode : Node
     {
         private HelixViewport3D _viewPort;
-        //private readonly PointSelectionCommand _seCo=new PointSelectionCommand() ;
         private IfcStore _xModel;
         public ModelInfoIFC2x3 ModelInfoIfc2X3;
         public ModelInfoIFC4 ModelInfoIfc4;
@@ -39,34 +36,26 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         private readonly Material _selectionMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Crimson));
         private BackgroundWorker worker;
         private Type IfcVersionType = null;
+
         public IfcViewerNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
-            // Init UI
             IsResizeable = true;
 
             AddInputPortToNode("Model", typeof(object), false);
             AddOutputPortToNode("FilteredElements", typeof(object));
 
-
-            
             UserControl usercontrol = new UserControl();
             Grid grid = new Grid();
             usercontrol.Content = grid;
 
-
-            //_viewPort.MouseDoubleClick += _viewPort_mouseclick;
-
             IFCViewerControl ifcViewerControl = new IFCViewerControl();
 
-
-
-//            AddControlToNode(_viewPort);
-//            AddControlToNode(radioButton_1);
-//            AddControlToNode(radioButton_2);
             AddControlToNode(ifcViewerControl);
         }
 
-
+        /// <summary>
+        /// Visualize the given IFC file
+        /// </summary>
         public override void Calculate()
         {
             if (InputPorts[0].Data == null)
@@ -79,10 +68,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (button_1 == null) return;
             var button_2 = ifcViewerControl.RadioButton_2;
             if (button_2 == null) return;
-            // Init the viewport
-
             
-
+            
+            // Init the viewport
             _viewPort = ifcViewerControl.Viewport3D;
             _viewPort.MinWidth = 300;
             _viewPort.MinHeight = 300;
@@ -90,12 +78,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             _viewPort.Children.Add(new SunLight());
             _viewPort.ZoomExtentsWhenLoaded = true;
 
-            
+            // Check for the IFC Version
             IfcVersionType = InputPorts[0].Data.GetType();
 
+            // Important for refresh node
             button_2.IsChecked = false;
             button_2.IsChecked = true;
 
+            // Differs between choosen IFC Version
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
                 var modelId = ((ModelInfoIFC2x3)(InputPorts[0].Data)).ModelId;
@@ -112,10 +102,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 SelectedProductsIFC2x3 = new List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>();
 
                 var context = new Xbim3DModelContext(_xModel);
-                //upgrade to new geometry represenation, uses the default 3D model
                 context.CreateContext();
+
                 worker_DoWork_IFC2x3(_xModel, elementIdsList2x3);
 
+                // Important for refreshing the node
                 List<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> elementIdsList4 = null;
 
                 button_1.Checked += (sender, e) => button_1_Checked(sender, e);
@@ -139,10 +130,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
                 var context = new Xbim3DModelContext(_xModel);
-                //upgrade to new geometry represenation, uses the default 3D model
                 context.CreateContext();
+
                 worker_DoWork_IFC4(_xModel, elementIdsList4);
 
+                // Important for refreshing the node
                 List<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> elementIdsList2x3 = null;
 
                 button_1.Checked += (sender, e) => button_1_Checked(sender, e);
@@ -151,8 +143,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             }
         }
 
-        
-
+        /// <summary>
+        /// Outputs the complete IFC File
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_1_Checked(object sender, RoutedEventArgs e)
         {
             if (IfcVersionType.Name == "ModelInfoIFC2x3" && elementIdsList2x3 != null)
@@ -183,6 +179,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
         }
         
+        /// <summary>
+        /// Outputs only selected elements
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="routedEventArgs"></param>
         private void button_2_Checked(object sender, RoutedEventArgs routedEventArgs)
         {
             if (IfcVersionType.Name == "ModelInfoIFC2x3" && SelectedProductsIFC2x3 != null)
@@ -216,8 +218,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             // Loop through Entities and visualze them in the viewport
             var res = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
 
-            // xModel = (IfcStore) e.Argument;
-            // parallel.foreach
+            // Test for parallel Loop. Doesn't work for viewport
             var parallel = false;
             List<ModelUIElement3D> elementList = new List<ModelUIElement3D>();
             switch (parallel)
@@ -244,8 +245,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                     if (v != null)
                                         ModelPositions.AddModel(v.ReferencingModel);
                                 }
-                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
                             }
+
+                            // Important for centralize the model in the viewer
                             var ModelBounds = ModelPositions.GetEnvelopeInMeters();
 
                             var p = ModelBounds.Centroid();
@@ -265,7 +267,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             var element = VisualizeMesh_IFC2x3(mb, m, mat, item);
                             elementList.Add(element);
                         }
-
                         // Show whole building with opacity 0.03
                         else
                         {
@@ -286,8 +287,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                     if (v != null)
                                         ModelPositions.AddModel(v.ReferencingModel);
                                 }
-                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
                             }
+                            
+                            // Important for centralize the model in the viewer
                             var ModelBounds = ModelPositions.GetEnvelopeInMeters();
 
                             var p = ModelBounds.Centroid();
@@ -308,7 +310,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         }
 
                     });
-                        // AddRange(elementList);
+
+                    // Adds all elements to the viewport
                     foreach (var element in elementList)
                     {
                         if (element != null)
@@ -316,6 +319,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     }
 
                     break;
+
                 case false:
                     foreach (var item in xModel.Instances.OfType<Xbim.Ifc2x3.Kernel.IfcProduct>())
                     {
@@ -339,7 +343,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                     if (v != null)
                                         ModelPositions.AddModel(v.ReferencingModel);
                                 }
-                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
                             }
                             var ModelBounds = ModelPositions.GetEnvelopeInMeters();
 
@@ -360,7 +363,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             var element = VisualizeMesh_IFC2x3(mb, m, mat, item);
                             elementList.Add(element);
 
-                            //                            _viewPort.Children.Add(element);
                         }
 
                         // Show whole building with opacity 0.03
@@ -383,7 +385,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                     if (v != null)
                                         ModelPositions.AddModel(v.ReferencingModel);
                                 }
-                                // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
                             }
                             var ModelBounds = ModelPositions.GetEnvelopeInMeters();
 
@@ -394,9 +395,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             var scaling = XbimMatrix3D.CreateScale(1 / oneMeter);
                             XbimMatrix3D Transform = translation * scaling;
 
-
-
-
                             var m = new MeshGeometry3D();
                             GetGeometryFromXbimModel_IFC2x3(m, item, Transform);
                             var mat = GetStyleFromXbimModel_IFC2x3(item, 0.03);
@@ -405,7 +403,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                             var element = VisualizeMesh_IFC2x3(mb, m, mat, item);
                             elementList.Add(element);
-//                            _viewPort.Children.Add(element);
                         }
                     }
                     foreach (var element in elementList)
@@ -421,7 +418,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         {
             // Loop through Entities and visualze them in the viewport
             var res = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>(elementIdsList);
-            // xModel = (IfcStore) e.Argument;
+
             List<ModelUIElement3D> elementList = new List<ModelUIElement3D>();
 
             foreach (var item in xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>())
@@ -445,7 +442,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             if (v != null)
                                 ModelPositions.AddModel(v.ReferencingModel);
                         }
-                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
                     }
                     var ModelBounds = ModelPositions.GetEnvelopeInMeters();
 
@@ -460,14 +456,12 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     var m = new MeshGeometry3D();
                     GetGeometryFromXbimModel_IFC4(m, item, Transform);
                     var mat = GetStyleFromXbimModel_IFC4(item);
-                    // var mat = Xbim.Presentation.ModelDataProvider.DefaultMaterials;
 
                     var mb = new MeshBuilder(false, false);
 
                     
                     var element = VisualizeMesh_IFC4(mb, m, mat, item);
                     elementList.Add(element);
-                    //                    _viewPort.Children.Add(element);
                 }
 
                 // Show whole building with opacity 0.03
@@ -490,7 +484,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                             if (v != null)
                                 ModelPositions.AddModel(v.ReferencingModel);
                         }
-                        // fedModel.ReferencedModels.CollectionChanged += ReferencedModels_CollectionChanged;
                     }
                     var ModelBounds = ModelPositions.GetEnvelopeInMeters();
 
@@ -507,11 +500,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     var mb = new MeshBuilder(false, false);
 
                     var element = VisualizeMesh_IFC4(mb, m, mat, item);
-                    //                    _viewPort.Children.Add(element);
                     elementList.Add(element);
                 }
-                
-             }
+            }
             foreach (var element in elementList)
             {
                 if (element != null)
@@ -522,14 +513,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
 
 
-        public override Node Clone()
-        {
-            return new IfcViewerNode(HostCanvas)
-            {
-                Top = Top,
-                Left = Left
-            };
-        }
+        
 
         /// <summary>
         ///     VisualizeMesh in the Viewport
@@ -541,9 +525,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="indexOfModel"></param>
         public ModelUIElement3D VisualizeMesh_IFC2x3(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc2x3.Kernel.IfcProduct itemModel)
         {
-            
-
-            // Output on console
             var points = new List<Point3D>();
 
             foreach (var item in mesh.Positions)
@@ -557,45 +538,21 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     points[mesh.TriangleIndices[i + 2]]);
             }
 
-            // TODO: Color has to be read! 
-            
-            // Create the Geometry
-
-
             var myGeometryModel = new GeometryModel3D
             {               
                 Material = mat,
                 BackMaterial = mat,
                 Geometry = meshBuilder.ToMesh(true)
-                // In case that you have to rotate the model ... 
-                // Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90))
             };
 
            
-                var element = new ModelUIElement3D { Model = myGeometryModel };
-                element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC2x3(sender1, e1, this, itemModel);
-
-
-            // Add the Mesh to the ViewPort
-            
-
-
-           // _viewPort.Children.Add(element);
-
-                // Do all UI related work here... }
-            
-            
-            
-            
-           
+            var element = new ModelUIElement3D { Model = myGeometryModel };
+            element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC2x3(sender1, e1, this, itemModel);
             
             return element;
         }
         public ModelUIElement3D VisualizeMesh_IFC4(MeshBuilder meshBuilder, MeshGeometry3D mesh, Material mat, Xbim.Ifc4.Kernel.IfcProduct itemModel)
         {
-            
-
-            // Output on console
             var points = new List<Point3D>();
 
             foreach (var item in mesh.Positions)
@@ -609,35 +566,16 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     points[mesh.TriangleIndices[i + 2]]);
             }
 
-            // TODO: Color has to be read! 
-            
-            // Create the Geometry
-
-
             var myGeometryModel = new GeometryModel3D
             {               
                 Material = mat,
                 BackMaterial = mat,
                 Geometry = meshBuilder.ToMesh(true)
-                // In case that you have to rotate the model ... 
-                // Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), 90))
             };
 
            
-                var element = new ModelUIElement3D { Model = myGeometryModel };
-                element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC4(sender1, e1, this, itemModel);
-
-
-                // Add the Mesh to the ViewPort
-
-                //_viewPort.Children.Add(element);
-
-                // Do all UI related work here... }
-            
-            
-            
-            
-           
+            var element = new ModelUIElement3D { Model = myGeometryModel };
+            element.MouseDown += (sender1, e1) => OnElementMouseDown_IFC4(sender1, e1, this, itemModel);
             
             return element;
         }
@@ -656,16 +594,11 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         /// <param name="indexOfModel"></param>
         protected void OnElementMouseDown_IFC2x3(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc2x3.Kernel.IfcProduct itemModel)
         {
-            // Check null expression
-            // if (e == null) throw new ArgumentNullException(nameof(e));
-            // 1-CLick event
             if (e.LeftButton != MouseButtonState.Pressed)
                 return;
            
-            // Get sender
             var element = sender as ModelUIElement3D;
 
-            // Check Type
             if (element != null)
             {
                 var geometryModel3D = element.Model as GeometryModel3D;
@@ -699,26 +632,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     modelInfoIfc2X3.AddElementIds(item);
                 }
                 OutputPorts[0].Data = modelInfoIfc2X3;
-
             }
-           
-            
-           // button_2.Checked += (sender2,e2)=>button_2_Checked(sender2,e2,indexOfModel);
             
             e.Handled = true;
         }
         protected void OnElementMouseDown_IFC4(object sender, MouseButtonEventArgs e, IfcViewerNode ifcParseGeometryNode, Xbim.Ifc4.Kernel.IfcProduct itemModel)
         {
-            // Check null expression
-            // if (e == null) throw new ArgumentNullException(nameof(e));
-            // 1-CLick event
             if (e.LeftButton != MouseButtonState.Pressed)
                 return;
            
-            // Get sender
             var element = sender as ModelUIElement3D;
 
-            // Check Type
             if (element != null)
             {
                 var geometryModel3D = element.Model as GeometryModel3D;
@@ -750,23 +674,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     modelInfoIfc4.AddElementIds(item);
                 }
                 OutputPorts[0].Data = modelInfoIfc4;
-
             }
-
-            // button_2.Checked += (sender2,e2)=>button_2_Checked(sender2,e2,indexOfModel);
 
             e.Handled = true;
         }
 
-        private void button_2_Checked(object sender2, RoutedEventArgs e2,int indexOfModel)
-        {
-            
-        }
-
         /// <summary>
-        /// Get Style if each Item
+        /// Get Style of each Item
         /// 
-        /// TODO: Exception Error 
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
@@ -790,6 +705,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             ((System.Windows.Media.Media3D.DiffuseMaterial)wpfMaterial).Brush.Opacity = opacity;
             return wpfMaterial;
         }
+
         public Material GetStyleFromXbimModel_IFC4(Xbim.Ifc4.Kernel.IfcProduct item, double opacity = 1)
         {
             var context = new Xbim3DModelContext(item.Model);
@@ -891,9 +807,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         break;
                 }
             }
-
         }
-
+        /// <summary>
+        /// Get the Material of a given element
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="styleId"></param>
+        /// <returns></returns>
         private static Material GetWpfMaterial(IModel model, int styleId)
         {
             var sStyle = model.Instances[styleId] as Xbim.Ifc4.Interfaces.IIfcSurfaceStyle;
@@ -927,7 +847,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 }
             }
-            
+        }
+        public override Node Clone()
+        {
+            return new IfcViewerNode(HostCanvas)
+            {
+                Top = Top,
+                Left = Left
+            };
         }
     }
 }

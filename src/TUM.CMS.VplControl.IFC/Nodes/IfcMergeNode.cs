@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Windows.Controls;
 using TUM.CMS.VplControl.Core;
 using TUM.CMS.VplControl.IFC.Utilities;
-using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -37,7 +36,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         
        
         /// <summary>
-        /// Adds all Models which are stored at the DataController to the ComboBox
+        /// Merge two IFC files with the same IFC Version to a new IFC File.
         /// </summary>
         public override void Calculate()
         {
@@ -46,8 +45,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             if (InputPorts[1].Data == null)
                 return;
 
-
-
+            // Check for same IFC Version
             IfcVersionTypeModel1 = InputPorts[0].Data.GetType();
             IfcVersionTypeModel2 = InputPorts[1].Data.GetType();
 
@@ -63,12 +61,14 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 return value;
             };
 
+            // Important for new IFC File
             var newModelIfc2x3 = IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
             var newModelIfc4 = IfcStore.Create(IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel);
 
             var txnIfc2x3 = newModelIfc2x3.BeginTransaction();
             var txnIfc4 = newModelIfc4.BeginTransaction();
 
+            // List of elements - Important, that no element exist twice in the new file
             HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId> buildingElementsIFC2x3 = new HashSet<Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId>();
             HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId> buildingElementsIFC4 = new HashSet<Xbim.Ifc4.UtilityResource.IfcGloballyUniqueId>();
 
@@ -79,6 +79,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             var label1 = ControlElements[1] as Label;
             label1.Content = "";
 
+            // Loop over both IFC files
             for (var i = 0; i < 2; i++)
             {
                 if (IfcVersionTypeModel1.Name == "ModelInfoIFC2x3")
@@ -126,7 +127,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     }
                 }
             }
-
+           
+            // Safe new IFC File
             Random zufall = new Random();
             int number = zufall.Next(1, 1000);
 
@@ -151,6 +153,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     modelInfo.AddElementIds(id);
                 }
                 OutputIfc2x3 = modelInfo;
+
+                var xModel = IfcStore.Open(copyFile);
+                DataController.Instance.AddModel(copyFile, xModel);
+                xModel.Close();
             }
             else if (ifcVersion == IfcSchemaVersion.Ifc4)
             {
@@ -164,6 +170,10 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     modelInfo.AddElementIds(id);
                 }
                 OutputIfc4 = modelInfo;
+
+                var xModel = IfcStore.Open(copyFile);
+                DataController.Instance.AddModel(copyFile, xModel);
+                xModel.Close();
             }
 
             if (IfcVersionTypeModel1.Name == "ModelInfoIFC2x3")

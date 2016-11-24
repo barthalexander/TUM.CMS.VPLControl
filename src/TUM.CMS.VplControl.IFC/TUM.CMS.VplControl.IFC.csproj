@@ -225,7 +225,6 @@
     </Compile>
     <Compile Include="Utilities\DataController.cs" />
     <Compile Include="Utilities\ElementListClass.cs" />
-    <Compile Include="Utilities\ModelInfoIFC.cs" />
     <Compile Include="Utilities\ModelInfoIFC4.cs" />
     <Compile Include="Utilities\ModelInfoIFC2x3.cs" />
     <Compile Include="Utilities\MvdXMLReader.cs" />

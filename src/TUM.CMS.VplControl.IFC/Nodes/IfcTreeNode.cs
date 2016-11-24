@@ -11,9 +11,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         private readonly TextBox _textBox;
         public IfcStore xModel;
-
         private XbimTreeview treeview;
-        // private DynamicProductSelectionControl productSelectionControl;
+
         public IfcTreeNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             IsResizeable = true;
@@ -27,25 +26,17 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             AddInputPortToNode("Object", typeof(object));
 
             AddControlToNode(treeview);
-
-            // Init
-           // productSelectionControl = new DynamicProductSelectionControl();
-           // AddControlToNode(productSelectionControl);
-
-            // Init 3DController
-
-            // AddOutputPortToNode("IFCFile", typeof(object));
-
-            
         }
 
-       
-
+        /// <summary>
+        /// Create a Tree of the given IFC File using xBIM Toolkit
+        /// </summary>
         public override void Calculate()
         {
             if (InputPorts[0].Data == null)
                 return;
 
+            // Check for the given IFC Version
             Type IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
@@ -68,6 +59,5 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Left = Left
             };
         }
-
     }
 }

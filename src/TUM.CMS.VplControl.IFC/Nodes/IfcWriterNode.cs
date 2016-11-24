@@ -20,12 +20,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
     {
         private readonly TextBox _textBox;
         public IfcStore xModel;
-
         public Type IfcVersionType = null;
-       
 
-
-        // private DynamicProductSelectionControl productSelectionControl;
         public IfcWriterNode(Core.VplControl hostCanvas) : base(hostCanvas)
         {
             AddInputPortToNode("Object", typeof(object), true);
@@ -36,10 +32,15 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             ifcWriterControl.Button.Click += button_Click;
 
             AddControlToNode(ifcWriterControl);
-
-
         }
 
+        /// <summary>
+        /// Writes the Input to an IFC file
+        /// 
+        /// The Input can be one or more models
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_Click(object sender, RoutedEventArgs e)
         {
             if (InputPorts[0].Data != null)
@@ -54,12 +55,13 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 var newModelIfc4 = IfcStore.Create(IfcSchemaVersion.Ifc4, XbimStoreType.InMemoryModel);
 
                 IfcSchemaVersion ifcVersion = IfcSchemaVersion.Unsupported;
+
+                // Check if one or more models
                 Type t = InputPorts[0].Data.GetType();
                 XbimInstanceHandleMap copied = null;
 
                 if (t.IsGenericType)
                 {
-
                     var collection = InputPorts[0].Data as ICollection;
                     var txnIfc2x3 = newModelIfc2x3.BeginTransaction();
                     var txnIfc4 = newModelIfc4.BeginTransaction();
@@ -70,9 +72,9 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     if (collection != null)
                     {
                         string ifcMergeVersionType = "";
-
                         foreach (var model in collection)
                         {
+                            // Check if the IFC Versions are the same
                             IfcVersionType = model.GetType();
                             if (ifcMergeVersionType == "")
                             {
@@ -85,6 +87,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                                 return;
                             }
 
+                            // Differs between the given IFC Version
                             if (IfcVersionType.Name == "ModelInfoIFC2x3")
                             {
                                 
@@ -183,8 +186,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                         xModel = DataController.Instance.GetModel(modelid);
                         List<Xbim.Ifc4.Kernel.IfcProduct> elements = xModel.Instances.OfType<Xbim.Ifc4.Kernel.IfcProduct>().ToList();
 
-
-
                         using (var txn = newModelIfc4.BeginTransaction())
                         {
                             copied = new XbimInstanceHandleMap(xModel, newModelIfc4);
@@ -201,6 +202,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                     
 
                 }
+
+                // Write the new IFC file to the selected Path
                 SaveFileDialog saveFileDialog1 = new SaveFileDialog();
                 saveFileDialog1.Filter = "IfcFile |*.ifc";
                 saveFileDialog1.Title = "Save an IFC File";
@@ -240,8 +243,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             {
                 MessageBox.Show("Please Connect a Model", "My Application", MessageBoxButton.OK);
             }
-
-
         }
 
         public override void Calculate()
@@ -264,6 +265,5 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 Left = Left
             };
         }
-
     }
 }
