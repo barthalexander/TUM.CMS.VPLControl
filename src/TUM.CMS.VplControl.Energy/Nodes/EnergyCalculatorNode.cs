@@ -80,7 +80,6 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             if (InputPorts[0].Data == null)
                 return;
 
-            // OutputPorts[0].Data = null;
             Console.WriteLine("--3--");
             IfcVersionType = InputPorts[0].Data.GetType();
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
@@ -92,11 +91,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 xModel = DataController.Instance.GetModel(modelid);
                 Console.WriteLine("--4.a.i--");
                 ComboBox comboBox = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxFilter;
-                if (comboBox != null && comboBox.Items.Count > 0)
-                {
-                    // comboBox.SelectedItem = -1;
-                    //  comboBox.Items.Clear();
-                }
+                
                 Console.WriteLine("--4.a.ii--");
                 var ifcwall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
                 var ifcbeam = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
@@ -284,11 +279,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 xModel = DataController.Instance.GetModel(modelid);
 
                 ComboBox comboBox = ((EnergyCalculatorControl)ControlElements[0]).ComboBoxFilter;
-                if (comboBox != null && comboBox.Items.Count > 0)
-                {
-                    // comboBox.SelectedItem = -1;
-                    // comboBox.Items.Clear();
-                }
+                
                 var ifcwall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWall>().ToList();
                 var ifcbeam = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcBeam>().ToList();
                 var ifccolumn = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcColumn>().ToList();
@@ -479,11 +470,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 return;
             if (textBox_l_in.Text == "Τhermal conductivity λ")
                 return;
-            /*  if ((comboBox_in.Items[0] != null) && ((ComboboxItemLocal)comboBox_in.Items[0]).Text.Equals("Select Rse"))
-              {
-                  comboBox_in.Items[0] = null;
-              }
-          */
+           
             ComboboxItemLocal Selection = (ComboboxItemLocal)(comboBox_in.SelectedItem);
             if (Selection.Text == "Select Rse")
                 return;
@@ -575,12 +562,12 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                     Console.WriteLine(ifcColumns[i].Tag + " although being " + ifcColumns[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all columns' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcColumnThickness.Count + " door-elements with their Properties in place...");
+          
             for (int i = 0; i < ifcColumnThickness.Count; i++)
             {
-                double denominator = Rsi + ifcColumnThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcColumnThickness[i] / l + Rse;//we consider that all columns are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -620,7 +607,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             }
             //create a new List which will contain all doors' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcDoorThickness.Count + " door-elements with their Properties in place...");
+      
             for (int i = 0; i < ifcDoorThickness.Count; i++)
             {
                 double denominator = Rsi + ifcDoorThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
@@ -663,7 +650,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             }
             //create a new List which will contain all doors' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcDoorThickness.Count + " door-elements with their Properties in place...");
+       
             for (int i = 0; i < ifcDoorThickness.Count; i++)
             {
                 double denominator = Rsi + ifcDoorThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
@@ -704,12 +691,12 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                     Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all curtain walls' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
+         
             for (int i = 0; i < ifcCWallThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all curtain walls are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -747,12 +734,12 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                     Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all curtain walls' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
+           
             for (int i = 0; i < ifcCWallThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all curtain walls are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -760,42 +747,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Beams()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
+            var ifcBeam = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcBeamThickness = new List<double> { };
+            for (int i = 0; i < ifcBeam.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcBeam[i].Tag + "###" + ifcBeam[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcBeamVolume = ifcBeam[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcBeamArea = ifcBeam[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcBeamVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcBeamArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcBeamThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcBeam[i].Tag + " although being " + ifcBeam[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcBeam[i].Tag + " although being " + ifcBeam[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all beams' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+   
+            for (int i = 0; i < ifcBeamThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcBeamThickness[i] / l + Rse;//we consider that all beams are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -803,42 +790,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Beams()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcBeam>().ToList();
+            var ifcBeam = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcBeam>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcBeamThickness = new List<double> { };
+            for (int i = 0; i < ifcBeam.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcBeam[i].Tag + "###" + ifcBeam[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcBeamVolume = ifcBeam[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcBeamArea = ifcBeam[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcBeamVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcBeamArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcBeamThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcBeam[i].Tag + " although being " + ifcBeam[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcBeam[i].Tag + " although being " + ifcBeam[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all beams' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+           
+            for (int i = 0; i < ifcBeamThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcBeamThickness[i] / l + Rse;//we consider that all beams are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -846,42 +833,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Slabs()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList();
+            var ifcSlab = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcSlabThickness = new List<double> { };
+            for (int i = 0; i < ifcSlab.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcSlab[i].Tag + "###" + ifcSlab[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcSlabVolume = ifcSlab[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcSlabArea = ifcSlab[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcSlabVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcSlabArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcSlabThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcSlab[i].Tag + " although being " + ifcSlab[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcSlab[i].Tag + " although being " + ifcSlab[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all slabs' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            
+            for (int i = 0; i < ifcSlabThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcSlabThickness[i] / l + Rse;//we consider that all slabs are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -889,42 +876,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Slabs()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcSlab>().ToList();
+            var ifcSlab = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcSlab>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcSlabThickness = new List<double> { };
+            for (int i = 0; i < ifcSlab.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcSlab[i].Tag + "###" + ifcSlab[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcSlabVolume = ifcSlab[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcSlabArea = ifcSlab[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcSlabVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcSlabArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcSlabThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcSlab[i].Tag + " although being " + ifcSlab[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcSlab[i].Tag + " although being " + ifcSlab[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all slabs' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            Console.WriteLine("Total of " + ifcSlabThickness.Count + " door-elements with their Properties in place...");
+            for (int i = 0; i < ifcSlabThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcSlabThickness[i] / l + Rse;//we consider that all slabs are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -932,42 +919,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Windows()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
+            var ifcWindow = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWindow>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcWindowThickness = new List<double> { };
+            for (int i = 0; i < ifcWindow.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcWindow[i].Tag + "###" + ifcWindow[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcWindowVolume = ifcWindow[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcWindowArea = ifcWindow[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcWindowVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcWindowArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcWindowThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWindow[i].Tag + " although being " + ifcWindow[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWindow[i].Tag + " although being " + ifcWindow[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all windows' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+           
+            for (int i = 0; i < ifcWindowThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcWindowThickness[i] / l + Rse;//we consider that all windows are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -975,42 +962,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Windows()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWindow>().ToList();
+            var ifcWindow = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWindow>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcWindowThickness = new List<double> { };
+            for (int i = 0; i < ifcWindow.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcWindow[i].Tag + "###" + ifcWindow[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcWindowVolume = ifcWindow[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcWindowArea = ifcWindow[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcWindowVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcWindowArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcWindowThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWindow[i].Tag + " although being " + ifcWindow[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWindow[i].Tag + " although being " + ifcWindow[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all windows' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            
+            for (int i = 0; i < ifcWindowThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcWindowThickness[i] / l + Rse;//we consider that all windows are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1018,42 +1005,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Stairs()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcStair>().ToList();
+            var ifcStair = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcStair>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcStairThickness = new List<double> { };
+            for (int i = 0; i < ifcStair.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcStair[i].Tag + "###" + ifcStair[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcStairVolume = ifcStair[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcStairArea = ifcStair[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcStairVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcStairArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcStairThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcStair[i].Tag + " although being " + ifcStair[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcStair[i].Tag + " although being " + ifcStair[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all stairs' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            Console.WriteLine("Total of " + ifcStairThickness.Count + " door-elements with their Properties in place...");
+            for (int i = 0; i < ifcStairThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcStairThickness[i] / l + Rse;//we consider that all stairs are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1061,42 +1048,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Stairs()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcStair>().ToList();
+            var ifcStair = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcStair>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcStairThickness = new List<double> { };
+            for (int i = 0; i < ifcStair.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcStair[i].Tag + "###" + ifcStair[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcStairVolume = ifcStair[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcStairArea = ifcStair[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcStairVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcStairArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcStairThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcStair[i].Tag + " although being " + ifcStair[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcStair[i].Tag + " although being " + ifcStair[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all stairs' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            
+            for (int i = 0; i < ifcStairThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcStairThickness[i] / l + Rse;//we consider that all stairs are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1104,42 +1091,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Roofs()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRoof>().ToList();
+            var ifcRoof = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRoof>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcRoofThickness = new List<double> { };
+            for (int i = 0; i < ifcRoof.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcRoof[i].Tag + "###" + ifcRoof[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcRoofVolume = ifcRoof[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcRoofArea = ifcRoof[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcRoofVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcRoofArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcRoofThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRoof[i].Tag + " although being " + ifcRoof[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRoof[i].Tag + " although being " + ifcRoof[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all roofs' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            
+            for (int i = 0; i < ifcRoofThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcRoofThickness[i] / l + Rse;//we consider that all roofs are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1147,42 +1134,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Roofs()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcRoof>().ToList();
+            var ifcRoof = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcRoof>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcRoofThickness = new List<double> { };
+            for (int i = 0; i < ifcRoof.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcRoof[i].Tag + "###" + ifcRoof[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcRoofVolume = ifcRoof[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcRoofArea = ifcRoof[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcRoofVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcRoofArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcRoofThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRoof[i].Tag + " although being " + ifcRoof[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRoof[i].Tag + " although being " + ifcRoof[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all roofs' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+           
+            for (int i = 0; i < ifcRoofThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcRoofThickness[i] / l + Rse;//we consider that all roofs are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1190,42 +1177,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Ramps()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRamp>().ToList();
+            var ifcRamp = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcRamp>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcRampThickness = new List<double> { };
+            for (int i = 0; i < ifcRamp.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcRamp[i].Tag + "###" + ifcRamp[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcRampVolume = ifcRamp[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcRampArea = ifcRamp[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcRampVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcRampArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcRampThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRamp[i].Tag + " although being " + ifcRamp[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRamp[i].Tag + " although being " + ifcRamp[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all Ramps' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            
+            for (int i = 0; i < ifcRampThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcRampThickness[i] / l + Rse;//we consider that all Ramps are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1233,42 +1220,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Ramps()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcRamp>().ToList();
+            var ifcRamp = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcRamp>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcRampThickness = new List<double> { };
+            for (int i = 0; i < ifcRamp.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcRamp[i].Tag + "###" + ifcRamp[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcRampVolume = ifcRamp[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcRampArea = ifcRamp[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcRampVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcRampArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcRampThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRamp[i].Tag + " although being " + ifcRamp[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcRamp[i].Tag + " although being " + ifcRamp[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all Ramps' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+          
+            for (int i = 0; i < ifcRampThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcRampThickness[i] / l + Rse;//we consider that all Ramps are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1276,42 +1263,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Plates()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcPlate>().ToList();
+            var ifcPlate = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcPlate>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcPlateThickness = new List<double> { };
+            for (int i = 0; i < ifcPlate.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcPlate[i].Tag + "###" + ifcPlate[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcPlateVolume = ifcPlate[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcPlateArea = ifcPlate[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcPlateVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcPlateArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcPlateThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcPlate[i].Tag + " although being " + ifcPlate[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcPlate[i].Tag + " although being " + ifcPlate[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all plates' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+          
+            for (int i = 0; i < ifcPlateThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcPlateThickness[i] / l + Rse;//we consider that all plates are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1319,42 +1306,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Plates()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcPlate>().ToList();
+            var ifcPlate = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcPlate>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcPlateThickness = new List<double> { };
+            for (int i = 0; i < ifcPlate.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcPlate[i].Tag + "###" + ifcPlate[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcPlateVolume = ifcPlate[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcPlateArea = ifcPlate[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcPlateVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcPlateArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcPlateThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcPlate[i].Tag + " although being " + ifcPlate[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcPlate[i].Tag + " although being " + ifcPlate[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all plates' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+           
+            for (int i = 0; i < ifcPlateThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcPlateThickness[i] / l + Rse;//we consider that all plates are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1362,42 +1349,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc2x3Walls()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
+            var ifcWall = xModel.Instances.OfType<Xbim.Ifc2x3.SharedBldgElements.IfcWall>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcWallThickness = new List<double> { };
+            for (int i = 0; i < ifcWall.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcWall[i].Tag + "###" + ifcWall[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcWallVolume = ifcWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcWallArea = ifcWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcWallThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWall[i].Tag + " although being " + ifcWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWall[i].Tag + " although being " + ifcWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all walls' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+         
+            for (int i = 0; i < ifcWallThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcWallThickness[i] / l + Rse;//we consider that all walls are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1405,42 +1392,42 @@ namespace TUM.CMS.VplControl.Energy.Nodes
         }
         public void CalculateIfc4Walls()
         {
-            var ifcCurtainWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWall>().ToList();
+            var ifcWall = xModel.Instances.OfType<Xbim.Ifc4.SharedBldgElements.IfcWall>().ToList();
 
-            List<double> ifcCWallThickness = new List<double> { };
-            for (int i = 0; i < ifcCurtainWall.Count; i++)
+            List<double> ifcWallThickness = new List<double> { };
+            for (int i = 0; i < ifcWall.Count; i++)
             {
-                Console.WriteLine("###" + ifcCurtainWall[i].Tag + "###" + ifcCurtainWall[i].GetType() + "###");
+                Console.WriteLine("###" + ifcWall[i].Tag + "###" + ifcWall[i].GetType() + "###");
                 try
                 {
-                    var ifcCWallVolume = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
-                    var ifcCWallArea = ifcCurtainWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
-                    var volume = ifcCWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var ifcWallVolume = ifcWall[i].PropertySets.ToList()[2].HasProperties.ToList()[1];//is it the right property..?-->Yes (Volumen)
+                    var ifcWallArea = ifcWall[i].PropertySets.ToList()[2].HasProperties.ToList()[0];//is it the right property..?-->Yes (Flache)
+                    var volume = ifcWallVolume as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var volumeValue = volume.NominalValue;
                     object volumeValueTrue = volume.NominalValue.Value;
                     double volumeVal = (double)volumeValueTrue;
-                    var area = ifcCWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
+                    var area = ifcWallArea as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue;
                     var areaValue = area.NominalValue;
                     Console.WriteLine("##Flache:" + areaValue + " -- Volumen:" + volumeVal);
                     object areaValueTrue = area.NominalValue.Value;
                     double areaVal = (double)areaValueTrue;//
-                    ifcCWallThickness.Add(volumeVal / areaVal);
+                    ifcWallThickness.Add(volumeVal / areaVal);
                 }
                 catch (System.InvalidCastException castwrong)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWall[i].Tag + " although being " + ifcWall[i].GetType() + ", it does not have the Flache and Volumen Properties where it should... Therefore we choose to ignore it...");
                 }
                 catch (System.ArgumentOutOfRangeException notenough)
                 {
-                    Console.WriteLine(ifcCurtainWall[i].Tag + " although being " + ifcCurtainWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
+                    Console.WriteLine(ifcWall[i].Tag + " although being " + ifcWall[i].GetType() + ", it does not have its Properties where it should... Therefore we choose to ignore it...");
                 }
             }
-            //create a new List which will contain all doors' thermal trasmittances
+            //create a new List which will contain all walls' thermal trasmittances
             ElementsThermalT = new List<double> { };
-            Console.WriteLine("Total of " + ifcCWallThickness.Count + " door-elements with their Properties in place...");
-            for (int i = 0; i < ifcCWallThickness.Count; i++)
+            
+            for (int i = 0; i < ifcWallThickness.Count; i++)
             {
-                double denominator = Rsi + ifcCWallThickness[i] / l + Rse;//we consider that all doors are not double nor triple layered....
+                double denominator = Rsi + ifcWallThickness[i] / l + Rse;//we consider that all walls are not double nor triple layered....
                 double thermo = 1 / denominator;
                 ElementsThermalT.Add(thermo);
                 Console.WriteLine("#" + i + " thermo:" + thermo);
@@ -1466,7 +1453,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 {
                     InfoIfc2x3.AddElementIds(item);
                 }
-                // OutputPorts[0].Data = OutputInfoIfc2x3; //no need to pass it to the output
+
             }
             else if (IfcVersionType.Name == "ModelInfoIFC4")
             {
@@ -1476,7 +1463,6 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 {
                     InfoIfc4.AddElementIds(item);
                 }
-                // OutputPorts[0].Data = OutputInfoIfc4; //no need to pass it to the output
             }
 
             TTExists = ((ComboboxItemFilter)comboBox.SelectedItem).TTAvailable;
@@ -1498,7 +1484,7 @@ namespace TUM.CMS.VplControl.Energy.Nodes
             else
             {
                 label_TT_exists.Content = "TT NOT available";
-                //we wont calculate here the sum of TTs cause we are not sure if the right values for λ, R have yet been selected
+                //we want to calculate here the sum of TTs cause we are not sure if the right values for λ, R have yet been selected
                 //the calculation will take place when the button is pressed
                 Label label_Uj_in = ((EnergyCalculatorControl)ControlElements[0]).Label_Uj;
                 label_Uj_in.Content = "Uj = ";
@@ -1507,17 +1493,10 @@ namespace TUM.CMS.VplControl.Energy.Nodes
                 ((EnergyCalculatorControl)ControlElements[0]).ComboBoxRse.Visibility = Visibility.Visible;
                 ((EnergyCalculatorControl)ControlElements[0]).Button_Uj.Visibility = Visibility.Visible;
             }
-
-
         }
 
         public void selection_changed2(object sender, SelectionChangedEventArgs e)
-        {   /*
-            var comboBox_Rse = ControlElements[2] as ComboBox;
-            comboBox_Rse.Items.Clear();
-            comboBox_Rse.Items.Add(Rse_1);
-            comboBox_Rse.Items.Add(Rse_2);
-            comboBox_Rse.Items.Add(Rse_3);*/
+        {   
             Calculate1();
         }
 
@@ -1548,11 +1527,6 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
             Calculate1();
 
-            /*  if (comboBox.SelectedIndex.Equals(-1))
-              {
-                  Console.WriteLine("No type of ifc-elements has been selected...");
-                  return;
-              }*/
             //since we got up 2 here, TT wont be available...
             if (IfcVersionType.Name == "ModelInfoIFC2x3")
             {
@@ -1700,7 +1674,6 @@ namespace TUM.CMS.VplControl.Energy.Nodes
 
             public override string ToString()
             { return Text; }
-
 
         }
 

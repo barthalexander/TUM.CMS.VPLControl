@@ -41,7 +41,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
         private Hashtable TTValueColorExistin;
         private Hashtable TTValueColorCalculated;
         private List<KeyValuePair<String, object>> _Colors;
-        private Color TTCannotBeCalculated = Colors.Black;//when TT is not available NOR can be calculated we use Black
+        private Color TTCannotBeCalculated = Colors.Black;//when TT is neither available NOR can be calculated we use Black
         private Color TTSmaller = Colors.Green;//for TT values in [0-1) range
         private Color TTBigger = Colors.Red;//for TT values in the last(bigger) range
 
@@ -116,9 +116,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 worker_DoWork_IFC4(_xModel);
                 worker = new BackgroundWorker();
             }
-
-
-
         }
 
         private void worker_DoWork_IFC2x3(IfcStore xModel)
@@ -215,7 +212,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             GradientStopCollection colorsCollectionCalculated = new GradientStopCollection();
 
             double i = 0;
-            //Console.WriteLine("**"+SortedTTs.Count+"**");
             SortedTTs.Remove(-1);//remove the NoTTColor(Black) we dont want it in our bar
                                  //Console.WriteLine("**" + SortedTTs.Count + "**");
             double inc = 1.0 / SortedTTs.Count;
@@ -261,10 +257,7 @@ namespace TUM.CMS.VplControl.IFC.Nodes
 
                 ((EnergyVisualisationControl)ControlElements[0]).ProgressLabel2.Content = "Problems while Reading";
 
-
             }
-
-
         }
 
         private void worker_DoWork_IFC4(IfcStore xModel)
@@ -523,8 +516,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 double denominator = Rsi + thickness / l + Rse;
                 double thermo = 1 / denominator;
 
-
-
                 return thermo;
             }
             catch (System.InvalidCastException castwrong)
@@ -664,8 +655,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 double denominator = Rsi + thickness / l + Rse;
                 double thermo = 1 / denominator;
 
-
-
                 return thermo;
             }
             catch (System.InvalidCastException castwrong)
@@ -699,8 +688,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 double denominator = Rsi + thickness / l + Rse;
                 double thermo = 1 / denominator;
 
-
-
                 return thermo;
             }
             catch (System.InvalidCastException castwrong)
@@ -724,10 +711,8 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             };
         }
 
-
         public bool VisualizeMesh(MeshBuilder meshBuilder, MeshGeometry3D mesh, DiffuseMaterial mat)
         {
-
             // Output on console
             var points = new List<Point3D>();
 
@@ -741,7 +726,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
                 meshBuilder.AddTriangle(points[mesh.TriangleIndices[i]], points[mesh.TriangleIndices[i + 1]],
                     points[mesh.TriangleIndices[i + 2]]);
             }
-
 
             var myGeometryModel = new GeometryModel3D
             {
@@ -761,12 +745,6 @@ namespace TUM.CMS.VplControl.IFC.Nodes
             return true;
         }
 
-        /// <summary>
-        ///     Create MeshGeometry3D
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="item"></param>
-        /// <param name="wcsTransform"></param>
         public void GetGeometryFromXbimModel_IFC2x3(MeshGeometry3D m, IPersistEntity item, XbimMatrix3D wcsTransform)
         {
             if (item.Model == null || !(item is Xbim.Ifc2x3.Interfaces.IIfcProduct)) return;
